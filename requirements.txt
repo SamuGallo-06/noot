@@ -1,1 +1,4 @@
 pymobiledevice3
+platformdirs
+PySide6
+textual

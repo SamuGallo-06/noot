@@ -1,56 +1,176 @@
 import asyncio
-from pymobiledevice3.lockdown import create_using_usbmux
-from pymobiledevice3.usbmux import list_devices
+from functools import wraps
+from pathlib import Path
+import sys
+from typing import Annotated
+
+from platformdirs import user_data_dir
+import typer
+
+from idevice import (
+    check_usbmuxd,
+    get_connected_devices,
+    get_device_summary,
+    usbmuxd_socket_exists,
+)
+# Import the interactive wizard from our separate module
+from tui import run_interactive_wizard
+
+DEFAULT_BACKUP_DIR = Path(user_data_dir("noot", "SamuGallo-06")) / "backups"
+
+app = typer.Typer(
+    help="NOOT - iOS device management and backup utility",
+    no_args_is_help=False,
+)
 
 
-async def get_connected_devices():
-    """Ritorna lista di dispositivi con UDID e nome — per popolare un menu a tendina"""
-    devices = await list_devices()
-    result = []
-    for dev in devices:
-        udid = dev.serial
-        lockdown = await create_using_usbmux(serial=udid)
-        result.append({
-            "udid": udid,
-            "name": lockdown.short_info.get("DeviceName"),
-        })
-    return result
+def coro(f):
+    """Decorator to run async functions inside synchronous Typer commands."""
+    @wraps(f)
+    def wrapper(*args, **kwargs):
+        return asyncio.run(f(*args, **kwargs))
+    return wrapper
 
 
-async def get_device_summary(udid=None):
-    """Riassunto leggibile del dispositivo selezionato"""
-    lockdown = await create_using_usbmux(serial=udid)
-    info = lockdown.all_values
+async def ensure_usbmuxd_running(gui: bool = False):
+    """Check if usbmuxd is running. If absent or unresponsive, attempt to restart it."""
+    auth_tool = "pkexec" if gui else "sudo"
 
-    summary = {
-        "nome": info.get("DeviceName"),
-        "modello": info.get("ProductType"),
-        "hardware": info.get("HardwareModel"),
-        "ios_version": info.get("ProductVersion"),
-        "build": info.get("BuildVersion"),
-        "serial": info.get("SerialNumber"),
-        "udid": info.get("UniqueDeviceID"),
-        "storage_totale_gb": round(info.get("TotalDiskCapacity", 0) / (1024**3), 1),
-        "storage_libero_gb": round(info.get("AmountDataAvailable", 0) / (1024**3), 1) if info.get("AmountDataAvailable") else None,
-        "wifi_mac": info.get("WiFiAddress"),
-        "bluetooth_mac": info.get("BluetoothAddress"),
-    }
-    return summary
+    async def run_sys_cmd(cmd: list[str]) -> bool:
+        proc = await asyncio.create_subprocess_exec(
+            *cmd,
+            stdout=asyncio.subprocess.DEVNULL,
+            stderr=asyncio.subprocess.DEVNULL,
+        )
+        await proc.wait()
+        return proc.returncode == 0
+
+    if not usbmuxd_socket_exists():
+        typer.secho(
+            f"[WARNING] usbmuxd socket missing. Attempting to start via {auth_tool}...",
+            fg=typer.colors.YELLOW,
+        )
+        await run_sys_cmd([auth_tool, "systemctl", "start", "usbmuxd"])
+
+    if not await check_usbmuxd():
+        typer.secho(
+            "[WARNING] usbmuxd is unresponsive. Attempting restart...",
+            fg=typer.colors.YELLOW,
+        )
+        await run_sys_cmd([auth_tool, "systemctl", "restart", "usbmuxd"])
 
 
-async def main():
+@app.callback(invoke_without_command=True)
+def main(
+    ctx: typer.Context,
+    gui: Annotated[
+        bool,
+        typer.Option("--gui", help="Launch GUI interface"),
+    ] = False,
+):
+    """Global entry point: intercepts --gui or triggers interactive mode when no command is provided."""
+    if gui:
+        typer.echo("Launching graphical user interface...")
+        # TODO: Initialize and launch GUI
+        raise typer.Exit()
+
+    # Fallback to interactive mode if no CLI arguments/commands are supplied
+    if ctx.invoked_subcommand is None:
+        typer.echo("No command provided. use --help for usage information.")
+        raise typer.Exit()
+
+
+###################################
+##          Commands             ##
+###################################
+
+@app.command("list")
+@coro
+async def list_devices():
+    """List all connected iOS devices."""
+    await ensure_usbmuxd_running()
+
+    if not await check_usbmuxd():
+        typer.secho("Error: usbmuxd is unreachable.", fg=typer.colors.RED)
+        raise typer.Exit(code=1)
+
     devices = await get_connected_devices()
-    print("Dispositivi trovati:")
-    for d in devices:
-        print(f"  - {d['name']} ({d['udid']})")
+    if not devices:
+        typer.echo("No devices detected.")
+        return
 
-    if devices:
-        selected = devices[0]["udid"]  # qui poi ci metti la selezione da menu
-        print("\nRiassunto:")
-        summary = await get_device_summary(selected)
-        for k, v in summary.items():
-            print(f"  {k}: {v}")
+    typer.secho("Connected devices:", bold=True)
+    for d in devices:
+        name = d.get("name", "Unknown")
+        udid = d.get("udid")
+        typer.echo(f"  • {name} ({udid})")
+
+
+@app.command("summary")
+@coro
+async def summary(
+    udid: Annotated[
+        str,
+        typer.Option(
+            "--udid",
+            "-u",
+            help="Target iOS device UDID",
+            prompt="Enter device UDID",
+        ),
+    ],
+):
+    """Display detailed hardware and system info for a specific device."""
+    await ensure_usbmuxd_running()
+
+    info = await get_device_summary(udid)
+    if not info:
+        typer.secho(
+            f"Error: Unable to fetch summary for device {udid}",
+            fg=typer.colors.RED,
+        )
+        raise typer.Exit(code=1)
+
+    typer.secho(f"Device Summary [{udid}]:", bold=True)
+    for k, v in info.items():
+        typer.echo(f"  {k}: {v}")
+
+
+@app.command("backup")
+@coro
+async def backup(
+    udid: Annotated[
+        str,
+        typer.Option(
+            "--udid",
+            "-u",
+            help="Target iOS device UDID",
+            prompt="Enter device UDID",
+        ),
+    ],
+    backup_dir: Annotated[
+        Path,
+        typer.Option(
+            "--backup-dir",
+            "-d",
+            help="Destination folder for backup files",
+        ),
+    ] = DEFAULT_BACKUP_DIR,
+):
+    """Run a local backup for the specified device."""
+    await ensure_usbmuxd_running()
+
+    backup_dir.mkdir(parents=True, exist_ok=True)
+
+    typer.echo(f"Starting backup for device: {udid}")
+    typer.echo(f"Destination: {backup_dir}")
+
+    # TODO: Implement actual backup execution
+    typer.secho("Backup operation not yet implemented.", fg=typer.colors.YELLOW)
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    try:
+        app()
+    except KeyboardInterrupt:
+        print("\nProcess interrupted by user.")
+        sys.exit(130)
