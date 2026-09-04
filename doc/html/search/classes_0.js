@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['backupnotfounderror_0',['BackupNotFoundError',['../classidevice_1_1BackupNotFoundError.html',1,'idevice']]]
+  ['ambiguousdevicenameerror_0',['AmbiguousDeviceNameError',['../classidevice_1_1AmbiguousDeviceNameError.html',1,'idevice']]]
 ];

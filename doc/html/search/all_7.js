@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['mode_0',['Mode',['../md_README.html#autotoc_md7',1,'Interactive Mode'],['../md_README.html#autotoc_md6',1,'Scriptable Mode']]]
+  ['line_0',['Command Line',['../md_README.html#autotoc_md5',1,'']]]
 ];

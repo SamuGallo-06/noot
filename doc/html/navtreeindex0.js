@@ -2,7 +2,9 @@ var NAVTREEINDEX0 =
 {
 "annotated.html":[1,0],
 "classes.html":[1,1],
+"classidevice_1_1AmbiguousDeviceNameError.html":[1,0,0,7],
 "classidevice_1_1BackupNotFoundError.html":[1,0,0,4],
+"classidevice_1_1DeviceNotFoundError.html":[1,0,0,6],
 "classidevice_1_1EncryptionNotEnabledError.html":[1,0,0,1],
 "classidevice_1_1IncorrectBackupPasswordError.html":[1,0,0,3],
 "classidevice_1_1IncrementalExcludeConflictError.html":[1,0,0,2],
@@ -16,7 +18,5 @@ var NAVTREEINDEX0 =
 "md_README.html#autotoc_md3":[0,1,0],
 "md_README.html#autotoc_md4":[0,1,1],
 "md_README.html#autotoc_md5":[0,2],
-"md_README.html#autotoc_md6":[0,2,0],
-"md_README.html#autotoc_md7":[0,2,1],
 "pages.html":[]
 };

@@ -25,16 +25,13 @@
 var NAVTREE =
 [
   [ "NOOT", "index.html", [
-    [ "Noot", "md_README.html", [
+    [ "Noot (Non-apple Open-source Operator for iTunes)", "md_README.html", [
       [ "Requirements", "md_README.html#autotoc_md1", null ],
       [ "Installation", "md_README.html#autotoc_md2", [
         [ "Debian based distributions", "md_README.html#autotoc_md3", null ],
         [ "Arch based distributions", "md_README.html#autotoc_md4", null ]
       ] ],
-      [ "Command Line Usage", "md_README.html#autotoc_md5", [
-        [ "Scriptable Mode", "md_README.html#autotoc_md6", null ],
-        [ "Interactive Mode", "md_README.html#autotoc_md7", null ]
-      ] ]
+      [ "Command Line", "md_README.html#autotoc_md5", null ]
     ] ],
     [ "Classi", "annotated.html", [
       [ "Elenco dei tipi composti", "annotated.html", "annotated_dup" ],

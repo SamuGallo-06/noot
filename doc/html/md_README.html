@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.16.1"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>NOOT: Noot</title>
+<title>NOOT: Noot (Non-apple Open-source Operator for iTunes)</title>
 <link rel="icon" href="icon.png" type="image/x-icon" />
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
@@ -90,7 +90,7 @@ $(function(){initNavTree('md_README.html','',''); });
 </div>
 
 <div><div class="header">
-  <div class="headertitle"><div class="title">Noot </div></div>
+  <div class="headertitle"><div class="title">Noot (Non-apple Open-source Operator for iTunes) </div></div>
 </div><!--header-->
 <div class="contents">
 <div class="textblock"><p><a class="anchor" id="autotoc_md0"></a></p>
@@ -118,17 +118,29 @@ Arch based distributions</h2>
 <div class="fragment"><div class="line">sudo pacman -S python-pip libusb usbmuxd</div>
 <div class="line">systemctl enable --now usbmuxd</div>
 </div><!-- fragment --><h1 class="doxsection"><a class="anchor" id="autotoc_md5"></a>
-Command Line Usage</h1>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md6"></a>
-Scriptable Mode</h2>
+Command Line</h1>
 <p>The software can be used from the command line. To see the available commands, run:</p>
-<div class="fragment"><div class="line">python3 main.py --help</div>
-</div><!-- fragment --><p>This will display a list of available commands and their usage</p>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md7"></a>
-Interactive Mode</h2>
-<p>You can also run the software in interactive mode by running:</p>
-<div class="fragment"><div class="line">python3 main.py</div>
-</div><!-- fragment --><p>without any arguments. This will start an interactive shell where you can run commands. </p>
+<div class="fragment"><div class="line">noot --help</div>
+</div><!-- fragment --><div class="fragment"><div class="line">(.venv) user@Some-Host:~/noot$ python3 main.py --help</div>
+<div class="line"> </div>
+<div class="line"> Usage: main.py [OPTIONS] COMMAND [ARGS]...</div>
+<div class="line"> </div>
+<div class="line"> NOOT - iOS device management and backup utility</div>
+<div class="line"> </div>
+<div class="line">╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────╮</div>
+<div class="line">│ --gui                         Launch GUI interface                                                              │</div>
+<div class="line">│ --install-completion          Install completion for the current shell.                                         │</div>
+<div class="line">│ --show-completion             Show completion for the current shell, to copy it or customize the installation.  │</div>
+<div class="line">│ --help                        Show this message and exit.                                                       │</div>
+<div class="line">╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯</div>
+<div class="line">╭─ Commands ──────────────────────────────────────────────────────────────────────────────────────────────────────╮</div>
+<div class="line">│ list                List all connected iOS devices.                                                             │</div>
+<div class="line">│ summary             Display detailed hardware and system info for a specific device.                            │</div>
+<div class="line">│ enable-encryption   Enable backup encryption on the device by setting a new backup password.                    │</div>
+<div class="line">│ disable-encryption  Disable backup encryption on the device (requires the current backup password).             │</div>
+<div class="line">│ backup              Run a local backup for the specified device.                                                │</div>
+<div class="line">╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯</div>
+</div><!-- fragment --><p>This will display a list of available commands and their usage </p>
 </div></div><!-- contents -->
 </div><!-- PageDoc -->
 </div><!-- doc-content -->
