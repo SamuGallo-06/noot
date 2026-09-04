@@ -35,7 +35,9 @@ from idevice import (
     PyMobileDevice3Exception,
     DeviceNotFoundError,
     AmbiguousDeviceNameError,
-    resolve_device_identifier
+    resolve_device_identifier,
+    restart_device,
+    shutdown_device
 )
 
 MAX_PASSWORD_ATTEMPTS = 3
@@ -44,7 +46,7 @@ DEFAULT_BACKUP_DIR = Path(user_data_dir("noot", "SamuGallo-06")) / "backups"
 
 app = typer.Typer(
     help="NOOT - iOS device management and backup utility",
-    no_args_is_help=False,
+    no_args_is_help=True,
 )
 
 console = Console()
@@ -74,7 +76,19 @@ def main(
     if ctx.invoked_subcommand is None:
         typer.echo("No command provided. use --help for usage information.")
         raise typer.Exit()
-    
+
+## Helper function to resolve device name or UDID to a valid UDID, with error handling and user feedback.
+async def resolve_name(name_or_udid: str) -> str:
+    try:
+        udid = await resolve_device_identifier(name_or_udid)
+    except DeviceNotFoundError as e:
+        typer.secho(f"Error: {e}", fg=typer.colors.RED)
+        raise typer.Exit(code=1)
+    except AmbiguousDeviceNameError as e:
+            typer.secho(f"Error: {e}", fg=typer.colors.RED)
+            raise typer.Exit(code=1)
+    return udid
+
 async def ensure_usbmuxd_or_exit(gui: bool = False):
     """@brief Wrap ensure_usbmuxd_running and map its status to CLI output and exit codes."""
     status = await ensure_usbmuxd_running(gui=gui)
@@ -135,14 +149,7 @@ async def summary(
     ],
 ):
     """Display detailed hardware and system info for a specific device."""
-    try:
-        udid = await resolve_device_identifier(udid)
-    except DeviceNotFoundError as e:
-        typer.secho(f"Error: {e}", fg=typer.colors.RED)
-        raise typer.Exit(code=1)
-    except AmbiguousDeviceNameError as e:
-        typer.secho(f"Error: {e}", fg=typer.colors.RED)
-        raise typer.Exit(code=1)
+    udid = await resolve_name(udid)
     
     status = await ensure_usbmuxd_running()
     if status == UsbmuxdStatus.FAILED:
@@ -184,15 +191,7 @@ async def enable_encryption(
     a previous iTunes/Finder pairing).
     """
     
-    try:
-        udid = await resolve_device_identifier(udid)
-    except DeviceNotFoundError as e:
-        typer.secho(f"Error: {e}", fg=typer.colors.RED)
-        raise typer.Exit(code=1)
-    except AmbiguousDeviceNameError as e:
-        typer.secho(f"Error: {e}", fg=typer.colors.RED)
-        raise typer.Exit(code=1)
-
+    udid = await resolve_name(udid)
     await ensure_usbmuxd_or_exit()
  
     if await is_backup_encrypted(udid):
@@ -253,15 +252,7 @@ async def change_encryption_password(
     ],
 ):
     """Change the current backup encryption password on the device."""
-    try:
-        udid = await resolve_device_identifier(udid)
-    except DeviceNotFoundError as e:
-        typer.secho(f"Error: {e}", fg=typer.colors.RED)
-        raise typer.Exit(code=1)
-    except AmbiguousDeviceNameError as e:
-        typer.secho(f"Error: {e}", fg=typer.colors.RED)
-        raise typer.Exit(code=1)
-    
+    udid = await resolve_name(udid)
     await ensure_usbmuxd_or_exit()
 
     if not await is_backup_encrypted(udid):
@@ -303,14 +294,7 @@ async def disable_encryption(
     ],
 ):
     """Disable backup encryption on the device (requires the current backup password)."""
-    try:
-        udid = await resolve_device_identifier(udid)
-    except DeviceNotFoundError as e:
-        typer.secho(f"Error: {e}", fg=typer.colors.RED)
-        raise typer.Exit(code=1)
-    except AmbiguousDeviceNameError as e:
-        typer.secho(f"Error: {e}", fg=typer.colors.RED)
-        raise typer.Exit(code=1)
+    udid = await resolve_name(udid)
     await ensure_usbmuxd_or_exit()
  
     if not await is_backup_encrypted(udid):
@@ -413,14 +397,7 @@ async def backup(
     ):
     """Run a local backup for the specified device."""
     
-    try:
-        udid = await resolve_device_identifier(udid)
-    except DeviceNotFoundError as e:
-        typer.secho(f"Error: {e}", fg=typer.colors.RED)
-        raise typer.Exit(code=1)
-    except AmbiguousDeviceNameError as e:
-        typer.secho(f"Error: {e}", fg=typer.colors.RED)
-        raise typer.Exit(code=1)
+    udid = await resolve_name(udid)
     
     status = await ensure_usbmuxd_running()
     if status == UsbmuxdStatus.FAILED:
@@ -529,14 +506,7 @@ async def restore(
 ):
     """Restore a local backup onto the connected device."""
     
-    try:
-        udid = await resolve_device_identifier(udid)
-    except DeviceNotFoundError as e:
-        typer.secho(f"Error: {e}", fg=typer.colors.RED)
-        raise typer.Exit(code=1)
-    except AmbiguousDeviceNameError as e:
-        typer.secho(f"Error: {e}", fg=typer.colors.RED)
-        raise typer.Exit(code=1)
+    udid = await resolve_name(udid)
     
     status = await ensure_usbmuxd_running()
     if status == UsbmuxdStatus.FAILED:
@@ -589,11 +559,8 @@ async def restore(
                 name = b["device_name"] or "Unknown device"
                 typer.echo(f"  • {name} (UDID: {b['udid']})")
         raise typer.Exit(code=1)
- 
-    password = ""
-    result = await is_backup_encrypted(source)
-    if result:
-        password = typer.prompt("Backup password", hide_input=True)
+
+    password = typer.prompt("Backup password (leave blank if not encrypted): ", hide_input=True)
  
     typer.secho(
         "\nFor safety reasons, please confirm you want to restore this device from a backup.",
@@ -659,14 +626,7 @@ async def delete(
 ):
     """Delete a local backup for the specified device UDID."""
     
-    try:
-        udid = await resolve_device_identifier(udid)
-    except DeviceNotFoundError as e:
-        typer.secho(f"Error: {e}", fg=typer.colors.RED)
-        raise typer.Exit(code=1)
-    except AmbiguousDeviceNameError as e:
-        typer.secho(f"Error: {e}", fg=typer.colors.RED)
-        raise typer.Exit(code=1)
+    udid = await resolve_name(udid)
 
     backups = list_local_backups(backup_dir)
     backup_to_delete = next((b for b in backups if b["udid"] == udid), None)
@@ -715,14 +675,7 @@ async def erase(
 ):
     """Erase all data on the specified iOS device, restoring it to factory settings."""
     
-    try:
-        udid = await resolve_device_identifier(udid)
-    except DeviceNotFoundError as e:
-        typer.secho(f"Error: {e}", fg=typer.colors.RED)
-        raise typer.Exit(code=1)
-    except AmbiguousDeviceNameError as e:
-        typer.secho(f"Error: {e}", fg=typer.colors.RED)
-        raise typer.Exit(code=1)
+    udid = await resolve_name(udid)
     
     await ensure_usbmuxd_or_exit()
  
@@ -791,6 +744,62 @@ async def erase(
             progress.update(100 - last_percent)  # type: ignore
  
     typer.secho("Device erased successfully.", fg=typer.colors.GREEN)
+    
+@app.command("restart")
+@coro
+async def restart(
+    udid: Annotated[
+        str,
+        typer.Option(
+            "--udid",
+            "-u",
+            help="Target iOS device UDID",
+            prompt="Enter device UDID",
+        ),
+    ],
+):
+    """Restart the specified iOS device."""
+    
+    udid = await resolve_name(udid)
+
+    await ensure_usbmuxd_or_exit()
+ 
+    typer.secho(f"Restarting device {udid}...", bold=True)
+    try:
+        await restart_device(udid)
+    except PyMobileDevice3Exception as e:
+        typer.secho(f"Error: {e}", fg=typer.colors.RED)
+        raise typer.Exit(code=1)
+ 
+    typer.secho("Device restarted successfully.", fg=typer.colors.GREEN)
+
+@app.command("shutdown")
+@coro
+async def shutdown(
+    udid: Annotated[
+        str,
+        typer.Option(
+            "--udid",
+            "-u",
+            help="Target iOS device UDID",
+            prompt="Enter device UDID",
+        ),
+    ],
+):
+    """Shutdown the specified iOS device."""
+    
+    udid = await resolve_name(udid)
+
+    await ensure_usbmuxd_or_exit()
+ 
+    typer.secho(f"Shutting down device {udid}...", bold=True)
+    try:
+        await shutdown_device(udid)
+    except PyMobileDevice3Exception as e:
+        typer.secho(f"Error: {e}", fg=typer.colors.RED)
+        raise typer.Exit(code=1)
+ 
+    typer.secho("Device shut down successfully.", fg=typer.colors.GREEN)
 
 ## @}
 
