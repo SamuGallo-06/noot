@@ -60,4 +60,4 @@ noot --help
 
 This will display a list of available commands and their usage
 
-[![image](screenshots/help.png)]Help command output
+![image](screenshots/help.png)
