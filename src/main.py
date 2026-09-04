@@ -40,6 +40,8 @@ from idevice import (
     shutdown_device
 )
 
+VERSION="1.0.0"
+
 MAX_PASSWORD_ATTEMPTS = 3
 
 DEFAULT_BACKUP_DIR = Path(user_data_dir("noot", "SamuGallo-06")) / "backups"
@@ -58,13 +60,20 @@ def coro(f):
         return asyncio.run(f(*args, **kwargs))
     return wrapper
 
+def version_callback():
+    typer.echo(f"NOOT version: {VERSION}")
+    raise typer.Exit()
+
 @app.callback(invoke_without_command=True)
 def main(
     ctx: typer.Context,
     gui: Annotated[
         bool,
-        typer.Option("--gui", help="Launch GUI interface"),
+        typer.Option("--gui", "-g", help="Launch GUI interface"),
     ] = False,
+    version: Annotated[
+        bool | None, typer.Option("--version", "-v", help="Display the current version", callback=version_callback)
+    ] = None,
 ):
     """Global entry point: intercepts --gui or triggers interactive mode when no command is provided."""
     if gui:
@@ -76,6 +85,7 @@ def main(
     if ctx.invoked_subcommand is None:
         typer.echo("No command provided. use --help for usage information.")
         raise typer.Exit()
+
 
 ## Helper function to resolve device name or UDID to a valid UDID, with error handling and user feedback.
 async def resolve_name(name_or_udid: str) -> str:

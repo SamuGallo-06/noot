@@ -1,3 +1,23 @@
+<div align="center">
+
+  <!-- Stato Avanzamento Moduli -->
+  <img src="https://img.shields.io/badge/CLI-Completed-brightgreen?style=for-the-badge&logo=gnubash&logoColor=white" alt="CLI Completed" />
+  <img src="https://img.shields.io/badge/GUI-In_Progress-orange?style=for-the-badge&logo=qt&logoColor=white" alt="GUI In Progress" />
+
+  <br/>
+
+  <!-- Stack Tecnologico -->
+  <img src="https://img.shields.io/badge/Python-3.10+-3776AB?style=for-the-badge&logo=python&logoColor=white" alt="Python 3" />
+  <img src="https://img.shields.io/badge/GUI-PySide6-41CD52?style=for-the-badge&logo=qt&logoColor=white" alt="PySide6" />
+
+  <br/>
+
+  <!-- Target & Compatibilità -->
+  <img src="https://img.shields.io/badge/Platform-Linux-FCC624?style=for-the-badge&logo=linux&logoColor=black" alt="Linux" />
+  <img src="https://img.shields.io/badge/Target-iOS_Backups-000000?style=for-the-badge&logo=apple&logoColor=white" alt="iOS Backups" />
+
+</div>
+
 # Noot (Non-apple Open-source Operator for iTunes)
 
 iPhone backup manager for Linux, built using pymobiledevice3 module.
@@ -58,7 +78,7 @@ noot --help
 │ list                List all connected iOS devices.                                                             │
 │ summary             Display detailed hardware and system info for a specific device.                            │
 │ enable-encryption   Enable backup encryption on the device by setting a new backup password.                    │
-│ disable-encryption  Disable backup encryption on the device (requires the current backup password).             │
+│ disable-encryption  Disable backup encr![CLI Status](https://img.shields.io/badge/CLI-Completed-brightgreen)yption on the device (requires the current backup password).             │
 │ backup              Run a local backup for the specified device.                                                │
 ╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 ```
