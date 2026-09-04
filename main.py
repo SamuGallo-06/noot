@@ -301,7 +301,7 @@ async def backup(
         raise typer.Exit(code=1)
 
     typer.secho(
-        "This backup will be encrypted. Keep the password safe — it cannot be "
+        "This backup will be encrypted. Please enter "
         "recovered, and you'll need it to restore or read this backup later.",
         fg=typer.colors.YELLOW,
     )
@@ -313,7 +313,41 @@ async def backup(
     if exclude:
         typer.echo(f"Excluding: {', '.join(exclude)}")
     typer.echo("Keep the device connected and unlocked until the backup finishes.\n")
+    
+    last_percent = 0.0
+ 
+    with typer.progressbar(length=100, label="Backing up") as progress:
+        def on_progress(percent: float) -> None:
+            nonlocal last_percent
+            delta = max(0.0, percent - last_percent)
+            if delta:
+                progress.update(delta) #type: ignore
+                last_percent = percent
+ 
+        try:
+            await run_backup(
+                udid=udid,
+                backup_dir=backup_dir,
+                full=full_backup,
+                exclude=exclude,
+                password=password,
+                progress_callback=on_progress,
+            )
+        except EncryptionNotEnabledError as e:
+            typer.secho(f"Error: {e}", fg=typer.colors.RED)
+            raise typer.Exit(code=1)
+        except IncrementalExcludeConflictError as e:
+            typer.secho(f"Error: {e}", fg=typer.colors.RED)
+            raise typer.Exit(code=1)
+ 
+    typer.secho("Backup completed successfully.", fg=typer.colors.GREEN)
 
+@app.command("restore")
+@coro
+def restore(
+    
+):
+    pass
 
 if __name__ == "__main__":
     try:
