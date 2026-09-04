@@ -110,10 +110,7 @@ async def check_usbmuxd() -> bool:
 # ---------------------------------------------------------------------------
 # Backup encryption
 # ---------------------------------------------------------------------------
- 
-# ---------------------------------------------------------------------------
-# Backup encryption
-# ---------------------------------------------------------------------------
+
  
 class EncryptionNotEnabledError(Exception):
     """Sollevato quando si tenta un backup ma il device non ha l'encryption attiva."""
@@ -398,4 +395,3 @@ async def erase_device(udid: str) -> None:
         # non viene scritto alcun backup reale durante un erase.
         await mb2.erase_device()
 
-##

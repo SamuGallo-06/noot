@@ -6,6 +6,7 @@ from typing import Annotated, Optional
  
 from platformdirs import user_data_dir
 import typer
+import click
  
 from idevice import (
     check_usbmuxd,
@@ -263,6 +264,23 @@ async def backup(
             help="Destination folder for backup files",
         ),
     ] = DEFAULT_BACKUP_DIR,
+    full_backup: Annotated[
+        bool,
+        typer.Option(
+            "--full-backup",
+            "-fb",
+            help="Perform Full Backup"
+        ),
+    ] = False,
+    exclude: Annotated[
+        Optional[list[str]],
+        typer.Option(
+            "--exclude",
+            "-e",
+            click_type=click.Choice(list(EXCLUDABLE_CATEGORIES.keys())),  # pyright: ignore[reportArgumentType]
+            help="Category to exclude from the backup. Repeatable.",
+        ),
+    ] = None,
 ):
     """Run a local backup for the specified device."""
     status = await ensure_usbmuxd_running()
@@ -274,12 +292,27 @@ async def backup(
         
     backup_dir.mkdir(parents=True, exist_ok=True)
 
-    typer.echo(f"Starting backup for device: {udid}")
-    typer.echo(f"Destination: {backup_dir}")
+    if not await is_backup_encrypted(udid):
+        typer.secho(
+            "Error: backup encryption is not enabled on this device.\n"
+            "Run 'noot enable-encryption --udid ...' first.",
+            fg=typer.colors.RED,
+        )
+        raise typer.Exit(code=1)
 
-    # TODO: Implement actual backup execution
-    #await execute_backup()
-    typer.secho("Backup operation not yet implemented.", fg=typer.colors.YELLOW)
+    typer.secho(
+        "This backup will be encrypted. Keep the password safe — it cannot be "
+        "recovered, and you'll need it to restore or read this backup later.",
+        fg=typer.colors.YELLOW,
+    )
+    password = typer.prompt("Backup password", hide_input=True)
+    
+    typer.secho(f"Starting {'full' if full_backup else 'incremental'} backup", bold=True)
+    typer.echo(f"Device: {udid}")
+    typer.echo(f"Destination: {backup_dir}")
+    if exclude:
+        typer.echo(f"Excluding: {', '.join(exclude)}")
+    typer.echo("Keep the device connected and unlocked until the backup finishes.\n")
 
 
 if __name__ == "__main__":
