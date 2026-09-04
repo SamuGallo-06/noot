@@ -1,4 +1,3 @@
-import asyncio
 from functools import wraps
 from pathlib import Path
 import sys
@@ -11,10 +10,10 @@ from idevice import (
     check_usbmuxd,
     get_connected_devices,
     get_device_summary,
-    usbmuxd_socket_exists,
+    ensure_usbmuxd_running,
+    UsbmuxdStatus,
+    asyncio
 )
-# Import the interactive wizard from our separate module
-from tui import run_interactive_wizard
 
 DEFAULT_BACKUP_DIR = Path(user_data_dir("noot", "SamuGallo-06")) / "backups"
 
@@ -30,35 +29,6 @@ def coro(f):
     def wrapper(*args, **kwargs):
         return asyncio.run(f(*args, **kwargs))
     return wrapper
-
-
-async def ensure_usbmuxd_running(gui: bool = False):
-    """Check if usbmuxd is running. If absent or unresponsive, attempt to restart it."""
-    auth_tool = "pkexec" if gui else "sudo"
-
-    async def run_sys_cmd(cmd: list[str]) -> bool:
-        proc = await asyncio.create_subprocess_exec(
-            *cmd,
-            stdout=asyncio.subprocess.DEVNULL,
-            stderr=asyncio.subprocess.DEVNULL,
-        )
-        await proc.wait()
-        return proc.returncode == 0
-
-    if not usbmuxd_socket_exists():
-        typer.secho(
-            f"[WARNING] usbmuxd socket missing. Attempting to start via {auth_tool}...",
-            fg=typer.colors.YELLOW,
-        )
-        await run_sys_cmd([auth_tool, "systemctl", "start", "usbmuxd"])
-
-    if not await check_usbmuxd():
-        typer.secho(
-            "[WARNING] usbmuxd is unresponsive. Attempting restart...",
-            fg=typer.colors.YELLOW,
-        )
-        await run_sys_cmd([auth_tool, "systemctl", "restart", "usbmuxd"])
-
 
 @app.callback(invoke_without_command=True)
 def main(
@@ -88,7 +58,12 @@ def main(
 @coro
 async def list_devices():
     """List all connected iOS devices."""
-    await ensure_usbmuxd_running()
+    status = await ensure_usbmuxd_running()
+    if status == UsbmuxdStatus.FAILED:
+        typer.secho("Error: usbmuxd is unreachable.", fg=typer.colors.RED)
+        raise typer.Exit(code=1)
+    elif status == UsbmuxdStatus.STARTED:
+        typer.secho("usbmuxd was restarted successfully.", fg=typer.colors.GREEN)
 
     if not await check_usbmuxd():
         typer.secho("Error: usbmuxd is unreachable.", fg=typer.colors.RED)
@@ -120,7 +95,12 @@ async def summary(
     ],
 ):
     """Display detailed hardware and system info for a specific device."""
-    await ensure_usbmuxd_running()
+    status = await ensure_usbmuxd_running()
+    if status == UsbmuxdStatus.FAILED:
+        typer.secho("Error: usbmuxd is unreachable.", fg=typer.colors.RED)
+        raise typer.Exit(code=1)
+    elif status == UsbmuxdStatus.STARTED:
+        typer.secho("usbmuxd was restarted successfully.", fg=typer.colors.GREEN)
 
     info = await get_device_summary(udid)
     if not info:
@@ -157,14 +137,20 @@ async def backup(
     ] = DEFAULT_BACKUP_DIR,
 ):
     """Run a local backup for the specified device."""
-    await ensure_usbmuxd_running()
-
+    status = await ensure_usbmuxd_running()
+    if status == UsbmuxdStatus.FAILED:
+        typer.secho("Error: usbmuxd is unreachable.", fg=typer.colors.RED)
+        raise typer.Exit(code=1)
+    elif status == UsbmuxdStatus.STARTED:
+        typer.secho("usbmuxd was restarted successfully.", fg=typer.colors.GREEN)
+        
     backup_dir.mkdir(parents=True, exist_ok=True)
 
     typer.echo(f"Starting backup for device: {udid}")
     typer.echo(f"Destination: {backup_dir}")
 
     # TODO: Implement actual backup execution
+    #await execute_backup()
     typer.secho("Backup operation not yet implemented.", fg=typer.colors.YELLOW)
 
 
