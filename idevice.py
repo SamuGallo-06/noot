@@ -25,7 +25,7 @@ from pymobiledevice3.services.diagnostics import DiagnosticsService
 
 
 async def get_connected_devices():
-    """Ritorna lista di dispositivi con UDID e nome"""
+    """@brief Return the connected devices with their UDID and name."""
     try:
         print("Fetching connected devices...")
         devices = await list_devices()
@@ -46,7 +46,7 @@ async def get_connected_devices():
         return []
 
 async def get_device_summary(udid=None):
-    """Riassunto leggibile del dispositivo selezionato"""
+    """@brief Return a readable summary of the selected device."""
     lockdown = await create_using_usbmux(serial=udid)
     info = lockdown.all_values
 
@@ -74,8 +74,8 @@ def usbmuxd_socket_exists() -> bool:
 
 class UsbmuxdStatus(Enum):
     OK = auto()
-    STARTED = auto()       # non era attivo, ora lo è
-    FAILED = auto()         # non è stato possibile avviarlo
+    STARTED = auto()       ## @brief usbmuxd was not running and is now running.
+    FAILED = auto()         ## @brief usbmuxd could not be started.
 
 async def ensure_usbmuxd_running(gui: bool = False) -> UsbmuxdStatus:
     auth_tool = "pkexec" if gui else "sudo"
@@ -119,46 +119,44 @@ async def check_usbmuxd() -> bool:
 
  
 class EncryptionNotEnabledError(Exception):
-    """Sollevato quando si tenta un backup ma il device non ha l'encryption attiva."""
+    """@brief Raised when a backup is attempted while device encryption is disabled."""
     pass
  
  
 class IncrementalExcludeConflictError(Exception):
-    """Sollevato quando si richiede --incremental insieme a --exclude.
+    """@brief Raised when ``--incremental`` is requested together with ``--exclude``.
  
-    La libreria sottostante forza sempre un full backup quando il manifest deve
-    essere "patchato" per applicare un filtro di esclusione (patch_manifest=True
-    implica full=True). Piuttosto che eseguire silenziosamente un full backup
-    quando l'utente ha chiesto esplicitamente un incrementale, preferiamo fermarci
-    e segnalarlo chiaramente.
+    The underlying library always forces a full backup when the manifest must be
+    patched to apply an exclusion filter (``patch_manifest=True`` implies
+    ``full=True``). Instead of silently performing a full backup when the user
+    explicitly requested an incremental one, stop and report the conflict.
     """
     pass
  
  
 class IncorrectBackupPasswordError(Exception):
-    """Sollevato quando il device rifiuta la password fornita per un'operazione
-    che la richiede (disable_backup_encryption, restore di un backup criptato, ecc.).
+    """@brief Raised when the device rejects a password required by an operation.
  
-    pymobiledevice3 non espone un'eccezione dedicata per questo caso: il device
-    risponde con un errore generico (PyMobileDevice3Exception / DeviceLink error)
-    che qui viene reinterpretato nel contesto in cui una password errata è
-    l'unica causa plausibile del fallimento.
+    This covers operations such as ``disable_backup_encryption`` and restoring
+    an encrypted backup. pymobiledevice3 does not expose a dedicated exception
+    for this case: the device returns a generic error, which is reinterpreted
+    here when an incorrect password is the only plausible cause.
     """
     pass
  
  
 async def is_backup_encrypted(udid: str) -> bool:
-    """True se il dispositivo è configurato per criptare i propri backup (WillEncrypt)."""
+    """@brief Return whether the device is configured to encrypt backups (WillEncrypt)."""
     lockdown = await create_using_usbmux(serial=udid)
     async with Mobilebackup2Service(lockdown) as mb2:
         return await mb2.get_will_encrypt()
  
  
 async def enable_backup_encryption(udid: str, password: str) -> None:
-    """Attiva l'encryption dei backup sul dispositivo impostando una nuova password.
+    """@brief Enable backup encryption on the device with a new password.
  
-    Va chiamato una sola volta (o quando si vuole cambiare password): l'impostazione
-    resta valida sul device finché non viene esplicitamente disattivata.
+    Call this once, or when changing the password. The setting remains active
+    until it is explicitly disabled.
     """
     lockdown = await create_using_usbmux(serial=udid)
     async with Mobilebackup2Service(lockdown) as mb2:
@@ -166,7 +164,7 @@ async def enable_backup_encryption(udid: str, password: str) -> None:
  
  
 async def disable_backup_encryption(udid: str, password: str) -> None:
-    """Disattiva l'encryption dei backup sul dispositivo (richiede la password attuale)."""
+    """@brief Disable backup encryption on the device using the current password."""
     lockdown = await create_using_usbmux(serial=udid)
     async with Mobilebackup2Service(lockdown) as mb2:
         try:
@@ -182,7 +180,7 @@ async def change_backup_encryption_password(
     old_password: str,
     new_password: str,
 ) -> None:
-    """Cambia la password di cifratura dei backup sul dispositivo."""
+    """@brief Change the backup encryption password on the device."""
     lockdown = await create_using_usbmux(serial=udid)
     async with Mobilebackup2Service(lockdown) as mb2:
         try:
@@ -197,21 +195,22 @@ async def change_backup_encryption_password(
 # Backup execution
 # ---------------------------------------------------------------------------
  
-# Mappa i nomi usati in --exclude ai preset già pronti in pymobiledevice3
+## @brief Map the names used by ``--exclude`` to pymobiledevice3 presets.
 EXCLUDABLE_CATEGORIES = {s.value: s for s in BackupSelection}
  
  
 def _build_exclude_filter(categories: list[str]) -> Optional[BackupFilterCallback]:
-    """Costruisce un filter_callback che ESCLUDE i file appartenenti alle categorie indicate.
+    """@brief Build a filter callback that excludes files in the selected categories.
  
-    filter_callback in pymobiledevice3 ritorna True per i file da TENERE, quindi qui
-    invertiamo la logica dei preset (che matchano cosa includere in quella categoria).
+    ``filter_callback`` in pymobiledevice3 returns ``True`` for files to keep,
+    so the preset matching logic is inverted here.
  
-    Il callback viene invocato in due contesti diversi dalla libreria, con campi
-    diversi popolati in BackupFile:
-      - durante il transfer live: solo `device_name` è valorizzato
-      - durante il pruning del manifest (patch_manifest=True): `domain` + `relative_path`
-    Per coprire entrambi i casi controlliamo qualunque campo sia disponibile.
+    The library invokes the callback in two contexts, with different
+    ``BackupFile`` fields populated:
+      - during live transfer: only ``device_name`` is populated;
+      - during manifest pruning (``patch_manifest=True``): ``domain`` and
+        ``relative_path`` are populated.
+    Check every available field to cover both cases.
     """
     if not categories:
         return None
@@ -243,22 +242,21 @@ async def run_backup(
     password: str = "",
     progress_callback: Optional[Callable[[float], None]] = None,
 ) -> None:
-    """Esegue il backup del dispositivo.
+    """@brief Back up the device.
  
-    :param udid: UDID del device target.
-    :param backup_dir: Cartella radice dove salvare il backup (verrà creata una
-        sottocartella <udid> al suo interno, gestita direttamente dalla libreria).
-    :param full: True per backup completo, False per incrementale (se non esiste
-        ancora uno stato incrementale valido, la libreria forza comunque un full).
-    :param exclude: Lista di categorie da escludere (valori validi: vedi
-        EXCLUDABLE_CATEGORIES.keys()).
-    :param password: Password di encryption del backup. Obbligatoria perché NOOT
-        richiede sempre backup criptati.
-    :param progress_callback: Chiamata con la percentuale di completamento (float).
-    :raises EncryptionNotEnabledError: se il device non ha l'encryption attiva.
-        L'utente deve prima lanciare il comando dedicato per abilitarla.
-    :raises IncrementalExcludeConflictError: se full=False ed exclude non è vuoto
-        (combinazione non supportata: vedi nota sulla classe).
+    :param udid: UDID of the target device.
+    :param backup_dir: Root folder for the backup. The library creates an
+        ``<udid>`` subfolder inside it.
+    :param full: ``True`` for a full backup, ``False`` for an incremental backup.
+        The library still forces a full backup if no valid incremental state exists.
+    :param exclude: Categories to exclude (see ``EXCLUDABLE_CATEGORIES.keys()``).
+    :param password: Backup encryption password. Required because NOOT always
+        requests encrypted backups.
+    :param progress_callback: Callback receiving the completion percentage.
+    :raises EncryptionNotEnabledError: If device encryption is disabled. Enable it
+        first using the dedicated command.
+    :raises IncrementalExcludeConflictError: If ``full=False`` and ``exclude`` is
+        not empty; this combination is unsupported.
     """
     filter_callback = _build_exclude_filter(exclude or [])
  
