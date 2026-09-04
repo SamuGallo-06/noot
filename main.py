@@ -76,7 +76,7 @@ def main(
         raise typer.Exit()
     
 async def ensure_usbmuxd_or_exit(gui: bool = False):
-    """Wrapper CLI attorno a ensure_usbmuxd_running: traduce lo stato in output/exit code."""
+    """@brief Wrap ensure_usbmuxd_running and map its status to CLI output and exit codes."""
     status = await ensure_usbmuxd_running(gui=gui)
     if status == UsbmuxdStatus.STARTED:
         typer.secho("usbmuxd was not running and has been started.", fg=typer.colors.GREEN)
@@ -88,9 +88,8 @@ async def ensure_usbmuxd_or_exit(gui: bool = False):
         )
         raise typer.Exit(code=1)
 
-###################################
-##          Commands             ##
-###################################
+## @name Commands
+## @{
 
 @app.command("list")
 @coro
@@ -215,7 +214,7 @@ async def enable_encryption(
         type=str,                
     )
     
-    ## Password Error Handle
+    ## Handle password errors.
     if(password is None):
         typer.secho("Error: Password cannot be empty.", fg=typer.colors.RED)
         raise typer.Exit(code=1)
@@ -234,7 +233,7 @@ async def enable_encryption(
         typer.secho("Error: Password must contain both letters and numbers and special characters.", fg=typer.colors.RED)
         raise typer.Exit(code=1)"""
     
-    ## Enable Encryption
+    ## Enable backup encryption.
     
     await enable_backup_encryption(udid, password)
     typer.secho("Backup encryption enabled successfully.", fg=typer.colors.GREEN)
@@ -360,7 +359,7 @@ async def list_backups(
         
     table = Table()
 
-    # Definizione delle colonne (stile, allineamento, larghezza)
+    ## Define the table columns (style, alignment, and width).
     table.add_column("ID", justify="right", style="cyan", no_wrap=True)
     table.add_column("Device Name")
     table.add_column("UDID", justify="center")
@@ -546,7 +545,7 @@ async def restore(
     elif status == UsbmuxdStatus.STARTED:
         typer.secho("usbmuxd was restarted successfully.", fg=typer.colors.GREEN)
  
-    # Se non specificato, il source è lo stesso device target (comportamento di default)
+    ## If omitted, the source is the target device by default.
     source = source_udid or udid
  
     typer.secho("Restore backup", bold=True)
@@ -579,8 +578,8 @@ async def restore(
         fg = typer.colors.BLUE
     )
  
-    # Verifichiamo che il backup esista PRIMA di chiedere la password, per non
-    # far digitare inutilmente una password a un utente che ha sbagliato UDID.
+    ## Check that the backup exists before requesting the password, so the user
+    ## does not enter a password unnecessarily after specifying a wrong UDID.
     if not (backup_dir / source).exists():
         available = list_local_backups(backup_dir)
         typer.secho(f"Error: no backup found for '{source}' in {backup_dir}.", fg=typer.colors.RED)
@@ -786,12 +785,14 @@ async def erase(
             typer.secho(f"Error: {e}", fg=typer.colors.RED)
             raise typer.Exit(code=1)
  
-        # L'erase tipicamente completa senza eventi di progresso granulari fino alla
-        # fine: se non abbiamo mai raggiunto 100%, portiamo la barra a completamento.
+        ## Erase typically completes without granular progress events until the
+        ## end; if progress has not reached 100%, complete the progress bar.
         if last_percent < 100:
             progress.update(100 - last_percent)  # type: ignore
  
     typer.secho("Device erased successfully.", fg=typer.colors.GREEN)
+
+## @}
 
 
 if __name__ == "__main__":

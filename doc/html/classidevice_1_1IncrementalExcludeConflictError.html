@@ -100,13 +100,12 @@ Diagramma delle classi per idevice.IncrementalExcludeConflictError</div>
   <img src="classidevice_1_1IncrementalExcludeConflictError.png" alt=""/>
  </div></div>
 <a name="details" id="details"></a><h2 id="header-details" class="groupheader">Descrizione dettagliata</h2>
-<div class="textblock"><pre class="fragment">Sollevato quando si richiede --incremental insieme a --exclude.
+<div class="textblock"><pre class="fragment">@brief Raised when ``--incremental`` is requested together with ``--exclude``.
 
-La libreria sottostante forza sempre un full backup quando il manifest deve
-essere "patchato" per applicare un filtro di esclusione (patch_manifest=True
-implica full=True). Piuttosto che eseguire silenziosamente un full backup
-quando l'utente ha chiesto esplicitamente un incrementale, preferiamo fermarci
-e segnalarlo chiaramente.
+The underlying library always forces a full backup when the manifest must be
+patched to apply an exclusion filter (``patch_manifest=True`` implies
+``full=True``). Instead of silently performing a full backup when the user
+explicitly requested an incremental one, stop and report the conflict.
 </pre> </div><hr/>La documentazione per questa classe è stata generata a partire dal seguente file:<ul>
 <li><b>idevice.py</b></li>
 </ul>

@@ -65,17 +65,19 @@ async def get_device_summary(udid=None):
     }
     return summary
 
-############################################
-#  usbmuxd management and status checking  #
-############################################
+## @brief usbmuxd management and status checking.
 
 def usbmuxd_socket_exists() -> bool:
     return os.path.exists("/var/run/usbmuxd")
 
+## @brief Status returned by usbmuxd availability checks.
 class UsbmuxdStatus(Enum):
+    ## @brief usbmuxd is already running.
     OK = auto()
-    STARTED = auto()       ## @brief usbmuxd was not running and is now running.
-    FAILED = auto()         ## @brief usbmuxd could not be started.
+    ## @brief usbmuxd was started successfully.
+    STARTED = auto()
+    ## @brief usbmuxd could not be started.
+    FAILED = auto()
 
 async def ensure_usbmuxd_running(gui: bool = False) -> UsbmuxdStatus:
     auth_tool = "pkexec" if gui else "sudo"
@@ -109,13 +111,9 @@ async def check_usbmuxd() -> bool:
         return False
 
 
-############################################
-#  Backup execution                        #
-############################################
+## @brief Backup execution.
 
-# ---------------------------------------------------------------------------
-# Backup encryption
-# ---------------------------------------------------------------------------
+## @brief Backup encryption.
 
  
 class EncryptionNotEnabledError(Exception):
@@ -191,9 +189,7 @@ async def change_backup_encryption_password(
             ) from e
  
  
-# ---------------------------------------------------------------------------
-# Backup execution
-# ---------------------------------------------------------------------------
+## @brief Backup execution helpers.
  
 ## @brief Map the names used by ``--exclude`` to pymobiledevice3 presets.
 EXCLUDABLE_CATEGORIES = {s.value: s for s in BackupSelection}
@@ -285,33 +281,32 @@ async def run_backup(
             patch_manifest=filter_callback is not None,
         )
 
-# ---------------------------------------------------------------------------
-# Backup restore
-# ---------------------------------------------------------------------------
+## @brief Backup restore.
  
 class BackupNotFoundError(Exception):
-    """Sollevato quando non esiste un backup locale valido per il source_udid indicato
-    dentro backup_dir (mancano Info.plist / Manifest.plist / Status.plist)."""
+    """@brief Raised when no valid local backup exists for the specified source UDID.
+
+    The backup directory is missing ``Info.plist``, ``Manifest.plist``, or
+    ``Status.plist``.
+    """
     pass
  
  
 class RestorePasswordRequiredError(Exception):
-    """Sollevato quando il backup da ripristinare è criptato ma non è stata fornita
-    una password.
+    """@brief Raised when an encrypted backup is restored without a password.
  
-    La libreria sottostante (Mobilebackup2Service.restore), in questo caso, si limita
-    a loggare un errore e ritornare silenziosamente senza fare nulla — qui lo
-    trasformiamo in un'eccezione esplicita per evitare che NOOT segnali "successo"
-    quando in realtà il restore non è mai partito.
+    In this case the underlying library only logs an error and returns without
+    doing anything. Convert that condition into an explicit exception so NOOT
+    does not report success when the restore never started.
     """
     pass
  
  
 def list_local_backups(backup_dir: Path) -> list[dict[str, str | datetime | None]]:
-    """Ritorna UDID, nome e data dei backup locali validi dentro backup_dir.
+    """@brief Return the UDID, name, and date of valid local backups.
  
-    Utile per popolare un menu "quale backup vuoi ripristinare" quando si gestiscono
-    più device (es. backup di device diversi salvati nella stessa cartella radice).
+    Useful for populating a backup selection menu when multiple devices are
+    stored in the same root folder.
     """
     if not backup_dir.exists():
         return []
@@ -353,35 +348,34 @@ async def run_restore(
     skip_apps: bool = False,
     progress_callback: Optional[Callable[[float], None]] = None,
 ) -> None:
-    """Ripristina un backup locale sul dispositivo indicato.
- 
-    :param udid: UDID del device SU CUI si esegue il ripristino (quello collegato ora).
-    :param backup_dir: Cartella radice che contiene le sottocartelle <udid>/ dei backup.
-    :param source_udid: UDID del backup DA ripristinare (chi ha prodotto quei dati).
-        Se None, si assume coincida con `udid` (ripristino sullo stesso device che
-        ha fatto il backup). Va specificato esplicitamente quando si vuole ripristinare
-        il backup di un device su un device *diverso*.
-    :param password: Password del backup, obbligatoria se il backup è criptato.
-    :param restore_system_files: Ripristina anche i file di sistema.
-    :param reboot_after: Riavvia il device al termine del ripristino.
-    :param keep_backup_copy: Mantiene una copia della cartella di backup prima del ripristino.
-    :param restore_settings: Ripristina anche le impostazioni del device.
-    :param remove_items_not_in_backup: Rimuove dal device elementi non presenti nel backup.
-    :param skip_apps: Non forzare la reinstallazione delle app dopo il ripristino.
-    :param progress_callback: Chiamata con la percentuale di completamento (float).
-    :raises BackupNotFoundError: se non esiste un backup valido per source_udid in backup_dir.
-    :raises RestorePasswordRequiredError: se il backup è criptato e password è vuota.
-    :raises IncorrectBackupPasswordError: se il device rifiuta la password fornita.
+    """@brief Restore a local backup onto the specified device.
+
+    :param udid: UDID of the target device currently connected.
+    :param backup_dir: Root folder containing the ``<udid>/`` backup folders.
+    :param source_udid: UDID of the backup to restore. If ``None``, it defaults
+        to ``udid``. Specify it when restoring a backup onto a different device.
+    :param password: Backup password, required when the backup is encrypted.
+    :param restore_system_files: Restore system files as well.
+    :param reboot_after: Reboot the device after the restore.
+    :param keep_backup_copy: Keep a copy of the backup folder before restoring.
+    :param restore_settings: Restore the device settings as well.
+    :param remove_items_not_in_backup: Remove device items not present in the backup.
+    :param skip_apps: Do not force application reinstallation after the restore.
+    :param progress_callback: Callback receiving the completion percentage.
+    :raises BackupNotFoundError: If no valid backup exists for ``source_udid``.
+    :raises RestorePasswordRequiredError: If the backup is encrypted and the
+        password is empty.
+    :raises IncorrectBackupPasswordError: If the device rejects the password.
     """
     source = source_udid or udid
     device_directory = backup_dir / source
- 
+
     if not all((device_directory / f).exists() for f in ("Info.plist", "Manifest.plist", "Status.plist")):
         raise BackupNotFoundError(
             f"Nessun backup valido trovato per '{source}' in {backup_dir}. "
             f"Backup disponibili: {list_local_backups(backup_dir) or 'nessuno'}"
         )
- 
+
     if _backup_is_encrypted(backup_dir, source) and not password:
         raise RestorePasswordRequiredError(
             "Il backup selezionato è criptato: è necessaria la password per ripristinarlo."
@@ -408,39 +402,33 @@ async def run_restore(
             ) from e
  
  
-###################################
-##       Erase Device            ##
-###################################
+## @brief Erase device.
  
 async def erase_device(
     udid: str,
     confirm_udid: str,
     progress_callback: Optional[Callable[[float], None]] = None,
 ) -> None:
-    """Ripristina il dispositivo allo stato di fabbrica, cancellando TUTTI i dati.
- 
-    Operazione irreversibile. La libreria sottostante (Mobilebackup2Service.erase_device)
-    non richiede alcuna conferma né password: chiamarla esegue la cancellazione
-    immediatamente. Per questo qui pretendiamo che il chiamante ripassi l'UDID una
-    seconda volta come conferma esplicita (oltre a qualsiasi conferma interattiva
-    che il layer CLI/GUI deciderà di chiedere all'utente).
- 
-    :param udid: UDID del device da cancellare.
-    :param confirm_udid: Deve essere identico a `udid`. Serve a prevenire chiamate
-        automatizzate o accidentali con un UDID diverso da quello effettivamente
-        inteso (es. copia-incolla errato, variabile sbagliata nel chiamante).
-    :param progress_callback: Chiamata con la percentuale di completamento (float),
-        se il device invia eventi di progresso durante l'operazione. L'erase è
-        tipicamente rapido: potrebbe non arrivare granularità utile.
-    :raises ValueError: se confirm_udid non coincide con udid.
+    """@brief Restore the device to factory settings by deleting all data.
+
+    This operation is irreversible. The underlying library does not require
+    confirmation or a password, so the caller must provide the UDID a second
+    time as explicit confirmation.
+
+    :param udid: UDID of the device to erase.
+    :param confirm_udid: Must match ``udid`` exactly. This prevents accidental
+        calls with an unintended device identifier.
+    :param progress_callback: Callback receiving progress events, if the device
+        provides them. Erase is typically fast and may provide few events.
+    :raises ValueError: If ``confirm_udid`` does not match ``udid``.
     """
     if confirm_udid != udid:
         raise ValueError("confirm_udid non coincide con udid: operazione annullata per sicurezza.")
  
     lockdown = await create_using_usbmux(serial=udid)
     async with Mobilebackup2Service(lockdown) as mb2:
-        # Replichiamo qui la logica interna di Mobilebackup2Service.erase_device(),
-        # che non espone un progress_callback nella sua firma pubblica.
+        ## Replicate the internal logic of Mobilebackup2Service.erase_device(),
+        ## which does not expose a progress_callback in its public signature.
         with suppress(IncompleteReadError):
             async with mb2.device_link(Path(".")) as dl:
                 await dl.send_process_message(
@@ -448,18 +436,15 @@ async def erase_device(
                 )
                 await dl.dl_loop(progress_callback=progress_callback or (lambda _: None))
 
-###################################
-##       Power Control           ##
-###################################
+## @brief Power control.
 
 async def restart_device(udid: str) -> None:
-    """Riavvia il dispositivo (equivalente a spegnimento + riaccensione).
+    """@brief Restart the device (equivalent to powering it off and on).
 
-    Non richiede conferma né password: l'operazione parte non appena chiamata.
-    Il device si disconnette dal bus USB durante il riavvio; eventuali operazioni
-    NOOT in corso su quel device (backup, restore) verranno interrotte.
+    No confirmation or password is required. The device disconnects from the USB
+    bus during the restart, interrupting any active NOOT operation on it.
 
-    :raises PyMobileDevice3Exception: se il device rifiuta la richiesta.
+    :raises PyMobileDevice3Exception: If the device rejects the request.
     """
     lockdown = await create_using_usbmux(serial=udid)
     async with DiagnosticsService(lockdown) as diagnostics:
@@ -467,62 +452,56 @@ async def restart_device(udid: str) -> None:
 
 
 async def shutdown_device(udid: str) -> None:
-    """Spegne il dispositivo.
+    """@brief Shut down the device.
 
-    Non richiede conferma né password: l'operazione parte non appena chiamata.
-    A differenza del riavvio, il device NON si riaccende da solo: per tornare
-    a usarlo servirà tenere premuto il tasto fisico di accensione.
+    No confirmation or password is required. Unlike a restart, the device does
+    not power on again automatically.
 
-    :raises PyMobileDevice3Exception: se il device rifiuta la richiesta.
+    :raises PyMobileDevice3Exception: If the device rejects the request.
     """
     lockdown = await create_using_usbmux(serial=udid)
     async with DiagnosticsService(lockdown) as diagnostics:
         await diagnostics.shutdown()
         
         
-#########################################
-##       Diagnostics / Logs           ##
-#########################################
+## @brief Diagnostics and logs.
 
 class DeviceNotFoundError(Exception):
-    """Sollevato quando l'identificatore fornito non corrisponde a nessun device connesso."""
+    """@brief Raised when the identifier does not match a connected device."""
     pass
 
 
 class AmbiguousDeviceNameError(Exception):
-    """Sollevato quando un nome (non UDID) corrisponde a più di un device connesso.
+    """@brief Raised when a device name matches multiple connected devices.
 
-    Capita se due device condividono lo stesso DeviceName (es. entrambi chiamati
-    "iPhone" perché non rinominati dall'utente). In questo caso non possiamo
-    scegliere per lui: deve disambiguare con l'UDID esplicito.
+    This happens when two devices share the same ``DeviceName``. The caller must
+    disambiguate them using an explicit UDID.
     """
     pass
 
 
 async def resolve_device_identifier(identifier: str) -> str:
-    """Risolve un identificatore fornito dall'utente (UDID o nome) nell'UDID reale.
+    """@brief Resolve a user-provided identifier (UDID or name) to the real UDID.
 
-    Se `identifier` corrisponde esattamente all'UDID di un device connesso, viene
-    ritornato invariato (nessuna chiamata aggiuntiva necessaria). Altrimenti viene
-    interpretato come nome (case-insensitive) e cercato tra i device connessi.
+    If ``identifier`` exactly matches the UDID of a connected device, return it
+    unchanged. Otherwise, interpret it as a case-insensitive device name.
 
-    Pensata per comandi a basso/medio rischio (list, summary, backup,
-    enable-encryption) dove la comodità del nome ha senso. NON usare per comandi
-    distruttivi (erase, restore, shutdown): lì l'UDID esplicito va richiesto
-    direttamente, senza risoluzione automatica.
+    Intended for low- and medium-risk commands such as list, summary, backup,
+    and enable-encryption. Do not use it for destructive commands such as erase,
+    restore, and shutdown; those commands must request an explicit UDID.
 
-    :param identifier: UDID esatto oppure nome del device (case-insensitive).
-    :raises DeviceNotFoundError: se nessun device connesso corrisponde.
-    :raises AmbiguousDeviceNameError: se il nome corrisponde a più device.
+    :param identifier: Exact UDID or case-insensitive device name.
+    :raises DeviceNotFoundError: If no connected device matches.
+    :raises AmbiguousDeviceNameError: If the name matches multiple devices.
     """
     devices = await get_connected_devices()
 
-    # Match esatto per UDID: nessuna ambiguità possibile, ritorna subito
+    ## Exact UDID match: ambiguity is impossible, so return immediately.
     for d in devices:
         if d["udid"] == identifier:
             return d["udid"]
 
-    # Altrimenti prova per nome, case-insensitive
+    ## Otherwise, try a case-insensitive name match.
     matches = [d for d in devices if (d.get("name") or "").lower() == identifier.lower()]
 
     if not matches:

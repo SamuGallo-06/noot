@@ -100,11 +100,10 @@ Diagramma delle classi per idevice.AmbiguousDeviceNameError</div>
   <img src="classidevice_1_1AmbiguousDeviceNameError.png" alt=""/>
  </div></div>
 <a name="details" id="details"></a><h2 id="header-details" class="groupheader">Descrizione dettagliata</h2>
-<div class="textblock"><pre class="fragment">Sollevato quando un nome (non UDID) corrisponde a più di un device connesso.
+<div class="textblock"><pre class="fragment">@brief Raised when a device name matches multiple connected devices.
 
-Capita se due device condividono lo stesso DeviceName (es. entrambi chiamati
-"iPhone" perché non rinominati dall'utente). In questo caso non possiamo
-scegliere per lui: deve disambiguare con l'UDID esplicito.
+This happens when two devices share the same ``DeviceName``. The caller must
+disambiguate them using an explicit UDID.
 </pre> </div><hr/>La documentazione per questa classe è stata generata a partire dal seguente file:<ul>
 <li><b>idevice.py</b></li>
 </ul>

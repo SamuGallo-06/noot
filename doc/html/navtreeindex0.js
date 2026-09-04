@@ -10,6 +10,8 @@ var NAVTREEINDEX0 =
 "classidevice_1_1IncrementalExcludeConflictError.html":[1,0,0,2],
 "classidevice_1_1RestorePasswordRequiredError.html":[1,0,0,5],
 "classidevice_1_1UsbmuxdStatus.html":[1,0,0,0],
+"functions.html":[1,3,0],
+"functions_vars.html":[1,3,1],
 "hierarchy.html":[1,2],
 "index.html":[],
 "md_README.html":[0],
