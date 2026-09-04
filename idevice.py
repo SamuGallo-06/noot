@@ -1,10 +1,12 @@
 import asyncio
 import os
 import plistlib
-from datetime import datetime
+from asyncio import IncompleteReadError
+from contextlib import suppress
 from enum import Enum, auto
 from pathlib import Path
 from typing import Callable, Optional
+from datetime import datetime
  
 from pymobiledevice3.lockdown import create_using_usbmux
 from pymobiledevice3.usbmux import list_devices
@@ -19,6 +21,8 @@ from pymobiledevice3.services.mobilebackup2 import (
     BackupSelection,
     BackupFilterCallback,
 )
+from pymobiledevice3.services.diagnostics import DiagnosticsService
+
 
 async def get_connected_devices():
     """Ritorna lista di dispositivi con UDID e nome"""
@@ -405,24 +409,136 @@ async def run_restore(
                 "Il dispositivo ha rifiutato la password fornita per il backup."
             ) from e
  
+ 
 ###################################
 ##       Erase Device            ##
 ###################################
  
-async def erase_device(udid: str) -> None:
+async def erase_device(
+    udid: str,
+    confirm_udid: str,
+    progress_callback: Optional[Callable[[float], None]] = None,
+) -> None:
     """Ripristina il dispositivo allo stato di fabbrica, cancellando TUTTI i dati.
  
     Operazione irreversibile. La libreria sottostante (Mobilebackup2Service.erase_device)
     non richiede alcuna conferma né password: chiamarla esegue la cancellazione
-    immediatamente. 
+    immediatamente. Per questo qui pretendiamo che il chiamante ripassi l'UDID una
+    seconda volta come conferma esplicita (oltre a qualsiasi conferma interattiva
+    che il layer CLI/GUI deciderà di chiedere all'utente).
  
     :param udid: UDID del device da cancellare.
-
+    :param confirm_udid: Deve essere identico a `udid`. Serve a prevenire chiamate
+        automatizzate o accidentali con un UDID diverso da quello effettivamente
+        inteso (es. copia-incolla errato, variabile sbagliata nel chiamante).
+    :param progress_callback: Chiamata con la percentuale di completamento (float),
+        se il device invia eventi di progresso durante l'operazione. L'erase è
+        tipicamente rapido: potrebbe non arrivare granularità utile.
+    :raises ValueError: se confirm_udid non coincide con udid.
     """
+    if confirm_udid != udid:
+        raise ValueError("confirm_udid non coincide con udid: operazione annullata per sicurezza.")
  
     lockdown = await create_using_usbmux(serial=udid)
     async with Mobilebackup2Service(lockdown) as mb2:
-        # backup_directory qui serve solo per il canale device_link (protocollo),
-        # non viene scritto alcun backup reale durante un erase.
-        await mb2.erase_device()
+        # Replichiamo qui la logica interna di Mobilebackup2Service.erase_device(),
+        # che non espone un progress_callback nella sua firma pubblica.
+        with suppress(IncompleteReadError):
+            async with mb2.device_link(Path(".")) as dl:
+                await dl.send_process_message(
+                    {"MessageName": "EraseDevice", "TargetIdentifier": mb2.lockdown.udid}
+                )
+                await dl.dl_loop(progress_callback=progress_callback or (lambda _: None))
+
+###################################
+##       Power Control           ##
+###################################
+
+async def restart_device(udid: str) -> None:
+    """Riavvia il dispositivo (equivalente a spegnimento + riaccensione).
+
+    Non richiede conferma né password: l'operazione parte non appena chiamata.
+    Il device si disconnette dal bus USB durante il riavvio; eventuali operazioni
+    NOOT in corso su quel device (backup, restore) verranno interrotte.
+
+    :raises PyMobileDevice3Exception: se il device rifiuta la richiesta.
+    """
+    lockdown = await create_using_usbmux(serial=udid)
+    async with DiagnosticsService(lockdown) as diagnostics:
+        await diagnostics.restart()
+
+
+async def shutdown_device(udid: str) -> None:
+    """Spegne il dispositivo.
+
+    Non richiede conferma né password: l'operazione parte non appena chiamata.
+    A differenza del riavvio, il device NON si riaccende da solo: per tornare
+    a usarlo servirà tenere premuto il tasto fisico di accensione.
+
+    :raises PyMobileDevice3Exception: se il device rifiuta la richiesta.
+    """
+    lockdown = await create_using_usbmux(serial=udid)
+    async with DiagnosticsService(lockdown) as diagnostics:
+        await diagnostics.shutdown()
+        
+        
+#########################################
+##       Diagnostics / Logs           ##
+#########################################
+
+class DeviceNotFoundError(Exception):
+    """Sollevato quando l'identificatore fornito non corrisponde a nessun device connesso."""
+    pass
+
+
+class AmbiguousDeviceNameError(Exception):
+    """Sollevato quando un nome (non UDID) corrisponde a più di un device connesso.
+
+    Capita se due device condividono lo stesso DeviceName (es. entrambi chiamati
+    "iPhone" perché non rinominati dall'utente). In questo caso non possiamo
+    scegliere per lui: deve disambiguare con l'UDID esplicito.
+    """
+    pass
+
+
+async def resolve_device_identifier(identifier: str) -> str:
+    """Risolve un identificatore fornito dall'utente (UDID o nome) nell'UDID reale.
+
+    Se `identifier` corrisponde esattamente all'UDID di un device connesso, viene
+    ritornato invariato (nessuna chiamata aggiuntiva necessaria). Altrimenti viene
+    interpretato come nome (case-insensitive) e cercato tra i device connessi.
+
+    Pensata per comandi a basso/medio rischio (list, summary, backup,
+    enable-encryption) dove la comodità del nome ha senso. NON usare per comandi
+    distruttivi (erase, restore, shutdown): lì l'UDID esplicito va richiesto
+    direttamente, senza risoluzione automatica.
+
+    :param identifier: UDID esatto oppure nome del device (case-insensitive).
+    :raises DeviceNotFoundError: se nessun device connesso corrisponde.
+    :raises AmbiguousDeviceNameError: se il nome corrisponde a più device.
+    """
+    devices = await get_connected_devices()
+
+    # Match esatto per UDID: nessuna ambiguità possibile, ritorna subito
+    for d in devices:
+        if d["udid"] == identifier:
+            return d["udid"]
+
+    # Altrimenti prova per nome, case-insensitive
+    matches = [d for d in devices if (d.get("name") or "").lower() == identifier.lower()]
+
+    if not matches:
+        available = ", ".join(f"{d.get('name', 'Unknown')} ({d['udid']})" for d in devices) or "nessuno"
+        raise DeviceNotFoundError(
+            f"Nessun device trovato per '{identifier}'. Device connessi: {available}"
+        )
+
+    if len(matches) > 1:
+        raise AmbiguousDeviceNameError(
+            f"Più device si chiamano '{identifier}': "
+            f"{', '.join(d['udid'] for d in matches)}. Specifica l'UDID esplicito."
+        )
+
+    return matches[0]["udid"]
+
 

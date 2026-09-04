@@ -2,6 +2,7 @@ import asyncio
 from functools import wraps
 from pathlib import Path
 import sys
+import time
 from typing import Annotated, Optional
  
 from platformdirs import user_data_dir
@@ -31,6 +32,10 @@ from idevice import (
     list_local_backups,
     BackupNotFoundError,
     RestorePasswordRequiredError,
+    PyMobileDevice3Exception,
+    DeviceNotFoundError,
+    AmbiguousDeviceNameError,
+    resolve_device_identifier
 )
 
 MAX_PASSWORD_ATTEMPTS = 3
@@ -83,8 +88,6 @@ async def ensure_usbmuxd_or_exit(gui: bool = False):
         )
         raise typer.Exit(code=1)
 
-
-
 ###################################
 ##          Commands             ##
 ###################################
@@ -127,12 +130,21 @@ async def summary(
         typer.Option(
             "--udid",
             "-u",
-            help="Target iOS device UDID. It can be obtained using the 'list' command.",
-            prompt="Enter device UDID",
+            help="Device UDID or name (e.g. 'iPhone 5c'). Use 'noot list' to see options.",
+            prompt="Enter device UDID or name",
         ),
     ],
 ):
     """Display detailed hardware and system info for a specific device."""
+    try:
+        udid = await resolve_device_identifier(udid)
+    except DeviceNotFoundError as e:
+        typer.secho(f"Error: {e}", fg=typer.colors.RED)
+        raise typer.Exit(code=1)
+    except AmbiguousDeviceNameError as e:
+        typer.secho(f"Error: {e}", fg=typer.colors.RED)
+        raise typer.Exit(code=1)
+    
     status = await ensure_usbmuxd_running()
     if status == UsbmuxdStatus.FAILED:
         typer.secho("Error: usbmuxd is unreachable.", fg=typer.colors.RED)
@@ -160,8 +172,8 @@ async def enable_encryption(
         typer.Option(
             "--udid",
             "-u",
-            help="Target iOS device UDID. It can be obtained using the 'list' command.",
-            prompt="Enter device UDID",
+            help="Device UDID or name. Use 'noot list' to see options.",
+            prompt="Enter device UDID or name",
         ),
     ],
 ):
@@ -172,6 +184,15 @@ async def enable_encryption(
     first backup (unless encryption is already enabled on the device, e.g. via
     a previous iTunes/Finder pairing).
     """
+    
+    try:
+        udid = await resolve_device_identifier(udid)
+    except DeviceNotFoundError as e:
+        typer.secho(f"Error: {e}", fg=typer.colors.RED)
+        raise typer.Exit(code=1)
+    except AmbiguousDeviceNameError as e:
+        typer.secho(f"Error: {e}", fg=typer.colors.RED)
+        raise typer.Exit(code=1)
 
     await ensure_usbmuxd_or_exit()
  
@@ -227,12 +248,21 @@ async def change_encryption_password(
         typer.Option(
             "--udid",
             "-u",
-            help="Target iOS device UDID",
-            prompt="Enter device UDID",
+            help="Device UDID or name. Use 'noot list' to see options.",
+            prompt="Enter device UDID or name",
         ),
     ],
 ):
     """Change the current backup encryption password on the device."""
+    try:
+        udid = await resolve_device_identifier(udid)
+    except DeviceNotFoundError as e:
+        typer.secho(f"Error: {e}", fg=typer.colors.RED)
+        raise typer.Exit(code=1)
+    except AmbiguousDeviceNameError as e:
+        typer.secho(f"Error: {e}", fg=typer.colors.RED)
+        raise typer.Exit(code=1)
+    
     await ensure_usbmuxd_or_exit()
 
     if not await is_backup_encrypted(udid):
@@ -268,12 +298,20 @@ async def disable_encryption(
         typer.Option(
             "--udid",
             "-u",
-            help="Target iOS device UDID",
-            prompt="Enter device UDID",
+            help="Device UDID or name. Use 'noot list' to see options.",
+            prompt="Enter device UDID or name",
         ),
     ],
 ):
     """Disable backup encryption on the device (requires the current backup password)."""
+    try:
+        udid = await resolve_device_identifier(udid)
+    except DeviceNotFoundError as e:
+        typer.secho(f"Error: {e}", fg=typer.colors.RED)
+        raise typer.Exit(code=1)
+    except AmbiguousDeviceNameError as e:
+        typer.secho(f"Error: {e}", fg=typer.colors.RED)
+        raise typer.Exit(code=1)
     await ensure_usbmuxd_or_exit()
  
     if not await is_backup_encrypted(udid):
@@ -344,8 +382,8 @@ async def backup(
         typer.Option(
             "--udid",
             "-u",
-            help="Target iOS device UDID",
-            prompt="Enter device UDID",
+            help="Device UDID or name. Use 'noot list' to see options.",
+            prompt="Enter device UDID or name",
         ),
     ],
     backup_dir: Annotated[
@@ -375,6 +413,16 @@ async def backup(
     ] = None,
     ):
     """Run a local backup for the specified device."""
+    
+    try:
+        udid = await resolve_device_identifier(udid)
+    except DeviceNotFoundError as e:
+        typer.secho(f"Error: {e}", fg=typer.colors.RED)
+        raise typer.Exit(code=1)
+    except AmbiguousDeviceNameError as e:
+        typer.secho(f"Error: {e}", fg=typer.colors.RED)
+        raise typer.Exit(code=1)
+    
     status = await ensure_usbmuxd_running()
     if status == UsbmuxdStatus.FAILED:
         typer.secho("Error: usbmuxd is unreachable.", fg=typer.colors.RED)
@@ -481,6 +529,16 @@ async def restore(
     ] = False,
 ):
     """Restore a local backup onto the connected device."""
+    
+    try:
+        udid = await resolve_device_identifier(udid)
+    except DeviceNotFoundError as e:
+        typer.secho(f"Error: {e}", fg=typer.colors.RED)
+        raise typer.Exit(code=1)
+    except AmbiguousDeviceNameError as e:
+        typer.secho(f"Error: {e}", fg=typer.colors.RED)
+        raise typer.Exit(code=1)
+    
     status = await ensure_usbmuxd_running()
     if status == UsbmuxdStatus.FAILED:
         typer.secho("Error: usbmuxd is unreachable.", fg=typer.colors.RED)
@@ -601,6 +659,16 @@ async def delete(
     ] = DEFAULT_BACKUP_DIR, 
 ):
     """Delete a local backup for the specified device UDID."""
+    
+    try:
+        udid = await resolve_device_identifier(udid)
+    except DeviceNotFoundError as e:
+        typer.secho(f"Error: {e}", fg=typer.colors.RED)
+        raise typer.Exit(code=1)
+    except AmbiguousDeviceNameError as e:
+        typer.secho(f"Error: {e}", fg=typer.colors.RED)
+        raise typer.Exit(code=1)
+
     backups = list_local_backups(backup_dir)
     backup_to_delete = next((b for b in backups if b["udid"] == udid), None)
     if not backup_to_delete:
@@ -630,6 +698,101 @@ async def delete(
     except Exception as e:
         typer.secho(f"Error deleting backup: {e}", fg=typer.colors.RED)
         raise typer.Exit(code=1)
+
+
+
+@app.command("erase")
+@coro
+async def erase(
+    udid: Annotated[
+        str,
+        typer.Option(
+            "--udid",
+            "-u",
+            help="Target iOS device UDID",
+            prompt="Enter device UDID",
+        ),
+    ],
+):
+    """Erase all data on the specified iOS device, restoring it to factory settings."""
+    
+    try:
+        udid = await resolve_device_identifier(udid)
+    except DeviceNotFoundError as e:
+        typer.secho(f"Error: {e}", fg=typer.colors.RED)
+        raise typer.Exit(code=1)
+    except AmbiguousDeviceNameError as e:
+        typer.secho(f"Error: {e}", fg=typer.colors.RED)
+        raise typer.Exit(code=1)
+    
+    await ensure_usbmuxd_or_exit()
+ 
+    typer.secho(
+        "This operation will completely erase all data, settings, apps and "
+        "personal files on the device, restoring it to its factory settings.\n",
+        fg=typer.colors.YELLOW,
+        bold=True,
+    )
+    typer.echo(
+        "Before continuing, on the device:\n"
+        "  1. Make sure the battery is charged at least 50%.\n"
+        "  2. Turn off Find My (Settings > [Your Name] > Find My > Find My iPhone/iPad, "
+        "and turn it off).\n"
+        "  3. Keep the device connected via USB and do not disconnect it during the process.\n"
+    )
+    typer.confirm("Have you completed the steps above and want to continue?", abort=True)
+ 
+    info = await get_device_summary(udid)
+    if not info:
+        typer.secho(f"Error: unable to fetch device info for {udid}.", fg=typer.colors.RED)
+        raise typer.Exit(code=1)
+ 
+    typer.secho(
+        "\nFor safety reasons, please confirm you want to erase this device.\n"
+        "This action is irreversible.",
+        fg=typer.colors.YELLOW,
+    )
+    typed = typer.prompt(f"Type the device UDID ({udid}) to confirm the erase")
+    if typed != udid:
+        typer.secho("UDID does not match. Erase operation cancelled.", fg=typer.colors.RED)
+        raise typer.Exit(code=1)
+ 
+    device_label = info.get("nome") or udid
+    typer.secho(
+        f"\n⚠ WARNING: this will permanently erase all data on '{device_label}'. "
+        "There is no way to undo this.",
+        fg=typer.colors.RED,
+        bold=True,
+    )
+    typer.confirm(f"Erase '{device_label}' now?", abort=True)
+ 
+    last_percent = 0.0
+ 
+    with typer.progressbar(length=100, label="Erasing device") as progress:
+        def on_progress(percent: float) -> None:
+            nonlocal last_percent
+            delta = max(0.0, percent - last_percent)
+            if delta:
+                progress.update(delta)  # type: ignore
+                last_percent = percent
+ 
+        try:
+            await erase_device(
+                udid=udid,
+                confirm_udid=typed,
+                progress_callback=on_progress,
+            )
+        except PyMobileDevice3Exception as e:
+            typer.secho(f"Error: {e}", fg=typer.colors.RED)
+            raise typer.Exit(code=1)
+ 
+        # L'erase tipicamente completa senza eventi di progresso granulari fino alla
+        # fine: se non abbiamo mai raggiunto 100%, portiamo la barra a completamento.
+        if last_percent < 100:
+            progress.update(100 - last_percent)  # type: ignore
+ 
+    typer.secho("Device erased successfully.", fg=typer.colors.GREEN)
+
 
 if __name__ == "__main__":
     try:
