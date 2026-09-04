@@ -1,4 +1,4 @@
-# Noot
+# Noot (Non-apple Open-source Operator for iTunes)
 
 iPhone backup manager for Linux, built using pymobiledevice3 module.
 

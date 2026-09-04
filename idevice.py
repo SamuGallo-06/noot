@@ -1,6 +1,7 @@
 import asyncio
 import os
 import plistlib
+from datetime import datetime
 from enum import Enum, auto
 from pathlib import Path
 from typing import Callable, Optional
@@ -22,6 +23,7 @@ from pymobiledevice3.services.mobilebackup2 import (
 async def get_connected_devices():
     """Ritorna lista di dispositivi con UDID e nome"""
     try:
+        print("Fetching connected devices...")
         devices = await list_devices()
         result = []
         for dev in devices:
@@ -163,7 +165,28 @@ async def disable_backup_encryption(udid: str, password: str) -> None:
     """Disattiva l'encryption dei backup sul dispositivo (richiede la password attuale)."""
     lockdown = await create_using_usbmux(serial=udid)
     async with Mobilebackup2Service(lockdown) as mb2:
-        await mb2.change_password(old=password, new="")
+        try:
+            await mb2.change_password(old=password, new="")
+        except PyMobileDevice3Exception as e:
+            raise IncorrectBackupPasswordError(
+                "Il dispositivo ha rifiutato la password attuale del backup."
+            ) from e
+
+
+async def change_backup_encryption_password(
+    udid: str,
+    old_password: str,
+    new_password: str,
+) -> None:
+    """Cambia la password di cifratura dei backup sul dispositivo."""
+    lockdown = await create_using_usbmux(serial=udid)
+    async with Mobilebackup2Service(lockdown) as mb2:
+        try:
+            await mb2.change_password(old=old_password, new=new_password)
+        except PyMobileDevice3Exception as e:
+            raise IncorrectBackupPasswordError(
+                "Il dispositivo ha rifiutato la password attuale del backup."
+            ) from e
  
  
 # ---------------------------------------------------------------------------
@@ -282,8 +305,8 @@ class RestorePasswordRequiredError(Exception):
     pass
  
  
-def list_local_backups(backup_dir: Path) -> list[str]:
-    """Ritorna la lista degli UDID per cui esiste un backup locale valido dentro backup_dir.
+def list_local_backups(backup_dir: Path) -> list[dict[str, str | datetime | None]]:
+    """Ritorna UDID, nome e data dei backup locali validi dentro backup_dir.
  
     Utile per popolare un menu "quale backup vuoi ripristinare" quando si gestiscono
     più device (es. backup di device diversi salvati nella stessa cartella radice).
@@ -291,12 +314,20 @@ def list_local_backups(backup_dir: Path) -> list[str]:
     if not backup_dir.exists():
         return []
  
-    result = []
+    result: list[dict[str, str | datetime | None]] = []
     for entry in backup_dir.iterdir():
         if not entry.is_dir():
             continue
         if all((entry / f).exists() for f in ("Info.plist", "Manifest.plist", "Status.plist")):
-            result.append(entry.name)
+            with open(entry / "Info.plist", "rb") as file:
+                info = plistlib.load(file)
+            with open(entry / "Status.plist", "rb") as file:
+                status = plistlib.load(file)
+            result.append({
+                "udid": entry.name,
+                "device_name": info.get("Device Name") or info.get("Display Name"),
+                "backup_date": status.get("Date"),
+            })
     return result
  
  
