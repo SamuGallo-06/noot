@@ -1,19 +1,29 @@
+import asyncio
 from functools import wraps
 from pathlib import Path
 import sys
-from typing import Annotated
-
+from typing import Annotated, Optional
+ 
 from platformdirs import user_data_dir
 import typer
-
+ 
 from idevice import (
     check_usbmuxd,
     get_connected_devices,
     get_device_summary,
     ensure_usbmuxd_running,
     UsbmuxdStatus,
-    asyncio
+    is_backup_encrypted,
+    enable_backup_encryption,
+    disable_backup_encryption,
+    run_backup,
+    EncryptionNotEnabledError,
+    IncrementalExcludeConflictError,
+    EXCLUDABLE_CATEGORIES,
+    IncorrectBackupPasswordError,
 )
+
+MAX_PASSWORD_ATTEMPTS = 3
 
 DEFAULT_BACKUP_DIR = Path(user_data_dir("noot", "SamuGallo-06")) / "backups"
 
@@ -21,7 +31,6 @@ app = typer.Typer(
     help="NOOT - iOS device management and backup utility",
     no_args_is_help=False,
 )
-
 
 def coro(f):
     """Decorator to run async functions inside synchronous Typer commands."""
@@ -48,6 +57,20 @@ def main(
     if ctx.invoked_subcommand is None:
         typer.echo("No command provided. use --help for usage information.")
         raise typer.Exit()
+    
+async def ensure_usbmuxd_or_exit(gui: bool = False):
+    """Wrapper CLI attorno a ensure_usbmuxd_running: traduce lo stato in output/exit code."""
+    status = await ensure_usbmuxd_running(gui=gui)
+    if status == UsbmuxdStatus.STARTED:
+        typer.secho("usbmuxd was not running and has been started.", fg=typer.colors.GREEN)
+    elif status == UsbmuxdStatus.FAILED:
+        typer.secho(
+            "Error: usbmuxd is unreachable and could not be started automatically.\n"
+            "Try manually: sudo systemctl start usbmuxd",
+            fg=typer.colors.RED,
+        )
+        raise typer.Exit(code=1)
+
 
 
 ###################################
@@ -78,7 +101,7 @@ async def list_devices():
     for d in devices:
         name = d.get("name", "Unknown")
         udid = d.get("udid")
-        typer.echo(f"  • {name} ({udid})")
+        typer.echo(f"  > {name} (UDID: {udid})")
 
 
 @app.command("summary")
@@ -89,7 +112,7 @@ async def summary(
         typer.Option(
             "--udid",
             "-u",
-            help="Target iOS device UDID",
+            help="Target iOS device UDID. It can be obtained using the 'list' command.",
             prompt="Enter device UDID",
         ),
     ],
@@ -113,6 +136,111 @@ async def summary(
     typer.secho(f"Device Summary [{udid}]:", bold=True)
     for k, v in info.items():
         typer.echo(f"  {k}: {v}")
+
+@app.command("enable-encryption")
+@coro
+async def enable_encryption(
+    udid: Annotated[
+        str,
+        typer.Option(
+            "--udid",
+            "-u",
+            help="Target iOS device UDID. It can be obtained using the 'list' command.",
+            prompt="Enter device UDID",
+        ),
+    ],
+):
+    
+    """Enable backup encryption on the device by setting a new backup password.
+ 
+    NOOT always performs encrypted backups, so this must be run once before the
+    first backup (unless encryption is already enabled on the device, e.g. via
+    a previous iTunes/Finder pairing).
+    """
+
+    await ensure_usbmuxd_or_exit()
+ 
+    if await is_backup_encrypted(udid):
+        typer.secho("Backup encryption is already enabled on this device.", fg=typer.colors.GREEN)
+        return
+ 
+    typer.secho(
+        "This password protects your backups. Passsword must be at least 8 characters long and contain both letters and numbers and special characters. Store it safely: it cannot be recovered, and you will need it to restore or read this device's backups.",
+        fg=typer.colors.YELLOW,
+    )
+    
+    typer.confirm("Do you want to enable encryption?")
+    
+    password = typer.prompt(
+        text="Choose a password",
+        default=None,
+        hide_input=True,       
+        confirmation_prompt=True,
+        type=str,                
+    )
+    
+    ## Password Error Handle
+    if(password is None):
+        typer.secho("Error: Password cannot be empty.", fg=typer.colors.RED)
+        raise typer.Exit(code=1)
+
+    if(password.strip() == ""):
+        typer.secho("Error: Password cannot be empty or whitespace.", fg=typer.colors.RED)
+        raise typer.Exit(code=1)
+    
+    if len(password) < 8:
+        typer.secho("Error: Password must be at least 8 characters long.", fg=typer.colors.RED)
+        raise typer.Exit(code=1)
+
+    if(not any(char.isdigit() for char in password) or
+       not any(char.isalpha() for char in password) or
+       not any(not char.isalnum() for char in password)):
+        typer.secho("Error: Password must contain both letters and numbers and special characters.", fg=typer.colors.RED)
+        raise typer.Exit(code=1)
+    
+    ## Enable Encryption
+    
+    await enable_backup_encryption(udid, password)
+    typer.secho("Backup encryption enabled successfully.", fg=typer.colors.GREEN)
+
+    
+@app.command("disable-encryption")
+@coro
+async def disable_encryption(
+    udid: Annotated[
+        str,
+        typer.Option(
+            "--udid",
+            "-u",
+            help="Target iOS device UDID",
+            prompt="Enter device UDID",
+        ),
+    ],
+):
+    """Disable backup encryption on the device (requires the current backup password)."""
+    await ensure_usbmuxd_or_exit()
+ 
+    if not await is_backup_encrypted(udid):
+        typer.secho("Backup encryption is already disabled on this device.", fg=typer.colors.GREEN)
+        return
+ 
+    for attempt in range(1, MAX_PASSWORD_ATTEMPTS + 1):
+        password = typer.prompt("Current backup password", hide_input=True)
+        try:
+            await disable_backup_encryption(udid, password)
+        except IncorrectBackupPasswordError:
+            remaining = MAX_PASSWORD_ATTEMPTS - attempt
+            if remaining > 0:
+                typer.secho(
+                    f"Incorrect password. {remaining} attempt(s) remaining.",
+                    fg=typer.colors.RED,
+                )
+                continue
+            typer.secho("Error: too many incorrect attempts.", fg=typer.colors.RED)
+            raise typer.Exit(code=1)
+        else:
+            typer.secho("Backup encryption disabled.", fg=typer.colors.GREEN)
+            return
 
 
 @app.command("backup")
