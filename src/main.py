@@ -2,7 +2,6 @@ import asyncio
 from functools import wraps
 from pathlib import Path
 import sys
-import time
 from typing import Annotated, Optional
  
 from platformdirs import user_data_dir
@@ -11,6 +10,8 @@ import click
 
 from rich.console import Console
 from rich.table import Table
+
+from PySide6.QtWidgets import QApplication
  
 from idevice import (
     check_usbmuxd,
@@ -40,6 +41,9 @@ from idevice import (
     shutdown_device
 )
 
+# Importing UI
+from gui.main_window import MainWindow
+
 VERSION="1.0.0"
 
 MAX_PASSWORD_ATTEMPTS = 3
@@ -64,6 +68,14 @@ def version_callback():
     typer.echo(f"NOOT version: {VERSION}")
     raise typer.Exit()
 
+def launch_gui():
+    """Launch the graphical user interface."""
+    app = QApplication(sys.argv)
+    app.setApplicationName("Noot")
+    window = MainWindow()
+    window.show()
+    sys.exit(app.exec())
+
 @app.callback(invoke_without_command=True)
 def main(
     ctx: typer.Context,
@@ -72,14 +84,18 @@ def main(
         typer.Option("--gui", "-g", help="Launch GUI interface"),
     ] = False,
     version: Annotated[
-        bool | None, typer.Option("--version", "-v", help="Display the current version", callback=version_callback)
-    ] = None,
+        bool,
+        typer.Option("--version", "-v", help="Display the current version")
+    ] = False,
 ):
     """Global entry point: intercepts --gui or triggers interactive mode when no command is provided."""
     if gui:
         typer.echo("Launching graphical user interface...")
-        # TODO: Initialize and launch GUI
+        launch_gui()
         raise typer.Exit()
+    
+    if version:
+        version_callback()
 
     # Fallback to interactive mode if no CLI arguments/commands are supplied
     if ctx.invoked_subcommand is None:

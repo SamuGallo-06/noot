@@ -22,6 +22,7 @@ from pymobiledevice3.services.mobilebackup2 import (
     BackupFilterCallback,
 )
 from pymobiledevice3.services.diagnostics import DiagnosticsService
+import typer
 
 
 async def get_connected_devices():
@@ -94,6 +95,7 @@ async def ensure_usbmuxd_running(gui: bool = False) -> UsbmuxdStatus:
     if await check_usbmuxd():
         return UsbmuxdStatus.OK
 
+    typer.secho("usbmuxd is not running. Attempting to start it...", fg=typer.colors.YELLOW)
     if not usbmuxd_socket_exists():
         await run_sys_cmd([auth_tool, "systemctl", "start", "usbmuxd"])
     else:
@@ -178,7 +180,11 @@ async def change_backup_encryption_password(
     old_password: str,
     new_password: str,
 ) -> None:
-    """@brief Change the backup encryption password on the device."""
+    """@brief Change         first = self._connected_devices[0]
+        self._current_udid = first["udid"]
+        self._set_actions_enabled(True)
+        self._load_device_summary(self._current_udid) #type: ignore
+        self._refresh_local_backups()the backup encryption password on the device."""
     lockdown = await create_using_usbmux(serial=udid)
     async with Mobilebackup2Service(lockdown) as mb2:
         try:
