@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 ################################################################################
-## Form generated from reading UI file 'mainwindownZeNIe.ui'
+## Form generated from reading UI file 'mainwindowROlgps.ui'
 ##
 ## Created by: Qt User Interface Compiler version 6.11.1
 ##
@@ -17,9 +17,10 @@ from PySide6.QtGui import (QAction, QBrush, QColor, QConicalGradient,
     QPainter, QPalette, QPixmap, QRadialGradient,
     QTransform)
 from PySide6.QtWidgets import (QApplication, QCheckBox, QComboBox, QFrame,
-    QGridLayout, QLabel, QMainWindow, QMenu,
-    QMenuBar, QProgressBar, QPushButton, QSizePolicy,
-    QSpacerItem, QStatusBar, QTabWidget, QWidget)
+    QGridLayout, QLabel, QLineEdit, QMainWindow,
+    QMenu, QMenuBar, QProgressBar, QPushButton,
+    QSizePolicy, QSpacerItem, QStatusBar, QTabWidget,
+    QWidget)
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
@@ -42,15 +43,27 @@ class Ui_MainWindow(object):
         self.centralwidget.setObjectName(u"centralwidget")
         self.gridLayout = QGridLayout(self.centralwidget)
         self.gridLayout.setObjectName(u"gridLayout")
-        self.progressLabel = QLabel(self.centralwidget)
-        self.progressLabel.setObjectName(u"progressLabel")
+        self.progressBar = QProgressBar(self.centralwidget)
+        self.progressBar.setObjectName(u"progressBar")
+        self.progressBar.setValue(24)
 
-        self.gridLayout.addWidget(self.progressLabel, 4, 0, 1, 1)
+        self.gridLayout.addWidget(self.progressBar, 4, 1, 1, 2)
+
+        self.connectedDevicesComboBox = QComboBox(self.centralwidget)
+        self.connectedDevicesComboBox.setObjectName(u"connectedDevicesComboBox")
+
+        self.gridLayout.addWidget(self.connectedDevicesComboBox, 0, 1, 1, 2)
 
         self.usbmuxd_status_label = QLabel(self.centralwidget)
         self.usbmuxd_status_label.setObjectName(u"usbmuxd_status_label")
 
         self.gridLayout.addWidget(self.usbmuxd_status_label, 2, 2, 1, 1)
+
+        self.deviceDetailsLabel = QLabel(self.centralwidget)
+        self.deviceDetailsLabel.setObjectName(u"deviceDetailsLabel")
+        self.deviceDetailsLabel.setTextFormat(Qt.TextFormat.MarkdownText)
+
+        self.gridLayout.addWidget(self.deviceDetailsLabel, 0, 0, 3, 2)
 
         self.bootStatusLabel = QLabel(self.centralwidget)
         self.bootStatusLabel.setObjectName(u"bootStatusLabel")
@@ -58,11 +71,10 @@ class Ui_MainWindow(object):
 
         self.gridLayout.addWidget(self.bootStatusLabel, 1, 2, 1, 1)
 
-        self.progressBar = QProgressBar(self.centralwidget)
-        self.progressBar.setObjectName(u"progressBar")
-        self.progressBar.setValue(24)
+        self.progressLabel = QLabel(self.centralwidget)
+        self.progressLabel.setObjectName(u"progressLabel")
 
-        self.gridLayout.addWidget(self.progressBar, 4, 1, 1, 2)
+        self.gridLayout.addWidget(self.progressLabel, 4, 0, 1, 1)
 
         self.tabWidget = QTabWidget(self.centralwidget)
         self.tabWidget.setObjectName(u"tabWidget")
@@ -222,9 +234,83 @@ class Ui_MainWindow(object):
         self.tabWidget.addTab(self.restore_tab, "")
         self.version_tab = QWidget()
         self.version_tab.setObjectName(u"version_tab")
+        self.gridLayout_6 = QGridLayout(self.version_tab)
+        self.gridLayout_6.setObjectName(u"gridLayout_6")
+        self.label_11 = QLabel(self.version_tab)
+        self.label_11.setObjectName(u"label_11")
+
+        self.gridLayout_6.addWidget(self.label_11, 8, 0, 1, 1)
+
+        self.line_2 = QFrame(self.version_tab)
+        self.line_2.setObjectName(u"line_2")
+        self.line_2.setFrameShape(QFrame.Shape.HLine)
+        self.line_2.setFrameShadow(QFrame.Shadow.Sunken)
+
+        self.gridLayout_6.addWidget(self.line_2, 1, 0, 1, 3)
+
+        self.checkSigningStatusButton = QPushButton(self.version_tab)
+        self.checkSigningStatusButton.setObjectName(u"checkSigningStatusButton")
+
+        self.gridLayout_6.addWidget(self.checkSigningStatusButton, 8, 2, 1, 1)
+
+        self.verticalSpacer_12 = QSpacerItem(20, 10, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Fixed)
+
+        self.gridLayout_6.addItem(self.verticalSpacer_12, 4, 0, 1, 1)
+
+        self.flashFirmwareButton = QPushButton(self.version_tab)
+        self.flashFirmwareButton.setObjectName(u"flashFirmwareButton")
+
+        self.gridLayout_6.addWidget(self.flashFirmwareButton, 10, 0, 1, 3)
+
+        self.label_10 = QLabel(self.version_tab)
+        self.label_10.setObjectName(u"label_10")
+
+        self.gridLayout_6.addWidget(self.label_10, 6, 0, 1, 1)
+
+        self.browseIpswFileButton = QPushButton(self.version_tab)
+        self.browseIpswFileButton.setObjectName(u"browseIpswFileButton")
+
+        self.gridLayout_6.addWidget(self.browseIpswFileButton, 6, 2, 1, 1)
+
+        self.verticalSpacer_10 = QSpacerItem(20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding)
+
+        self.gridLayout_6.addItem(self.verticalSpacer_10, 9, 1, 1, 1)
+
+        self.ipswFilePathInput = QLineEdit(self.version_tab)
+        self.ipswFilePathInput.setObjectName(u"ipswFilePathInput")
+
+        self.gridLayout_6.addWidget(self.ipswFilePathInput, 6, 1, 1, 1)
+
+        self.signingStatusLabel = QLabel(self.version_tab)
+        self.signingStatusLabel.setObjectName(u"signingStatusLabel")
+
+        self.gridLayout_6.addWidget(self.signingStatusLabel, 8, 1, 1, 1)
+
+        self.label_9 = QLabel(self.version_tab)
+        self.label_9.setObjectName(u"label_9")
+
+        self.gridLayout_6.addWidget(self.label_9, 5, 0, 1, 3)
+
+        self.verticalSpacer_13 = QSpacerItem(20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Minimum)
+
+        self.gridLayout_6.addItem(self.verticalSpacer_13, 7, 1, 1, 1)
+
         self.label_8 = QLabel(self.version_tab)
         self.label_8.setObjectName(u"label_8")
-        self.label_8.setGeometry(QRect(30, 70, 341, 161))
+        self.label_8.setTextFormat(Qt.TextFormat.RichText)
+        self.label_8.setWordWrap(True)
+
+        self.gridLayout_6.addWidget(self.label_8, 0, 0, 1, 3)
+
+        self.verticalSpacer_11 = QSpacerItem(20, 10, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Fixed)
+
+        self.gridLayout_6.addItem(self.verticalSpacer_11, 2, 0, 1, 1)
+
+        self.currentIosVersionLabel = QLabel(self.version_tab)
+        self.currentIosVersionLabel.setObjectName(u"currentIosVersionLabel")
+
+        self.gridLayout_6.addWidget(self.currentIosVersionLabel, 3, 0, 1, 3)
+
         self.tabWidget.addTab(self.version_tab, "")
         self.danger_tab = QWidget()
         self.danger_tab.setObjectName(u"danger_tab")
@@ -287,17 +373,6 @@ class Ui_MainWindow(object):
 
         self.gridLayout.addWidget(self.tabWidget, 3, 0, 1, 3)
 
-        self.connectedDevicesComboBox = QComboBox(self.centralwidget)
-        self.connectedDevicesComboBox.setObjectName(u"connectedDevicesComboBox")
-
-        self.gridLayout.addWidget(self.connectedDevicesComboBox, 0, 1, 1, 2)
-
-        self.deviceDetailsLabel = QLabel(self.centralwidget)
-        self.deviceDetailsLabel.setObjectName(u"deviceDetailsLabel")
-        self.deviceDetailsLabel.setTextFormat(Qt.TextFormat.MarkdownText)
-
-        self.gridLayout.addWidget(self.deviceDetailsLabel, 0, 0, 3, 2)
-
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QMenuBar(MainWindow)
         self.menubar.setObjectName(u"menubar")
@@ -344,9 +419,12 @@ class Ui_MainWindow(object):
 #if QT_CONFIG(shortcut)
         self.actionExit.setShortcut(QCoreApplication.translate("MainWindow", u"Ctrl+Q", None))
 #endif // QT_CONFIG(shortcut)
-        self.progressLabel.setText(QCoreApplication.translate("MainWindow", u"Running:", None))
+        self.connectedDevicesComboBox.setPlaceholderText(QCoreApplication.translate("MainWindow", u"<Select a Device>", None))
         self.usbmuxd_status_label.setText(QCoreApplication.translate("MainWindow", u" usbmuxd: OK", None))
+        self.deviceDetailsLabel.setText(QCoreApplication.translate("MainWindow", u"### iPhone XR\n"
+"Samuele's iPhone ", None))
         self.bootStatusLabel.setText(QCoreApplication.translate("MainWindow", u"<html><head/><body><p><span style=\" font-weight:700; color:#1c71d8;\">Recovery Mode / DFU Mode</span></p></body></html>", None))
+        self.progressLabel.setText(QCoreApplication.translate("MainWindow", u"Running:", None))
         self.deviceInfoLabel.setText(QCoreApplication.translate("MainWindow", u"<html><head/><body><p><span style=\" font-weight:700;\">Device Name</span>: iPhone Xr<br/><span style=\" font-weight:700;\">Hardware:</span> N841AP<br/><span style=\" font-weight:700;\">iOS Version</span> 18.7.10<br/><span style=\" font-weight:700;\">Build</span>: 22H374<br/><span style=\" font-weight:700;\">Serial</span>: F4GXGEVSKXKW<br/><span style=\" font-weight:700;\">UDID</span>: 00008020-000C6CA634F8002E<br/><span style=\" font-weight:700;\">Storage</span>: 0.0 / None GB<br/><span style=\" font-weight:700;\">WiFi MAC</span>: d8:1c:79:c5:d0:7c<br/><span style=\" font-weight:700;\">Bluetooth MAC</span>: d8:1c:79:c3:62:a7</p><p><br/></p></body></html>", None))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.summary_tab), QCoreApplication.translate("MainWindow", u"Summary", None))
         self.latest_backup_label.setText(QCoreApplication.translate("MainWindow", u"Latest Backup: ", None))
@@ -371,7 +449,15 @@ class Ui_MainWindow(object):
         self.deleteBackupButton.setText(QCoreApplication.translate("MainWindow", u"Delete", None))
         self.openBackupFolderButton.setText(QCoreApplication.translate("MainWindow", u"Open Backup Folder", None))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.restore_tab), QCoreApplication.translate("MainWindow", u"Restore", None))
-        self.label_8.setText(QCoreApplication.translate("MainWindow", u"Coming Soon... =)", None))
+        self.label_11.setText(QCoreApplication.translate("MainWindow", u"Signing Status: ", None))
+        self.checkSigningStatusButton.setText(QCoreApplication.translate("MainWindow", u"Check Signing Status", None))
+        self.flashFirmwareButton.setText(QCoreApplication.translate("MainWindow", u"Flash Firmware", None))
+        self.label_10.setText(QCoreApplication.translate("MainWindow", u"IPSW File: ", None))
+        self.browseIpswFileButton.setText(QCoreApplication.translate("MainWindow", u"Browse...", None))
+        self.signingStatusLabel.setText(QCoreApplication.translate("MainWindow", u"\u23f3 Not checked yet ", None))
+        self.label_9.setText(QCoreApplication.translate("MainWindow", u"Flash Firmware from IPSW", None))
+        self.label_8.setText(QCoreApplication.translate("MainWindow", u"<html><head/><body><p><span style=\" color:#ff7800;\">Downgrading/upgrading via custom IPSW may void warranty, brick your device, or fail if Apple no longer signs that firmware. Proceed at your own risk. Noot and its author assume no responsibility for data loss or device damage.</span></p></body></html>", None))
+        self.currentIosVersionLabel.setText(QCoreApplication.translate("MainWindow", u"Current iOS Version: ", None))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.version_tab), QCoreApplication.translate("MainWindow", u"iOS Version", None))
         self.recoveryModeButton.setText(QCoreApplication.translate("MainWindow", u"Enter/Exit Recovery Mode", None))
         self.label_4.setText(QCoreApplication.translate("MainWindow", u"<html><head/><body><p><span style=\" font-size:12pt; font-weight:700;\">Erase Device</span></p><p>This will permanently erase all content and settings from this device, restoring it to factory defaults. This includes photos, messages, apps, and all personal data. This action cannot be undone.</p></body></html>", None))
@@ -380,9 +466,6 @@ class Ui_MainWindow(object):
         self.checkBox_8.setText(QCoreApplication.translate("MainWindow", u"I understand this will permanently erase all data on this device", None))
         self.label_3.setText(QCoreApplication.translate("MainWindow", u"<html><head/><body><p><span style=\" font-weight:700; color:#f66151;\">Actions in this section are irreversible and will permanently affect your device. Proceed only if you understand the consequences. </span></p></body></html>", None))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.danger_tab), QCoreApplication.translate("MainWindow", u"Danger Zone", None))
-        self.connectedDevicesComboBox.setPlaceholderText(QCoreApplication.translate("MainWindow", u"<Select a Device>", None))
-        self.deviceDetailsLabel.setText(QCoreApplication.translate("MainWindow", u"### iPhone XR\n"
-"Samuele's iPhone ", None))
         self.menuFile.setTitle(QCoreApplication.translate("MainWindow", u"File", None))
         self.menuDevice.setTitle(QCoreApplication.translate("MainWindow", u"Device", None))
         self.menuHelp.setTitle(QCoreApplication.translate("MainWindow", u"Help", None))
