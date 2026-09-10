@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 ################################################################################
-## Form generated from reading UI file 'mainwindowZazllj.ui'
+## Form generated from reading UI file 'mainwindowdDVreF.ui'
 ##
 ## Created by: Qt User Interface Compiler version 6.11.1
 ##
@@ -81,24 +81,24 @@ class Ui_MainWindow(object):
 
         self.gridLayout_3.addWidget(self.latest_backup_label, 0, 0, 1, 1)
 
-        self.checkBox = QCheckBox(self.backup_tab)
-        self.checkBox.setObjectName(u"checkBox")
+        self.excludeBookmarksCheckBox = QCheckBox(self.backup_tab)
+        self.excludeBookmarksCheckBox.setObjectName(u"excludeBookmarksCheckBox")
 
-        self.gridLayout_3.addWidget(self.checkBox, 7, 0, 1, 1)
+        self.gridLayout_3.addWidget(self.excludeBookmarksCheckBox, 7, 0, 1, 1)
 
-        self.checkBox_7 = QCheckBox(self.backup_tab)
-        self.checkBox_7.setObjectName(u"checkBox_7")
+        self.fullBackupCheckBox = QCheckBox(self.backup_tab)
+        self.fullBackupCheckBox.setObjectName(u"fullBackupCheckBox")
 
-        self.gridLayout_3.addWidget(self.checkBox_7, 4, 0, 1, 1)
+        self.gridLayout_3.addWidget(self.fullBackupCheckBox, 4, 0, 1, 1)
 
         self.verticalSpacer_2 = QSpacerItem(20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding)
 
         self.gridLayout_3.addItem(self.verticalSpacer_2, 2, 0, 1, 3)
 
-        self.checkBox_5 = QCheckBox(self.backup_tab)
-        self.checkBox_5.setObjectName(u"checkBox_5")
+        self.excludeSMSCheckBox = QCheckBox(self.backup_tab)
+        self.excludeSMSCheckBox.setObjectName(u"excludeSMSCheckBox")
 
-        self.gridLayout_3.addWidget(self.checkBox_5, 8, 1, 1, 1)
+        self.gridLayout_3.addWidget(self.excludeSMSCheckBox, 8, 1, 1, 1)
 
         self.verticalSpacer = QSpacerItem(20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding)
 
@@ -108,10 +108,10 @@ class Ui_MainWindow(object):
 
         self.gridLayout_3.addItem(self.verticalSpacer_3, 12, 1, 1, 1)
 
-        self.checkBox_6 = QCheckBox(self.backup_tab)
-        self.checkBox_6.setObjectName(u"checkBox_6")
+        self.excludeWhatsappCheckBox = QCheckBox(self.backup_tab)
+        self.excludeWhatsappCheckBox.setObjectName(u"excludeWhatsappCheckBox")
 
-        self.gridLayout_3.addWidget(self.checkBox_6, 8, 0, 1, 1)
+        self.gridLayout_3.addWidget(self.excludeWhatsappCheckBox, 8, 0, 1, 1)
 
         self.label_5 = QLabel(self.backup_tab)
         self.label_5.setObjectName(u"label_5")
@@ -139,20 +139,20 @@ class Ui_MainWindow(object):
 
         self.gridLayout_3.addWidget(self.performBackupButton, 15, 0, 1, 3)
 
-        self.checkBox_4 = QCheckBox(self.backup_tab)
-        self.checkBox_4.setObjectName(u"checkBox_4")
+        self.excludeMessagesCheckBox = QCheckBox(self.backup_tab)
+        self.excludeMessagesCheckBox.setObjectName(u"excludeMessagesCheckBox")
 
-        self.gridLayout_3.addWidget(self.checkBox_4, 8, 2, 1, 1)
+        self.gridLayout_3.addWidget(self.excludeMessagesCheckBox, 8, 2, 1, 1)
 
-        self.checkBox_3 = QCheckBox(self.backup_tab)
-        self.checkBox_3.setObjectName(u"checkBox_3")
+        self.excludeContactsCheckBox = QCheckBox(self.backup_tab)
+        self.excludeContactsCheckBox.setObjectName(u"excludeContactsCheckBox")
 
-        self.gridLayout_3.addWidget(self.checkBox_3, 7, 1, 1, 1)
+        self.gridLayout_3.addWidget(self.excludeContactsCheckBox, 7, 1, 1, 1)
 
-        self.checkBox_2 = QCheckBox(self.backup_tab)
-        self.checkBox_2.setObjectName(u"checkBox_2")
+        self.excludeCallHistoryCheckBox = QCheckBox(self.backup_tab)
+        self.excludeCallHistoryCheckBox.setObjectName(u"excludeCallHistoryCheckBox")
 
-        self.gridLayout_3.addWidget(self.checkBox_2, 7, 2, 1, 1)
+        self.gridLayout_3.addWidget(self.excludeCallHistoryCheckBox, 7, 2, 1, 1)
 
         self.changeEncryptionpasswordButton = QPushButton(self.backup_tab)
         self.changeEncryptionpasswordButton.setObjectName(u"changeEncryptionpasswordButton")
@@ -426,18 +426,18 @@ class Ui_MainWindow(object):
         self.deviceInfoLabel.setText(QCoreApplication.translate("MainWindow", u"No Connected Device", None))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.summary_tab), QCoreApplication.translate("MainWindow", u"Summary", None))
         self.latest_backup_label.setText(QCoreApplication.translate("MainWindow", u"Latest Backup: ", None))
-        self.checkBox.setText(QCoreApplication.translate("MainWindow", u"Bookmarks", None))
-        self.checkBox_7.setText(QCoreApplication.translate("MainWindow", u"Full Backup", None))
-        self.checkBox_5.setText(QCoreApplication.translate("MainWindow", u"SMS", None))
-        self.checkBox_6.setText(QCoreApplication.translate("MainWindow", u"Whatsapp", None))
+        self.excludeBookmarksCheckBox.setText(QCoreApplication.translate("MainWindow", u"Bookmarks", None))
+        self.fullBackupCheckBox.setText(QCoreApplication.translate("MainWindow", u"Full Backup", None))
+        self.excludeSMSCheckBox.setText(QCoreApplication.translate("MainWindow", u"SMS", None))
+        self.excludeWhatsappCheckBox.setText(QCoreApplication.translate("MainWindow", u"Whatsapp", None))
         self.label_5.setText(QCoreApplication.translate("MainWindow", u"**Backup Options**", None))
         self.label.setText(QCoreApplication.translate("MainWindow", u"Backup Encryption", None))
         self.label_6.setText(QCoreApplication.translate("MainWindow", u"Exclude from backup: ", None))
         self.enableEncrypyionButton.setText(QCoreApplication.translate("MainWindow", u"Enable/Disable", None))
         self.performBackupButton.setText(QCoreApplication.translate("MainWindow", u"Perform Backup", None))
-        self.checkBox_4.setText(QCoreApplication.translate("MainWindow", u"Messages", None))
-        self.checkBox_3.setText(QCoreApplication.translate("MainWindow", u"Contacts", None))
-        self.checkBox_2.setText(QCoreApplication.translate("MainWindow", u"Call History", None))
+        self.excludeMessagesCheckBox.setText(QCoreApplication.translate("MainWindow", u"Messages", None))
+        self.excludeContactsCheckBox.setText(QCoreApplication.translate("MainWindow", u"Contacts", None))
+        self.excludeCallHistoryCheckBox.setText(QCoreApplication.translate("MainWindow", u"Call History", None))
         self.changeEncryptionpasswordButton.setText(QCoreApplication.translate("MainWindow", u"Change Password", None))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.backup_tab), QCoreApplication.translate("MainWindow", u"Backup", None))
         self.label_2.setText(QCoreApplication.translate("MainWindow", u"Backup stored on this computer:", None))
