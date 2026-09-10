@@ -22,41 +22,6 @@
       </property>
      </widget>
     </item>
-    <item row="0" column="1" colspan="2">
-     <widget class="QComboBox" name="connectedDevicesComboBox">
-      <property name="placeholderText">
-       <string>&lt;Select a Device&gt;</string>
-      </property>
-     </widget>
-    </item>
-    <item row="2" column="2">
-     <widget class="QLabel" name="usbmuxd_status_label">
-      <property name="text">
-       <string> usbmuxd: OK</string>
-      </property>
-     </widget>
-    </item>
-    <item row="0" column="0" rowspan="3" colspan="2">
-     <widget class="QLabel" name="deviceDetailsLabel">
-      <property name="text">
-       <string>### iPhone XR
-Samuele's iPhone </string>
-      </property>
-      <property name="textFormat">
-       <enum>Qt::TextFormat::MarkdownText</enum>
-      </property>
-     </widget>
-    </item>
-    <item row="1" column="2">
-     <widget class="QLabel" name="bootStatusLabel">
-      <property name="text">
-       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700; color:#1c71d8;&quot;&gt;Recovery Mode / DFU Mode&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-      </property>
-      <property name="textFormat">
-       <enum>Qt::TextFormat::RichText</enum>
-      </property>
-     </widget>
-    </item>
     <item row="4" column="0">
      <widget class="QLabel" name="progressLabel">
       <property name="text">
@@ -67,7 +32,7 @@ Samuele's iPhone </string>
     <item row="3" column="0" colspan="3">
      <widget class="QTabWidget" name="tabWidget">
       <property name="currentIndex">
-       <number>0</number>
+       <number>1</number>
       </property>
       <widget class="QWidget" name="summary_tab">
        <attribute name="title">
@@ -77,10 +42,10 @@ Samuele's iPhone </string>
         <item row="0" column="0">
          <widget class="QLabel" name="deviceInfoLabel">
           <property name="text">
-           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Device Name&lt;/span&gt;: iPhone Xr&lt;br/&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Hardware:&lt;/span&gt; N841AP&lt;br/&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;iOS Version&lt;/span&gt; 18.7.10&lt;br/&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Build&lt;/span&gt;: 22H374&lt;br/&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Serial&lt;/span&gt;: F4GXGEVSKXKW&lt;br/&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;UDID&lt;/span&gt;: 00008020-000C6CA634F8002E&lt;br/&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Storage&lt;/span&gt;: 0.0 / None GB&lt;br/&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;WiFi MAC&lt;/span&gt;: d8:1c:79:c5:d0:7c&lt;br/&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Bluetooth MAC&lt;/span&gt;: d8:1c:79:c3:62:a7&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+           <string>No Connected Device</string>
           </property>
           <property name="textFormat">
-           <enum>Qt::TextFormat::RichText</enum>
+           <enum>Qt::TextFormat::MarkdownText</enum>
           </property>
           <property name="wordWrap">
            <bool>true</bool>
@@ -193,14 +158,14 @@ Samuele's iPhone </string>
          </widget>
         </item>
         <item row="10" column="2">
-         <widget class="QPushButton" name="pushButton_2">
+         <widget class="QPushButton" name="enableEncrypyionButton">
           <property name="text">
            <string>Enable/Disable</string>
           </property>
          </widget>
         </item>
         <item row="15" column="0" colspan="3">
-         <widget class="QPushButton" name="pushButton">
+         <widget class="QPushButton" name="performBackupButton">
           <property name="text">
            <string>Perform Backup</string>
           </property>
@@ -228,7 +193,7 @@ Samuele's iPhone </string>
          </widget>
         </item>
         <item row="11" column="2">
-         <widget class="QPushButton" name="pushButton_3">
+         <widget class="QPushButton" name="changeEncryptionpasswordButton">
           <property name="text">
            <string>Change Password</string>
           </property>
@@ -604,6 +569,34 @@ Samuele's iPhone </string>
       </widget>
      </widget>
     </item>
+    <item row="1" column="2">
+     <widget class="QLabel" name="bootStatusLabel">
+      <property name="text">
+       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700; color:#1c71d8;&quot;&gt;Recovery Mode / DFU Mode&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+      </property>
+      <property name="textFormat">
+       <enum>Qt::TextFormat::RichText</enum>
+      </property>
+     </widget>
+    </item>
+    <item row="2" column="2">
+     <widget class="QLabel" name="usbmuxd_status_label">
+      <property name="text">
+       <string> usbmuxd: OK</string>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="0" rowspan="2" colspan="2">
+     <widget class="QLabel" name="deviceDetailsLabel">
+      <property name="text">
+       <string>### iPhone XR
+Samuele's iPhone </string>
+      </property>
+      <property name="textFormat">
+       <enum>Qt::TextFormat::MarkdownText</enum>
+      </property>
+     </widget>
+    </item>
    </layout>
   </widget>
   <widget class="QMenuBar" name="menubar">
@@ -627,6 +620,7 @@ Samuele's iPhone </string>
     <property name="title">
      <string>Device</string>
     </property>
+    <addaction name="actionRefresh_Devices"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="title">
@@ -637,6 +631,7 @@ Samuele's iPhone </string>
     <addaction name="actionGitHub_Repository"/>
     <addaction name="separator"/>
     <addaction name="actionHow_to_Enter_DFU_mode"/>
+    <addaction name="actionReport_Issue"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuDevice"/>
@@ -674,6 +669,16 @@ Samuele's iPhone </string>
    </property>
    <property name="shortcut">
     <string>Ctrl+Q</string>
+   </property>
+  </action>
+  <action name="actionRefresh_Devices">
+   <property name="text">
+    <string>Refresh Devices</string>
+   </property>
+  </action>
+  <action name="actionReport_Issue">
+   <property name="text">
+    <string>Report Issue</string>
    </property>
   </action>
  </widget>

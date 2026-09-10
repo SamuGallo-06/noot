@@ -20,8 +20,7 @@ from importlib.resources import files
 @lru_cache(maxsize=1)
 def _load_model_map() -> dict[str, str]:
     """Carica il JSON una sola volta per processo (risultato messo in cache)."""
-    data_path = files("noot.assets") / "device_models.json"
-    with data_path.open("r", encoding="utf-8") as f:
+    with open("device_models.json", "r") as f:
         raw = json.load(f)
     ## "_comment" e' un campo informativo nel JSON, non un ProductType reale.
     return {k: v for k, v in raw.items() if not k.startswith("_")}

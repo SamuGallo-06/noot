@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 ################################################################################
-## Form generated from reading UI file 'mainwindowROlgps.ui'
+## Form generated from reading UI file 'mainwindowZazllj.ui'
 ##
 ## Created by: Qt User Interface Compiler version 6.11.1
 ##
@@ -39,6 +39,10 @@ class Ui_MainWindow(object):
         self.actionPreferences.setObjectName(u"actionPreferences")
         self.actionExit = QAction(MainWindow)
         self.actionExit.setObjectName(u"actionExit")
+        self.actionRefresh_Devices = QAction(MainWindow)
+        self.actionRefresh_Devices.setObjectName(u"actionRefresh_Devices")
+        self.actionReport_Issue = QAction(MainWindow)
+        self.actionReport_Issue.setObjectName(u"actionReport_Issue")
         self.centralwidget = QWidget(MainWindow)
         self.centralwidget.setObjectName(u"centralwidget")
         self.gridLayout = QGridLayout(self.centralwidget)
@@ -48,28 +52,6 @@ class Ui_MainWindow(object):
         self.progressBar.setValue(24)
 
         self.gridLayout.addWidget(self.progressBar, 4, 1, 1, 2)
-
-        self.connectedDevicesComboBox = QComboBox(self.centralwidget)
-        self.connectedDevicesComboBox.setObjectName(u"connectedDevicesComboBox")
-
-        self.gridLayout.addWidget(self.connectedDevicesComboBox, 0, 1, 1, 2)
-
-        self.usbmuxd_status_label = QLabel(self.centralwidget)
-        self.usbmuxd_status_label.setObjectName(u"usbmuxd_status_label")
-
-        self.gridLayout.addWidget(self.usbmuxd_status_label, 2, 2, 1, 1)
-
-        self.deviceDetailsLabel = QLabel(self.centralwidget)
-        self.deviceDetailsLabel.setObjectName(u"deviceDetailsLabel")
-        self.deviceDetailsLabel.setTextFormat(Qt.TextFormat.MarkdownText)
-
-        self.gridLayout.addWidget(self.deviceDetailsLabel, 0, 0, 3, 2)
-
-        self.bootStatusLabel = QLabel(self.centralwidget)
-        self.bootStatusLabel.setObjectName(u"bootStatusLabel")
-        self.bootStatusLabel.setTextFormat(Qt.TextFormat.RichText)
-
-        self.gridLayout.addWidget(self.bootStatusLabel, 1, 2, 1, 1)
 
         self.progressLabel = QLabel(self.centralwidget)
         self.progressLabel.setObjectName(u"progressLabel")
@@ -84,7 +66,7 @@ class Ui_MainWindow(object):
         self.gridLayout_2.setObjectName(u"gridLayout_2")
         self.deviceInfoLabel = QLabel(self.summary_tab)
         self.deviceInfoLabel.setObjectName(u"deviceInfoLabel")
-        self.deviceInfoLabel.setTextFormat(Qt.TextFormat.RichText)
+        self.deviceInfoLabel.setTextFormat(Qt.TextFormat.MarkdownText)
         self.deviceInfoLabel.setWordWrap(True)
 
         self.gridLayout_2.addWidget(self.deviceInfoLabel, 0, 0, 1, 1)
@@ -147,15 +129,15 @@ class Ui_MainWindow(object):
 
         self.gridLayout_3.addWidget(self.label_6, 6, 0, 1, 1)
 
-        self.pushButton_2 = QPushButton(self.backup_tab)
-        self.pushButton_2.setObjectName(u"pushButton_2")
+        self.enableEncrypyionButton = QPushButton(self.backup_tab)
+        self.enableEncrypyionButton.setObjectName(u"enableEncrypyionButton")
 
-        self.gridLayout_3.addWidget(self.pushButton_2, 10, 2, 1, 1)
+        self.gridLayout_3.addWidget(self.enableEncrypyionButton, 10, 2, 1, 1)
 
-        self.pushButton = QPushButton(self.backup_tab)
-        self.pushButton.setObjectName(u"pushButton")
+        self.performBackupButton = QPushButton(self.backup_tab)
+        self.performBackupButton.setObjectName(u"performBackupButton")
 
-        self.gridLayout_3.addWidget(self.pushButton, 15, 0, 1, 3)
+        self.gridLayout_3.addWidget(self.performBackupButton, 15, 0, 1, 3)
 
         self.checkBox_4 = QCheckBox(self.backup_tab)
         self.checkBox_4.setObjectName(u"checkBox_4")
@@ -172,10 +154,10 @@ class Ui_MainWindow(object):
 
         self.gridLayout_3.addWidget(self.checkBox_2, 7, 2, 1, 1)
 
-        self.pushButton_3 = QPushButton(self.backup_tab)
-        self.pushButton_3.setObjectName(u"pushButton_3")
+        self.changeEncryptionpasswordButton = QPushButton(self.backup_tab)
+        self.changeEncryptionpasswordButton.setObjectName(u"changeEncryptionpasswordButton")
 
-        self.gridLayout_3.addWidget(self.pushButton_3, 11, 2, 1, 1)
+        self.gridLayout_3.addWidget(self.changeEncryptionpasswordButton, 11, 2, 1, 1)
 
         self.tabWidget.addTab(self.backup_tab, "")
         self.restore_tab = QWidget()
@@ -373,6 +355,23 @@ class Ui_MainWindow(object):
 
         self.gridLayout.addWidget(self.tabWidget, 3, 0, 1, 3)
 
+        self.bootStatusLabel = QLabel(self.centralwidget)
+        self.bootStatusLabel.setObjectName(u"bootStatusLabel")
+        self.bootStatusLabel.setTextFormat(Qt.TextFormat.RichText)
+
+        self.gridLayout.addWidget(self.bootStatusLabel, 1, 2, 1, 1)
+
+        self.usbmuxd_status_label = QLabel(self.centralwidget)
+        self.usbmuxd_status_label.setObjectName(u"usbmuxd_status_label")
+
+        self.gridLayout.addWidget(self.usbmuxd_status_label, 2, 2, 1, 1)
+
+        self.deviceDetailsLabel = QLabel(self.centralwidget)
+        self.deviceDetailsLabel.setObjectName(u"deviceDetailsLabel")
+        self.deviceDetailsLabel.setTextFormat(Qt.TextFormat.MarkdownText)
+
+        self.gridLayout.addWidget(self.deviceDetailsLabel, 1, 0, 2, 2)
+
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QMenuBar(MainWindow)
         self.menubar.setObjectName(u"menubar")
@@ -394,15 +393,17 @@ class Ui_MainWindow(object):
         self.menuFile.addAction(self.actionPreferences)
         self.menuFile.addSeparator()
         self.menuFile.addAction(self.actionExit)
+        self.menuDevice.addAction(self.actionRefresh_Devices)
         self.menuHelp.addAction(self.actionAbout_Noot)
         self.menuHelp.addAction(self.actionWiki)
         self.menuHelp.addAction(self.actionGitHub_Repository)
         self.menuHelp.addSeparator()
         self.menuHelp.addAction(self.actionHow_to_Enter_DFU_mode)
+        self.menuHelp.addAction(self.actionReport_Issue)
 
         self.retranslateUi(MainWindow)
 
-        self.tabWidget.setCurrentIndex(0)
+        self.tabWidget.setCurrentIndex(1)
 
 
         QMetaObject.connectSlotsByName(MainWindow)
@@ -419,13 +420,10 @@ class Ui_MainWindow(object):
 #if QT_CONFIG(shortcut)
         self.actionExit.setShortcut(QCoreApplication.translate("MainWindow", u"Ctrl+Q", None))
 #endif // QT_CONFIG(shortcut)
-        self.connectedDevicesComboBox.setPlaceholderText(QCoreApplication.translate("MainWindow", u"<Select a Device>", None))
-        self.usbmuxd_status_label.setText(QCoreApplication.translate("MainWindow", u" usbmuxd: OK", None))
-        self.deviceDetailsLabel.setText(QCoreApplication.translate("MainWindow", u"### iPhone XR\n"
-"Samuele's iPhone ", None))
-        self.bootStatusLabel.setText(QCoreApplication.translate("MainWindow", u"<html><head/><body><p><span style=\" font-weight:700; color:#1c71d8;\">Recovery Mode / DFU Mode</span></p></body></html>", None))
+        self.actionRefresh_Devices.setText(QCoreApplication.translate("MainWindow", u"Refresh Devices", None))
+        self.actionReport_Issue.setText(QCoreApplication.translate("MainWindow", u"Report Issue", None))
         self.progressLabel.setText(QCoreApplication.translate("MainWindow", u"Running:", None))
-        self.deviceInfoLabel.setText(QCoreApplication.translate("MainWindow", u"<html><head/><body><p><span style=\" font-weight:700;\">Device Name</span>: iPhone Xr<br/><span style=\" font-weight:700;\">Hardware:</span> N841AP<br/><span style=\" font-weight:700;\">iOS Version</span> 18.7.10<br/><span style=\" font-weight:700;\">Build</span>: 22H374<br/><span style=\" font-weight:700;\">Serial</span>: F4GXGEVSKXKW<br/><span style=\" font-weight:700;\">UDID</span>: 00008020-000C6CA634F8002E<br/><span style=\" font-weight:700;\">Storage</span>: 0.0 / None GB<br/><span style=\" font-weight:700;\">WiFi MAC</span>: d8:1c:79:c5:d0:7c<br/><span style=\" font-weight:700;\">Bluetooth MAC</span>: d8:1c:79:c3:62:a7</p><p><br/></p></body></html>", None))
+        self.deviceInfoLabel.setText(QCoreApplication.translate("MainWindow", u"No Connected Device", None))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.summary_tab), QCoreApplication.translate("MainWindow", u"Summary", None))
         self.latest_backup_label.setText(QCoreApplication.translate("MainWindow", u"Latest Backup: ", None))
         self.checkBox.setText(QCoreApplication.translate("MainWindow", u"Bookmarks", None))
@@ -435,12 +433,12 @@ class Ui_MainWindow(object):
         self.label_5.setText(QCoreApplication.translate("MainWindow", u"**Backup Options**", None))
         self.label.setText(QCoreApplication.translate("MainWindow", u"Backup Encryption", None))
         self.label_6.setText(QCoreApplication.translate("MainWindow", u"Exclude from backup: ", None))
-        self.pushButton_2.setText(QCoreApplication.translate("MainWindow", u"Enable/Disable", None))
-        self.pushButton.setText(QCoreApplication.translate("MainWindow", u"Perform Backup", None))
+        self.enableEncrypyionButton.setText(QCoreApplication.translate("MainWindow", u"Enable/Disable", None))
+        self.performBackupButton.setText(QCoreApplication.translate("MainWindow", u"Perform Backup", None))
         self.checkBox_4.setText(QCoreApplication.translate("MainWindow", u"Messages", None))
         self.checkBox_3.setText(QCoreApplication.translate("MainWindow", u"Contacts", None))
         self.checkBox_2.setText(QCoreApplication.translate("MainWindow", u"Call History", None))
-        self.pushButton_3.setText(QCoreApplication.translate("MainWindow", u"Change Password", None))
+        self.changeEncryptionpasswordButton.setText(QCoreApplication.translate("MainWindow", u"Change Password", None))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.backup_tab), QCoreApplication.translate("MainWindow", u"Backup", None))
         self.label_2.setText(QCoreApplication.translate("MainWindow", u"Backup stored on this computer:", None))
         self.start_restore_button.setText(QCoreApplication.translate("MainWindow", u"Start Restore", None))
@@ -466,6 +464,10 @@ class Ui_MainWindow(object):
         self.checkBox_8.setText(QCoreApplication.translate("MainWindow", u"I understand this will permanently erase all data on this device", None))
         self.label_3.setText(QCoreApplication.translate("MainWindow", u"<html><head/><body><p><span style=\" font-weight:700; color:#f66151;\">Actions in this section are irreversible and will permanently affect your device. Proceed only if you understand the consequences. </span></p></body></html>", None))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.danger_tab), QCoreApplication.translate("MainWindow", u"Danger Zone", None))
+        self.bootStatusLabel.setText(QCoreApplication.translate("MainWindow", u"<html><head/><body><p><span style=\" font-weight:700; color:#1c71d8;\">Recovery Mode / DFU Mode</span></p></body></html>", None))
+        self.usbmuxd_status_label.setText(QCoreApplication.translate("MainWindow", u" usbmuxd: OK", None))
+        self.deviceDetailsLabel.setText(QCoreApplication.translate("MainWindow", u"### iPhone XR\n"
+"Samuele's iPhone ", None))
         self.menuFile.setTitle(QCoreApplication.translate("MainWindow", u"File", None))
         self.menuDevice.setTitle(QCoreApplication.translate("MainWindow", u"Device", None))
         self.menuHelp.setTitle(QCoreApplication.translate("MainWindow", u"Help", None))
