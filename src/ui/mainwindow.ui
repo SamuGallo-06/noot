@@ -206,24 +206,8 @@
         <string>Restore</string>
        </attribute>
        <layout class="QGridLayout" name="gridLayout_4">
-        <item row="4" column="0" colspan="3">
-         <spacer name="verticalSpacer_6">
-          <property name="orientation">
-           <enum>Qt::Orientation::Vertical</enum>
-          </property>
-          <property name="sizeType">
-           <enum>QSizePolicy::Policy::Fixed</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>20</width>
-            <height>20</height>
-           </size>
-          </property>
-         </spacer>
-        </item>
-        <item row="6" column="0" colspan="3">
-         <spacer name="verticalSpacer_4">
+        <item row="3" column="0" colspan="3">
+         <spacer name="verticalSpacer_5">
           <property name="orientation">
            <enum>Qt::Orientation::Vertical</enum>
           </property>
@@ -245,25 +229,8 @@
           </property>
          </widget>
         </item>
-        <item row="0" column="1" colspan="2">
-         <widget class="QComboBox" name="local_backup_comboBox"/>
-        </item>
-        <item row="7" column="0" colspan="3">
-         <widget class="QPushButton" name="start_restore_button">
-          <property name="text">
-           <string>Start Restore</string>
-          </property>
-         </widget>
-        </item>
-        <item row="5" column="0" colspan="2">
-         <widget class="QLabel" name="different_device_warning">
-          <property name="text">
-           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700; color:#ff7800;&quot;&gt;WARNING: &lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; color:#ff7800;&quot;&gt;This backup was made from a different device. Some data may not restore correctly.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-          </property>
-         </widget>
-        </item>
-        <item row="2" column="0" colspan="3">
-         <spacer name="verticalSpacer_5">
+        <item row="5" column="0" colspan="3">
+         <spacer name="verticalSpacer_6">
           <property name="orientation">
            <enum>Qt::Orientation::Vertical</enum>
           </property>
@@ -278,10 +245,36 @@
           </property>
          </spacer>
         </item>
-        <item row="3" column="0" colspan="3">
+        <item row="0" column="1" colspan="2">
+         <widget class="QComboBox" name="local_backup_comboBox"/>
+        </item>
+        <item row="7" column="0" colspan="3">
+         <spacer name="verticalSpacer_4">
+          <property name="orientation">
+           <enum>Qt::Orientation::Vertical</enum>
+          </property>
+          <property name="sizeType">
+           <enum>QSizePolicy::Policy::Fixed</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>20</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item row="6" column="0" colspan="2">
+         <widget class="QLabel" name="different_device_warning">
+          <property name="text">
+           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700; color:#ff7800;&quot;&gt;WARNING: &lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; color:#ff7800;&quot;&gt;This backup was made from a different device. Some data may not restore correctly.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+          </property>
+         </widget>
+        </item>
+        <item row="4" column="0" colspan="3">
          <widget class="QLabel" name="backup_details_label">
           <property name="text">
-           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;BACKUP DATE:&lt;/span&gt; 2026-09-08 14:32&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;DEVICE:&lt;/span&gt; Samuele's iPhone&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;IOS VERSION:&lt;/span&gt; 18.4&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;SIZE:&lt;/span&gt; 1.2 GB&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;ENCRYPTED:&lt;/span&gt; Yes&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;BACKUP DATE:&lt;/span&gt; 2026-09-08 14:32&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;DEVICE:&lt;/span&gt; Samuele's iPhone&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;IOS VERSION:&lt;/span&gt; 18.4&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;SIZE:&lt;/span&gt; 1.2 GB&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
           </property>
           <property name="textFormat">
            <enum>Qt::TextFormat::RichText</enum>
@@ -291,17 +284,17 @@
           </property>
          </widget>
         </item>
-        <item row="1" column="1">
-         <widget class="QPushButton" name="deleteBackupButton">
+        <item row="8" column="0" colspan="3">
+         <widget class="QPushButton" name="start_restore_button">
           <property name="text">
-           <string>Delete</string>
+           <string>Start Restore</string>
           </property>
          </widget>
         </item>
         <item row="1" column="2">
-         <widget class="QPushButton" name="openBackupFolderButton">
+         <widget class="QPushButton" name="deleteBackupButton">
           <property name="text">
-           <string>Open Backup Folder</string>
+           <string>Delete</string>
           </property>
          </widget>
         </item>

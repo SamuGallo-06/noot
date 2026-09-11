@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 ################################################################################
-## Form generated from reading UI file 'mainwindowaoNYRO.ui'
+## Form generated from reading UI file 'mainwindowUoOvtf.ui'
 ##
 ## Created by: Qt User Interface Compiler version 6.11.1
 ##
@@ -166,54 +166,49 @@ class Ui_MainWindow(object):
         self.restore_tab.setObjectName(u"restore_tab")
         self.gridLayout_4 = QGridLayout(self.restore_tab)
         self.gridLayout_4.setObjectName(u"gridLayout_4")
-        self.verticalSpacer_6 = QSpacerItem(20, 20, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Fixed)
+        self.verticalSpacer_5 = QSpacerItem(20, 20, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Fixed)
 
-        self.gridLayout_4.addItem(self.verticalSpacer_6, 4, 0, 1, 3)
-
-        self.verticalSpacer_4 = QSpacerItem(20, 20, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Fixed)
-
-        self.gridLayout_4.addItem(self.verticalSpacer_4, 6, 0, 1, 3)
+        self.gridLayout_4.addItem(self.verticalSpacer_5, 3, 0, 1, 3)
 
         self.label_2 = QLabel(self.restore_tab)
         self.label_2.setObjectName(u"label_2")
 
         self.gridLayout_4.addWidget(self.label_2, 0, 0, 1, 1)
 
+        self.verticalSpacer_6 = QSpacerItem(20, 20, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Fixed)
+
+        self.gridLayout_4.addItem(self.verticalSpacer_6, 5, 0, 1, 3)
+
         self.local_backup_comboBox = QComboBox(self.restore_tab)
         self.local_backup_comboBox.setObjectName(u"local_backup_comboBox")
 
         self.gridLayout_4.addWidget(self.local_backup_comboBox, 0, 1, 1, 2)
 
-        self.start_restore_button = QPushButton(self.restore_tab)
-        self.start_restore_button.setObjectName(u"start_restore_button")
+        self.verticalSpacer_4 = QSpacerItem(20, 20, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Fixed)
 
-        self.gridLayout_4.addWidget(self.start_restore_button, 7, 0, 1, 3)
+        self.gridLayout_4.addItem(self.verticalSpacer_4, 7, 0, 1, 3)
 
         self.different_device_warning = QLabel(self.restore_tab)
         self.different_device_warning.setObjectName(u"different_device_warning")
 
-        self.gridLayout_4.addWidget(self.different_device_warning, 5, 0, 1, 2)
-
-        self.verticalSpacer_5 = QSpacerItem(20, 20, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Fixed)
-
-        self.gridLayout_4.addItem(self.verticalSpacer_5, 2, 0, 1, 3)
+        self.gridLayout_4.addWidget(self.different_device_warning, 6, 0, 1, 2)
 
         self.backup_details_label = QLabel(self.restore_tab)
         self.backup_details_label.setObjectName(u"backup_details_label")
         self.backup_details_label.setTextFormat(Qt.TextFormat.RichText)
         self.backup_details_label.setWordWrap(True)
 
-        self.gridLayout_4.addWidget(self.backup_details_label, 3, 0, 1, 3)
+        self.gridLayout_4.addWidget(self.backup_details_label, 4, 0, 1, 3)
+
+        self.start_restore_button = QPushButton(self.restore_tab)
+        self.start_restore_button.setObjectName(u"start_restore_button")
+
+        self.gridLayout_4.addWidget(self.start_restore_button, 8, 0, 1, 3)
 
         self.deleteBackupButton = QPushButton(self.restore_tab)
         self.deleteBackupButton.setObjectName(u"deleteBackupButton")
 
-        self.gridLayout_4.addWidget(self.deleteBackupButton, 1, 1, 1, 1)
-
-        self.openBackupFolderButton = QPushButton(self.restore_tab)
-        self.openBackupFolderButton.setObjectName(u"openBackupFolderButton")
-
-        self.gridLayout_4.addWidget(self.openBackupFolderButton, 1, 2, 1, 1)
+        self.gridLayout_4.addWidget(self.deleteBackupButton, 1, 2, 1, 1)
 
         self.tabWidget.addTab(self.restore_tab, "")
         self.version_tab = QWidget()
@@ -445,11 +440,10 @@ class Ui_MainWindow(object):
         self.changeEncryptionpasswordButton.setText(QCoreApplication.translate("MainWindow", u"Change Password", None))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.backup_tab), QCoreApplication.translate("MainWindow", u"Backup", None))
         self.label_2.setText(QCoreApplication.translate("MainWindow", u"Backup stored on this computer:", None))
-        self.start_restore_button.setText(QCoreApplication.translate("MainWindow", u"Start Restore", None))
         self.different_device_warning.setText(QCoreApplication.translate("MainWindow", u"<html><head/><body><p><span style=\" font-weight:700; color:#ff7800;\">WARNING: </span></p><p><span style=\" color:#ff7800;\">This backup was made from a different device. Some data may not restore correctly.</span></p></body></html>", None))
-        self.backup_details_label.setText(QCoreApplication.translate("MainWindow", u"<html><head/><body><p><span style=\" font-weight:700;\">BACKUP DATE:</span> 2026-09-08 14:32</p><p><span style=\" font-weight:700;\">DEVICE:</span> Samuele's iPhone</p><p><span style=\" font-weight:700;\">IOS VERSION:</span> 18.4</p><p><span style=\" font-weight:700;\">SIZE:</span> 1.2 GB</p><p><span style=\" font-weight:700;\">ENCRYPTED:</span> Yes</p></body></html>", None))
+        self.backup_details_label.setText(QCoreApplication.translate("MainWindow", u"<html><head/><body><p><span style=\" font-weight:700;\">BACKUP DATE:</span> 2026-09-08 14:32</p><p><span style=\" font-weight:700;\">DEVICE:</span> Samuele's iPhone</p><p><span style=\" font-weight:700;\">IOS VERSION:</span> 18.4</p><p><span style=\" font-weight:700;\">SIZE:</span> 1.2 GB</p></body></html>", None))
+        self.start_restore_button.setText(QCoreApplication.translate("MainWindow", u"Start Restore", None))
         self.deleteBackupButton.setText(QCoreApplication.translate("MainWindow", u"Delete", None))
-        self.openBackupFolderButton.setText(QCoreApplication.translate("MainWindow", u"Open Backup Folder", None))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.restore_tab), QCoreApplication.translate("MainWindow", u"Restore", None))
         self.label_11.setText(QCoreApplication.translate("MainWindow", u"Signing Status: ", None))
         self.checkSigningStatusButton.setText(QCoreApplication.translate("MainWindow", u"Check Signing Status", None))
