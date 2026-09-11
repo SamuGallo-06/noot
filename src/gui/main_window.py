@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from datetime import datetime
 from pathlib import Path
 from typing import Callable
 
@@ -36,6 +37,7 @@ class MainWindow(QMainWindow):
         self.ui.setupUi(self)
         
         self.current_device_udid: str | None = None
+        self._local_backups: list[dict[str, str | datetime | None]] = []
         
         self._threadpool = QThreadPool()
         self._threadpool.setMaxThreadCount(1)
@@ -43,6 +45,7 @@ class MainWindow(QMainWindow):
         self.ui.bootStatusLabel.setVisible(False) # Nascondo la label di stato bootloader/DFU finche' non viene implementata la gestione di questi stati.
         self.ui.progressBar.setVisible(False)
         self.ui.progressLabel.setVisible(False)
+        self.ui.different_device_warning.setVisible(False)
         self.ui.statusbar.showMessage("Ready")
         self.ui.tabWidget.setCurrentIndex(0)
         
@@ -50,6 +53,8 @@ class MainWindow(QMainWindow):
         self.setupButton()
         self.setupSignals()
         self.setupLabels()
+
+        self.__list_backups()
 
         self.check_usbdmux()
         self.refresh_devices()
@@ -60,6 +65,7 @@ class MainWindow(QMainWindow):
         
         #Devices
         self.ui.actionRefresh_Devices.triggered.connect(self.refresh_devices)
+        self.ui.actionStart_usbmuxd.triggered.connect(self.check_usbdmux)
         
         #Help
         self.ui.actionAbout_Noot.triggered.connect(self.__on_about_noot)
@@ -71,9 +77,12 @@ class MainWindow(QMainWindow):
         self.ui.enableEncrypyionButton.clicked.connect(self.__enable_or_disable_Encryption)
         self.ui.changeEncryptionpasswordButton.clicked.connect(self.__changeEncryptionPassword)
         self.ui.performBackupButton.clicked.connect(self.__perform_backup)
+        self.ui.deleteBackupButton.clicked.connect(self.__on_delete_backup)
     
     def setupSignals(self):
-        pass
+        self.ui.local_backup_comboBox.currentIndexChanged.connect(
+            self.__on_backup_selected
+        )
     
     def setupLabels(self):
         self.ui.latest_backup_label.setText("Latest Backup: Not Implemented Yet")
@@ -123,13 +132,23 @@ class MainWindow(QMainWindow):
         
     def __on_usbdmux_checked(self, is_running: bool) -> None:
         if not is_running:
-            QMessageBox.critical(
-                self,
-                "usbmuxd Not Running",
-                "The usbmuxd service is not running. Please start it and try again.",
-            )
+            #first of all, try to start usbmuxd automatically
+            try:
+                worker = AsyncWorker(idevice.ensure_usbmuxd_running, gui=True)
+                worker.signals.finished.connect(self.__on_usbdmux_checked)
+                worker.signals.error.connect(lambda exc: self.__on_usbdmux_check_failed(exc))
+                self._threadpool.start(worker)
+            except Exception as e:
+                self.__on_usbdmux_check_failed(e)
         
         self.ui.usbmuxd_status_label.setText("usbmuxd is running" if is_running else "usbmuxd is NOT running")
+    
+    def __on_usbdmux_check_failed(self, error):
+        QMessageBox.critical(
+            self,
+            "usbmuxd Not Running",
+            "Cound not start usbmuxd automatically. Please start it manually and try again.\n\nError: " + str(error),
+        )
 
     def _load_device_summary(self, udid: str) -> None:
         worker = AsyncWorker(idevice.get_device_summary, udid=udid)
@@ -398,3 +417,147 @@ class MainWindow(QMainWindow):
         self.ui.progressBar.setVisible(False)
         self.ui.progressLabel.setText("")
         self.ui.statusbar.showMessage("Backup failed.", 5000)
+        
+        
+    ##############################
+    # Restore Page:              #
+    ##############################
+    
+    def __list_backups(self, backup_dir: Path = DEFAULT_BACKUP_DIR) -> None:
+        """Restituisce una lista di backup disponibili nella cartella di backup predefinita."""
+        worker = AsyncWorker(idevice.list_local_backups, backup_dir=backup_dir)
+        worker.signals.finished.connect(self.__on_backups_listed)
+        worker.signals.error.connect(lambda exc: print("Errore:", exc))
+        self._threadpool.start(worker)
+    
+    def __on_backups_listed(self, backups: list[dict[str, str | datetime | None]]) -> None:
+        self._local_backups = backups
+        self.ui.local_backup_comboBox.clear()
+
+        if not backups:
+            self.ui.local_backup_comboBox.addItem("No local backups found")
+            self.ui.local_backup_comboBox.setEnabled(False)
+            self.ui.backup_details_label.setText("No valid local backups found.")
+            return
+
+        self.ui.local_backup_comboBox.setEnabled(True)
+        for backup in backups:
+            device_name = backup.get("device_name") or "Unnamed device"
+            backup_date = backup.get("backup_date")
+            date_text = (
+                backup_date.strftime("%Y-%m-%d %H:%M:%S")
+                if isinstance(backup_date, datetime)
+                else str(backup_date or "Unknown date")
+            )
+            self.ui.local_backup_comboBox.addItem(
+                f"{device_name} - {date_text}",
+                backup.get("udid"),
+            )
+
+        self.__on_backup_selected(self.ui.local_backup_comboBox.currentIndex())
+
+    def __on_backup_selected(self, index: int) -> None:
+        if index < 0:
+            self.ui.backup_details_label.clear()
+            return
+
+        udid = self.ui.local_backup_comboBox.itemData(index)
+        if not udid:
+            self.ui.backup_details_label.clear()
+            return
+
+        backup = next(
+            (
+                item
+                for item in self._local_backups
+                if item.get("udid") == udid
+            ),
+            None,
+        )
+        if backup is None:
+            self.ui.backup_details_label.clear()
+            return
+
+        backup_date = backup.get("backup_date")
+        date_text = (
+            backup_date.strftime("%Y-%m-%d %H:%M:%S")
+            if isinstance(backup_date, datetime)
+            else str(backup_date or "Unknown date")
+        )
+        self.ui.backup_details_label.setText(
+            f"<b>BACKUP DATE:</b> {date_text}<br>"
+            f"<b>DEVICE:</b> {backup.get('device_name') or 'Unnamed device'}<br>"
+            f"<b>UDID:</b> {udid}"
+        )
+        
+        if(backup.get("udid") != self.current_device_udid):
+            self.ui.different_device_warning.setVisible(True)
+        
+        worker = AsyncWorker(idevice.get_backup_size, backup_dir=DEFAULT_BACKUP_DIR, udid=udid)
+        worker.signals.finished.connect(lambda size: self.__on_backup_size_computed(udid, size))
+        worker.signals.error.connect(lambda e: print("Errore size:", e))
+        self._threadpool.start(worker)
+
+    def __on_backup_size_computed(self, udid: str, size_bytes: int) -> None:
+        # Ignora il risultato se l'utente ha già cambiato selezione nel frattempo
+        if self.ui.local_backup_comboBox.itemData(self.ui.local_backup_comboBox.currentIndex()) != udid:
+            return
+        size_gb = size_bytes / (1024 ** 3)
+        current_text = self.ui.backup_details_label.text().replace("Calculating...", f"{size_gb:.2f} GB")
+        self.ui.backup_details_label.setText(current_text)
+            
+    def __on_delete_backup(self):
+        index = self.ui.local_backup_comboBox.currentIndex()
+        if index < 0:
+            return
+
+        udid = self.ui.local_backup_comboBox.itemData(index)
+        if not udid:
+            return
+
+        backup = next(
+            (
+                item
+                for item in self._local_backups
+                if item.get("udid") == udid
+            ),
+            None,
+        )
+        if backup is None:
+            return
+
+        confirm = QMessageBox.question(
+            self,
+            "Delete Backup",
+            f"Are you sure you want to delete the backup for device '{backup.get('device_name') or 'Unnamed device'}' dated '{backup.get('backup_date')}'?",
+            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+        )
+
+        if confirm != QMessageBox.StandardButton.Yes:
+            return
+
+        self.ui.deleteBackupButton.setEnabled(False)
+
+        worker = AsyncWorker(
+            idevice.delete_local_backup,
+            backup_dir=DEFAULT_BACKUP_DIR,
+            udid=udid,
+        )
+        worker.signals.finished.connect(self.__on_backup_deleted)
+        worker.signals.error.connect(self.__on_backup_delete_failed)
+        self._threadpool.start(worker)
+
+    def __on_backup_deleted(self, result) -> None:
+        self.ui.deleteBackupButton.setEnabled(True)
+        self.ui.statusbar.showMessage("Backup deleted successfully.", 5000)
+        self.__list_backups()
+
+    def __on_backup_delete_failed(self, error) -> None:
+        self.ui.deleteBackupButton.setEnabled(True)
+        QMessageBox.critical(
+            self,
+            "Delete Backup Failed",
+            f"Could not delete the backup: {error}",
+        )
+        self.ui.statusbar.showMessage("Backup deletion failed.", 5000)
+            

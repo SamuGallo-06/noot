@@ -32,7 +32,7 @@
     <item row="3" column="0" colspan="3">
      <widget class="QTabWidget" name="tabWidget">
       <property name="currentIndex">
-       <number>0</number>
+       <number>2</number>
       </property>
       <widget class="QWidget" name="summary_tab">
        <attribute name="title">
@@ -621,6 +621,7 @@ Samuele's iPhone </string>
      <string>Device</string>
     </property>
     <addaction name="actionRefresh_Devices"/>
+    <addaction name="actionStart_usbmuxd"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="title">
@@ -679,6 +680,11 @@ Samuele's iPhone </string>
   <action name="actionReport_Issue">
    <property name="text">
     <string>Report Issue</string>
+   </property>
+  </action>
+  <action name="actionStart_usbmuxd">
+   <property name="text">
+    <string>Start usbmuxd</string>
    </property>
   </action>
  </widget>

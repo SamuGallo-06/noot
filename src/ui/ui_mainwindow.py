@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 ################################################################################
-## Form generated from reading UI file 'mainwindowdDVreF.ui'
+## Form generated from reading UI file 'mainwindowaoNYRO.ui'
 ##
 ## Created by: Qt User Interface Compiler version 6.11.1
 ##
@@ -43,6 +43,8 @@ class Ui_MainWindow(object):
         self.actionRefresh_Devices.setObjectName(u"actionRefresh_Devices")
         self.actionReport_Issue = QAction(MainWindow)
         self.actionReport_Issue.setObjectName(u"actionReport_Issue")
+        self.actionStart_usbmuxd = QAction(MainWindow)
+        self.actionStart_usbmuxd.setObjectName(u"actionStart_usbmuxd")
         self.centralwidget = QWidget(MainWindow)
         self.centralwidget.setObjectName(u"centralwidget")
         self.gridLayout = QGridLayout(self.centralwidget)
@@ -394,6 +396,7 @@ class Ui_MainWindow(object):
         self.menuFile.addSeparator()
         self.menuFile.addAction(self.actionExit)
         self.menuDevice.addAction(self.actionRefresh_Devices)
+        self.menuDevice.addAction(self.actionStart_usbmuxd)
         self.menuHelp.addAction(self.actionAbout_Noot)
         self.menuHelp.addAction(self.actionWiki)
         self.menuHelp.addAction(self.actionGitHub_Repository)
@@ -403,7 +406,7 @@ class Ui_MainWindow(object):
 
         self.retranslateUi(MainWindow)
 
-        self.tabWidget.setCurrentIndex(1)
+        self.tabWidget.setCurrentIndex(2)
 
 
         QMetaObject.connectSlotsByName(MainWindow)
@@ -422,6 +425,7 @@ class Ui_MainWindow(object):
 #endif // QT_CONFIG(shortcut)
         self.actionRefresh_Devices.setText(QCoreApplication.translate("MainWindow", u"Refresh Devices", None))
         self.actionReport_Issue.setText(QCoreApplication.translate("MainWindow", u"Report Issue", None))
+        self.actionStart_usbmuxd.setText(QCoreApplication.translate("MainWindow", u"Start usbmuxd", None))
         self.progressLabel.setText(QCoreApplication.translate("MainWindow", u"Running:", None))
         self.deviceInfoLabel.setText(QCoreApplication.translate("MainWindow", u"No Connected Device", None))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.summary_tab), QCoreApplication.translate("MainWindow", u"Summary", None))

@@ -22,6 +22,7 @@ della GUI, altrimenti la finestra si blocca per tutta la durata dell'operazione.
 from __future__ import annotations
 
 import asyncio
+import inspect
 import traceback
 from typing import Any, Callable
 
@@ -82,17 +83,19 @@ class AsyncWorker(QRunnable):
         asyncio.set_event_loop(loop)
         try:
             kwargs = dict(self._kwargs)
-            kwargs.setdefault("progress_callback", self._emit_progress)
-            result = loop.run_until_complete(self._coro_func(*self._args, **kwargs))
+            parameters = inspect.signature(self._coro_func).parameters.values()
+            accepts_progress = any(
+                parameter.name == "progress_callback"
+                or parameter.kind is parameter.VAR_KEYWORD
+                for parameter in parameters
+            )
+            if accepts_progress:
+                kwargs.setdefault("progress_callback", self._emit_progress)
+
+            result = self._coro_func(*self._args, **kwargs)
+            if inspect.isawaitable(result):
+                result = loop.run_until_complete(result)
             self.signals.finished.emit(result)
-        except TypeError:
-            # coro_func non accetta progress_callback: si ritenta senza.
-            try:
-                result = loop.run_until_complete(self._coro_func(*self._args, **self._kwargs))
-                self.signals.finished.emit(result)
-            except Exception as exc:  # noqa: BLE001 - da mostrare in UI cosi' com'e'
-                traceback.print_exc()
-                self.signals.error.emit(exc)
         except Exception as exc:  # noqa: BLE001 - da mostrare in UI cosi' com'e'
             traceback.print_exc()
             self.signals.error.emit(exc)
