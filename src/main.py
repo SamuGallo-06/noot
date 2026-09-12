@@ -38,7 +38,9 @@ from idevice import (
     AmbiguousDeviceNameError,
     resolve_device_identifier,
     restart_device,
-    shutdown_device
+    shutdown_device,
+    get_boot_state_device,
+    IRecvError,
 )
 
 # Importing UI
@@ -159,6 +161,42 @@ async def list_devices():
         name = d.get("name", "Unknown")
         udid = d.get("udid")
         table.add_row(name, udid)
+    console.print(table)
+
+@app.command("list-dfu")
+@coro
+async def list_dfu():
+    """Check for a device in DFU, Recovery, or WTF mode (single instant check).
+
+    Unlike ``list``, this does not go through usbmuxd: devices in these modes
+    are invisible to it. Useful before a firmware flash, or while waiting for
+    a device to enter DFU (re-run the command until it shows up).
+    """
+    try:
+        device = await get_boot_state_device()
+    except IRecvError as e:
+        ## More than one device in DFU/Recovery/WTF at once: IRecv refuses to
+        ## disambiguate them, consistent with NOOT's one-device-at-a-time
+        ## architecture for destructive operations.
+        typer.secho(f"Error: {e}", fg=typer.colors.RED)
+        typer.secho(
+            "Multiple devices in DFU/Recovery/WTF mode detected. "
+            "Disconnect all but one and try again.",
+            fg=typer.colors.YELLOW,
+        )
+        raise typer.Exit(code=1)
+
+    if device is None:
+        typer.echo("No device in DFU/Recovery/WTF mode detected.")
+        return
+
+    label = device["state"].name.replace("_", " ").title()
+    typer.secho(f"Device in {label} mode:", bold=True, fg=typer.colors.YELLOW)
+    table = Table(show_header=False)
+    table.add_row("Model", device.get("display_name") or "Unknown")
+    table.add_row("ECID", f"{device['ecid']:x}")
+    table.add_row("Serial", device.get("serial") or "Unknown")
+    table.add_row("iBoot version", device.get("iboot_version") or "Unknown")
     console.print(table)
 
 @app.command("summary")

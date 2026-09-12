@@ -10,10 +10,13 @@ from datetime import datetime
  
 from pymobiledevice3.lockdown import create_using_usbmux
 from pymobiledevice3.usbmux import list_devices
+from pymobiledevice3.irecv import IRecv, Mode as IRecvMode
 from pymobiledevice3.exceptions import (
     ConnectionFailedToUsbmuxdError,
     UserDeniedPairingError,
     PyMobileDevice3Exception,
+    IRecvNoDeviceConnectedError,
+    IRecvError,
 )
 from pymobiledevice3.services.mobilebackup2 import (
     Mobilebackup2Service,
@@ -204,11 +207,7 @@ async def change_backup_encryption_password(
     old_password: str,
     new_password: str,
 ) -> None:
-    """@brief Change         first = self._connected_devices[0]
-        self._current_udid = first["udid"]
-        self._set_actions_enabled(True)
-        self._load_device_summary(self._current_udid) #type: ignore
-        self._refresh_local_backups()the backup encryption password on the device."""
+    """@brief Change the backup encryption password on the device."""
     lockdown = await create_using_usbmux(serial=udid)
     async with Mobilebackup2Service(lockdown) as mb2:
         try:
@@ -548,4 +547,84 @@ async def resolve_device_identifier(identifier: str) -> str:
 
     return matches[0]["udid"]
 
+## @brief Boot state detection (DFU / Recovery / WTF).
+##
+## This protocol is independent from lockdown/usbmuxd: a device in DFU or
+## Recovery mode does not appear in ``list_devices()`` at all, because it does
+## not run the lockdown daemon usbmuxd talks to. It only enumerates as a bare
+## USB device with an Apple-specific product ID. Detecting it requires talking
+## to libusb directly via ``pymobiledevice3.irecv.IRecv``, which is
+## synchronous and blocking by nature (it wraps pyusb), so it is always run
+## in a worker thread via ``asyncio.to_thread`` to avoid blocking the event loop.
 
+class BootState(Enum):
+    """@brief Coarse boot state of a device, independent of usbmuxd."""
+    RECOVERY = auto()
+    DFU = auto()
+    ## "What The Fuck" mode: a rare, more bricked sibling of DFU, reachable
+    ## e.g. after a failed baseband flash. Surfaced distinctly because it is
+    ## not something the CLI should silently fold into DFU.
+    WTF = auto()
+
+
+def _classify_irecv_mode(mode: IRecvMode) -> BootState:
+    if mode is IRecvMode.DFU_MODE:
+        return BootState.DFU
+    if mode is IRecvMode.WTF_MODE:
+        return BootState.WTF
+    ## Remaining values are RECOVERY_MODE_1..4, all covered by is_recovery.
+    return BootState.RECOVERY
+
+
+def _probe_irecv_device() -> Optional[dict]:
+    """@brief Blocking libusb probe. Runs in a worker thread, never call directly from async code."""
+    try:
+        ## timeout=0: perform a single immediate scan instead of IRecv's
+        ## default of blocking indefinitely until a device shows up.
+        with IRecv(timeout=0) as irecv:
+            info = {
+                "state": _classify_irecv_mode(irecv.mode),
+                "ecid": irecv.ecid,
+                "serial": irecv.serial_number,
+                "iboot_version": irecv.iboot_version,
+            }
+            ## product_type/hardware_model/display_name rely on a local static
+            ## table (IRECV_DEVICES) that may lag behind brand-new hardware,
+            ## so a lookup miss must not take down detection entirely.
+            try:
+                info["product_type"] = irecv.product_type
+                info["hardware_model"] = irecv.hardware_model
+                info["display_name"] = irecv.display_name
+            except KeyError:
+                info["product_type"] = None
+                info["hardware_model"] = None
+                info["display_name"] = None
+            return info
+    except IRecvNoDeviceConnectedError:
+        return None
+
+
+async def get_boot_state_device() -> Optional[dict]:
+    """@brief Detect a single device currently in DFU, Recovery, or WTF mode.
+
+    Unlike :func:`get_connected_devices`, this does not go through usbmuxd: a
+    device stuck in one of these modes is invisible to usbmuxd entirely. This
+    is why the GUI (which only lists normally-booted devices via
+    ``get_connected_devices``) and the CLI need separate detection paths: the
+    CLI must also surface devices in these states, e.g. to guide a user
+    recovering a bricked device or about to flash firmware.
+
+    :return: ``None`` if no device in DFU/Recovery/WTF is found (it may still
+        be booted normally, or simply absent). Otherwise a dict with keys
+        ``state`` (:class:`BootState`), ``ecid``, ``serial``,
+        ``iboot_version``, ``product_type``, ``hardware_model``,
+        ``display_name``. The last three may be ``None`` if the board/chip ID
+        pair is not present in pymobiledevice3's static device table.
+    :raises IRecvError: If more than one device in DFU/Recovery/WTF is
+        connected simultaneously; ``IRecv`` itself refuses to disambiguate.
+        This mirrors NOOT's one-device-at-a-time architecture.
+    """
+    return await asyncio.to_thread(_probe_irecv_device)
+
+
+## @brief firmware flash tools.

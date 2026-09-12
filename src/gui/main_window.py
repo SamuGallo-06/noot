@@ -643,4 +643,8 @@ class MainWindow(QMainWindow):
         self.ui.progressBar.setVisible(False)
         self.ui.progressLabel.setText("")
         self.ui.statusbar.showMessage("Restore failed.", 5000)
+        
+    #############################
+    # iOS Version Tab           #
+    #############################
             
