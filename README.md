@@ -50,14 +50,16 @@ sudo ./install.sh
 
 The script will install the required dependencies and pyhton modules, and enable the usbmuxd service.
 
-## Command Line
+## Usage
 
-The software can be used from the command line. To see the available commands, run:
+See the [wiki] for more information on how to use Noot.
 
-```bash
-noot --help
-```
+## License
 
-This will display a list of available commands and their usage
+This project is licensed under the GNU LESSER GENERAL PUBLIC LICENSE - see the [LICENSE](LICENSE) file for details.
 
-![image](screenshots/help.png)
+## Disclaimer
+
+> Apple, iPhone, iPad, iPod, iPod Touch, Apple TV, Apple Watch, Mac, iOS, iPadOS, tvOS, watchOS, and macOS are trademarks of Apple Inc.
+>
+> This project is an independent software application and has not been authorized, sponsored, or otherwise approved by Apple Inc.

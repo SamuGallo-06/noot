@@ -40,7 +40,7 @@ class MainWindow(QMainWindow):
         self._local_backups: list[dict[str, str | datetime | None]] = []
         
         self._threadpool = QThreadPool()
-        self._threadpool.setMaxThreadCount(1)
+        self._threadpool.setMaxThreadCount(2)  # Limit the number of concurrent threads to avoid overwhelming the system
         
         self.ui.bootStatusLabel.setVisible(False) # Nascondo la label di stato bootloader/DFU finche' non viene implementata la gestione di questi stati.
         self.ui.progressBar.setVisible(False)
@@ -83,6 +83,9 @@ class MainWindow(QMainWindow):
         self.ui.deleteBackupButton.clicked.connect(self.__on_delete_backup)
         self.ui.refreshBackupsButton.clicked.connect(lambda: self.__list_backups(backup_dir=DEFAULT_BACKUP_DIR))
         self.ui.startRestoreButton.clicked.connect(self.__perform_restore)
+        
+        #iOS Version Page
+        self.ui.browseIpswFileButton.clicked.connect(self.__on_browse_ipsw)
     
     def setupSignals(self):
         self.ui.local_backup_comboBox.currentIndexChanged.connect(
@@ -647,4 +650,59 @@ class MainWindow(QMainWindow):
     #############################
     # iOS Version Tab           #
     #############################
-            
+    
+    def __on_browse_ipsw(self):
+        file_path, _ = QFileDialog.getOpenFileName(
+            self,
+            "Select IPSW File",
+            str(Path.home()),
+            "IPSW Files (*.ipsw);;All Files (*)",
+        )
+        if not file_path:
+            return
+
+        self.ui.ipswFilePathInput.setText(file_path)
+        self.ui.ipswFileDetailsLabel.setText("Reading IPSW file information...")
+
+        ipsw = idevice.open_ipsw(file_path)
+        info = idevice.get_ipsw_file_info(ipsw)
+        
+        self.ui.ipswFileDetailsLabel.setText(
+            f"* **Product Version:** {info.get('product_version')}\n"
+            f"* **Product Build Version:** {info.get('product_build_version')}\n"
+            f"* **Supported product types:** {', '.join(info.get('supported_product_types', []))}\n"
+            f"* **Build Major:** {info.get('build_major')}"
+        )
+        
+        if self.current_device_udid is not None:
+            self.__check_ipsw_compatibility(info, file_path)
+
+    def __check_ipsw_compatibility(self, info: dict, file_path: str) -> None:
+        """@brief Fetch the connected device's summary and warn if it's incompatible with the given IPSW info."""
+        worker = AsyncWorker(idevice.get_device_summary, udid=self.current_device_udid)
+        worker.signals.finished.connect(
+            lambda summary: self.__on_device_summary_for_compatibility(summary, info)
+        )
+        worker.signals.error.connect(self.__on_device_summary_failed)
+        self._threadpool.start(worker)
+
+
+    def __on_device_summary_for_compatibility(self, summary: dict, info: dict) -> None:
+        device_product_type = summary.get("modello")
+        supported_types = info.get("supported_product_types", [])
+
+        if device_product_type not in supported_types:
+            QMessageBox.warning(
+                self,
+                "Incompatible IPSW",
+                f"The selected IPSW is not compatible with the connected device "
+                f"({device_product_type}).\n\n"
+                f"Supported product types for this IPSW: {', '.join(supported_types)}",
+            )
+        
+    def __on_device_summary_failed(self, exc: Exception) -> None:
+        QMessageBox.critical(
+            self,
+            "Error",
+            f"Failed to fetch device summary. Please ensure the device is connected and try again.\n\n{exc}",
+        )
