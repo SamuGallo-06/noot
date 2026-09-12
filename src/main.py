@@ -13,6 +13,21 @@ from rich.table import Table
 
 from PySide6.QtWidgets import QApplication
  
+import asyncio
+from functools import wraps
+from pathlib import Path
+import sys
+from typing import Annotated, Optional
+ 
+from platformdirs import user_data_dir
+import typer
+import click
+ 
+from rich.console import Console
+from rich.table import Table
+ 
+from PySide6.QtWidgets import QApplication
+ 
 from idevice import (
     check_usbmuxd,
     get_connected_devices,
@@ -41,7 +56,17 @@ from idevice import (
     shutdown_device,
     get_boot_state_device,
     IRecvError,
+    open_ipsw,
+    get_ipsw_file_info,
+    flash_from_ipsw,
+    validate_flash_target,
+    RecoveryDeviceMismatchError,
+    UnsupportedFirmwareFormatError,
 )
+ 
+# Importing UI
+from gui.main_window import MainWindow
+
 
 # Importing UI
 from gui.main_window import MainWindow
@@ -865,7 +890,146 @@ async def shutdown(
  
     typer.secho("Device shut down successfully.", fg=typer.colors.GREEN)
 
+
+@app.command("flash")
+@coro
+async def flash_firmware(
+    udid: Annotated[
+        Optional[str],
+        typer.Option(
+            "--udid",
+            "-u",
+            help="UDID of a normally-booted target device. Mutually exclusive with --ecid.",
+        ),
+    ] = None,
+    ecid: Annotated[
+        Optional[str],
+        typer.Option(
+            "--ecid",
+            "-e",
+            help="Hex ECID of a device already stuck in Recovery/DFU/WTF (see 'noot list-dfu'). Mutually exclusive with --udid.",
+        ),
+    ] = None,
+    ipsw_file: Annotated[
+        str,
+        typer.Option(
+            "--file", "-f",
+            help="IPSW File Path or URL",
+            prompt="Enter IPSW File Path...",
+        ),
+    ] = "",
+    erase: Annotated[
+        bool,
+        typer.Option(
+            "--erase/--no-erase",
+            help="Erase and restore (factory reset) instead of updating in place.",
+            prompt="Erase and restore? (factory reset, data loss)",
+        ),
+    ] = False,
+):
+    """Flash or restore the specified device from an IPSW (path or URL).
+ 
+    Exactly one of --udid or --ecid must be given: --udid for a normally-
+    booted device (the common case, equivalent to iTunes/Finder — the device
+    reboots into Recovery mode on its own during the process); --ecid only
+    if the device is already stuck in Recovery/DFU/WTF, e.g. after a failed
+    update (get it from 'noot list-dfu').
+    """
+    if (udid is None) == (ecid is None):
+        typer.secho("Error: specify exactly one of --udid or --ecid.", fg=typer.colors.RED)
+        raise typer.Exit(code=1)
+ 
+    if not ipsw_file.startswith(("http://", "https://")) and not Path(ipsw_file).exists():
+        typer.secho(f"Error: File {ipsw_file} does not exist", fg=typer.colors.RED)
+        raise typer.Exit(code=1)
+ 
+    ecid_int: Optional[int] = None
+    if ecid is not None:
+        try:
+            ecid_int = int(ecid, 16)
+        except ValueError:
+            typer.secho(f"Error: '{ecid}' is not a valid hex ECID.", fg=typer.colors.RED)
+            raise typer.Exit(code=1)
+ 
+    await ensure_usbmuxd_or_exit()
+ 
+    typer.secho("Checking target device...", bold=True)
+    try:
+        await validate_flash_target(udid, ecid_int)
+    except DeviceNotFoundError as e:
+        typer.secho(f"Error: {e}", fg=typer.colors.RED)
+        raise typer.Exit(code=1)
+    except RecoveryDeviceMismatchError as e:
+        typer.secho(f"Error: {e}", fg=typer.colors.RED)
+        raise typer.Exit(code=1)
+    except IRecvError as e:
+        typer.secho(f"Error: {e}", fg=typer.colors.RED)
+        typer.secho(
+            "Multiple devices in Recovery/DFU/WTF mode detected. "
+            "Disconnect all but one and try again.",
+            fg=typer.colors.YELLOW,
+        )
+        raise typer.Exit(code=1)
+    typer.secho("Target device confirmed.", fg=typer.colors.GREEN)
+ 
+    typer.secho("Reading IPSW file information...", bold=True)
+    try:
+        ipsw = open_ipsw(ipsw_file)
+        info = get_ipsw_file_info(ipsw)
+    except Exception as e:
+        typer.secho(f"Error reading IPSW file information: {e}", fg=typer.colors.RED)
+        raise typer.Exit(code=1)
+ 
+    ## Compatibility check only applies to the --udid path: a device already
+    ## in Recovery/DFU/WTF cannot be queried via lockdown for its ProductType,
+    ## so there is nothing to compare against ahead of time in that case.
+    if udid is not None:
+        summary = await get_device_summary(udid)
+        product_type = summary.get("modello")
+        typer.secho(f"Current device model: {product_type}", bold=True)
+        if product_type not in info["supported_product_types"]:
+            typer.secho(
+                "Error: This IPSW file is not compatible with the connected device.",
+                fg=typer.colors.RED,
+                bold=True,
+            )
+            raise typer.Exit(code=1)
+ 
+    typer.secho(
+        "Summary: "
+        f"iOS {info['product_version']} ({info['product_build_version']}) — "
+        f"{'ERASE (factory reset)' if erase else 'UPDATE (preserve data)'}",
+        bold=True,
+    )
+    typer.secho(
+        "The device will reboot into Recovery mode and stay unusable until the process completes.",
+        fg=typer.colors.YELLOW,
+    )
+    typer.secho(
+        "Warning: back up your data first if you have not already — this cannot be undone.",
+        fg=typer.colors.YELLOW,
+        bold=True,
+    )
+    typer.confirm("Proceed with the flash?", abort=True)
+ 
+    typer.secho("Flashing firmware...", bold=True)
+    typer.secho(
+        "This may take several minutes. Please keep the device connected and do not interrupt the process.",
+        fg=typer.colors.YELLOW,
+    )
+    try:
+        await flash_from_ipsw(udid=udid, ecid=ecid_int, ipsw=ipsw, erase=erase)
+    except UnsupportedFirmwareFormatError as e:
+        typer.secho(f"Error: {e}", fg=typer.colors.RED)
+        raise typer.Exit(code=1)
+    except PyMobileDevice3Exception as e:
+        typer.secho(f"Error: {e}", fg=typer.colors.RED)
+        raise typer.Exit(code=1)
+ 
+    typer.secho("Flash completed.", fg=typer.colors.GREEN)
+ 
 ## @}
+
 
 
 if __name__ == "__main__":
