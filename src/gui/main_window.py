@@ -54,7 +54,7 @@ class MainWindow(QMainWindow):
         self.setupSignals()
         self.setupLabels()
 
-        self.__list_backups()
+        self.__list_backups(backup_dir=DEFAULT_BACKUP_DIR)
 
         self.check_usbdmux()
         self.refresh_devices()
@@ -74,10 +74,15 @@ class MainWindow(QMainWindow):
         self.ui.actionHow_to_Enter_DFU_mode.triggered.connect(self.__on_how_to_enter_dfu_mode)
     
     def setupButton(self):
+        # Backup Page
         self.ui.enableEncrypyionButton.clicked.connect(self.__enable_or_disable_Encryption)
         self.ui.changeEncryptionpasswordButton.clicked.connect(self.__changeEncryptionPassword)
         self.ui.performBackupButton.clicked.connect(self.__perform_backup)
+        
+        # Restore Page
         self.ui.deleteBackupButton.clicked.connect(self.__on_delete_backup)
+        self.ui.refreshBackupsButton.clicked.connect(lambda: self.__list_backups(backup_dir=DEFAULT_BACKUP_DIR))
+        self.ui.startRestoreButton.clicked.connect(self.__perform_restore)
     
     def setupSignals(self):
         self.ui.local_backup_comboBox.currentIndexChanged.connect(
@@ -492,19 +497,8 @@ class MainWindow(QMainWindow):
         
         if(backup.get("udid") != self.current_device_udid):
             self.ui.different_device_warning.setVisible(True)
-        
-        worker = AsyncWorker(idevice.get_backup_size, backup_dir=DEFAULT_BACKUP_DIR, udid=udid)
-        worker.signals.finished.connect(lambda size: self.__on_backup_size_computed(udid, size))
-        worker.signals.error.connect(lambda e: print("Errore size:", e))
-        self._threadpool.start(worker)
-
-    def __on_backup_size_computed(self, udid: str, size_bytes: int) -> None:
-        # Ignora il risultato se l'utente ha già cambiato selezione nel frattempo
-        if self.ui.local_backup_comboBox.itemData(self.ui.local_backup_comboBox.currentIndex()) != udid:
-            return
-        size_gb = size_bytes / (1024 ** 3)
-        current_text = self.ui.backup_details_label.text().replace("Calculating...", f"{size_gb:.2f} GB")
-        self.ui.backup_details_label.setText(current_text)
+        else:
+            self.ui.different_device_warning.setVisible(False)
             
     def __on_delete_backup(self):
         index = self.ui.local_backup_comboBox.currentIndex()
@@ -560,4 +554,93 @@ class MainWindow(QMainWindow):
             f"Could not delete the backup: {error}",
         )
         self.ui.statusbar.showMessage("Backup deletion failed.", 5000)
+        
+    def __perform_restore(self):
+        if self.current_device_udid is None:
+            QMessageBox.critical(
+                self,
+                "No Device Connected",
+                "No device is currently connected. Please connect a device and try again.",
+            )
+            return
+
+        index = self.ui.local_backup_comboBox.currentIndex()
+        if index < 0:
+            return
+
+        source_udid = self.ui.local_backup_comboBox.itemData(index)
+        if not source_udid:
+            return
+
+        backup = next(
+            (
+                item
+                for item in self._local_backups
+                if item.get("udid") == source_udid
+            ),
+            None,
+        )
+        if backup is None:
+            return
+
+        device_name = backup.get("device_name") or "Unnamed device"
+        confirm = QMessageBox.question(
+            self,
+            "Restore Backup",
+            f"This will overwrite all data on the connected device with the backup "
+            f"for '{device_name}' dated '{backup.get('backup_date')}'. "
+            f"This operation cannot be undone. Continue?",
+            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+        )
+        if confirm != QMessageBox.StandardButton.Yes:
+            return
+
+        password_dialog = EnterPasswordDialog(self)
+        if password_dialog.exec() != QDialog.DialogCode.Accepted:
+            return
+        password = password_dialog.password()
+
+        self.ui.progressBar.setVisible(True)
+        self.ui.progressBar.setMaximum(100)
+        self.ui.progressBar.setValue(0)
+        self.ui.progressLabel.setVisible(True)
+        self.ui.progressLabel.setText("Starting restore...")
+
+        worker = AsyncWorker(
+            idevice.run_restore,
+            udid=self.current_device_udid,
+            backup_dir=DEFAULT_BACKUP_DIR,
+            source_udid=source_udid,
+            password=password,
+            restore_system_files=True,
+            progress_callback=self.__on_restore_progress,
+        )
+        worker.signals.finished.connect(self.__on_restore_finished)
+        worker.signals.error.connect(self.__on_restore_failed)
+        self._threadpool.start(worker)
+        
+    def __on_restore_progress(self, percent: float) -> None:
+        self.ui.progressBar.setValue(round(percent))
+        self.ui.progressLabel.setText("Restoring...")
+        
+    def __on_restore_finished(self, result) -> None:
+        QMessageBox.information(
+            self,
+            "Restore Completed",
+            "The restore completed successfully."
+            "Device will now reboot.",
+        )
+        self.ui.progressBar.setVisible(False)
+        self.ui.progressLabel.setText("")
+        self.ui.statusbar.showMessage("Restore completed successfully.", 5000)
+        
+    def __on_restore_failed(self, error) -> None:
+        QMessageBox.critical(
+            self,
+            "Restore Failed",
+            f"Could not complete the restore: {error}",
+        )
+        self.ui.progressBar.setVisible(False)
+        self.ui.progressLabel.setText("")
+        self.ui.statusbar.showMessage("Restore failed.", 5000)
             

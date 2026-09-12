@@ -167,33 +167,6 @@ def delete_local_backup(backup_dir: Path, udid: str) -> None:
         )
 
     shutil.rmtree(device_directory)
-    
-def get_backup_size(backup_dir: Path, udid: str) -> int:
-    """@brief Return the total size in bytes of a local backup folder.
-
-    Walks the entire ``<udid>/`` folder tree and sums the size of every file.
-    This can take a few seconds for large backups (tens of GB, thousands of
-    files), so callers should run it off the UI thread (e.g. via
-    ``AsyncWorker``) and avoid calling it for every entry in a list at once.
-
-    :param backup_dir: Root folder containing the ``<udid>/`` backup folders.
-    :param udid: UDID of the backup to measure.
-    :raises BackupNotFoundError: If no valid backup exists for ``udid`` in
-        ``backup_dir``.
-    """
-    device_directory = backup_dir / udid
-
-    if not all((device_directory / f).exists() for f in ("Info.plist", "Manifest.plist", "Status.plist")):
-        raise BackupNotFoundError(
-            f"Nessun backup valido trovato per '{udid}' in {backup_dir}. "
-            f"Backup disponibili: {list_local_backups(backup_dir) or 'nessuno'}"
-        )
-
-    total_size = 0
-    for entry in device_directory.rglob("*"):
-        if entry.is_file():
-            total_size += entry.stat().st_size
-    return total_size
  
  
 async def is_backup_encrypted(udid: str) -> bool:

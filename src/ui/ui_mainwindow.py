@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 ################################################################################
-## Form generated from reading UI file 'mainwindowUoOvtf.ui'
+## Form generated from reading UI file 'mainwindowAGVtJK.ui'
 ##
 ## Created by: Qt User Interface Compiler version 6.11.1
 ##
@@ -200,15 +200,20 @@ class Ui_MainWindow(object):
 
         self.gridLayout_4.addWidget(self.backup_details_label, 4, 0, 1, 3)
 
-        self.start_restore_button = QPushButton(self.restore_tab)
-        self.start_restore_button.setObjectName(u"start_restore_button")
+        self.startRestoreButton = QPushButton(self.restore_tab)
+        self.startRestoreButton.setObjectName(u"startRestoreButton")
 
-        self.gridLayout_4.addWidget(self.start_restore_button, 8, 0, 1, 3)
+        self.gridLayout_4.addWidget(self.startRestoreButton, 8, 0, 1, 3)
 
         self.deleteBackupButton = QPushButton(self.restore_tab)
         self.deleteBackupButton.setObjectName(u"deleteBackupButton")
 
         self.gridLayout_4.addWidget(self.deleteBackupButton, 1, 2, 1, 1)
+
+        self.refreshBackupsButton = QPushButton(self.restore_tab)
+        self.refreshBackupsButton.setObjectName(u"refreshBackupsButton")
+
+        self.gridLayout_4.addWidget(self.refreshBackupsButton, 1, 1, 1, 1)
 
         self.tabWidget.addTab(self.restore_tab, "")
         self.version_tab = QWidget()
@@ -442,8 +447,9 @@ class Ui_MainWindow(object):
         self.label_2.setText(QCoreApplication.translate("MainWindow", u"Backup stored on this computer:", None))
         self.different_device_warning.setText(QCoreApplication.translate("MainWindow", u"<html><head/><body><p><span style=\" font-weight:700; color:#ff7800;\">WARNING: </span></p><p><span style=\" color:#ff7800;\">This backup was made from a different device. Some data may not restore correctly.</span></p></body></html>", None))
         self.backup_details_label.setText(QCoreApplication.translate("MainWindow", u"<html><head/><body><p><span style=\" font-weight:700;\">BACKUP DATE:</span> 2026-09-08 14:32</p><p><span style=\" font-weight:700;\">DEVICE:</span> Samuele's iPhone</p><p><span style=\" font-weight:700;\">IOS VERSION:</span> 18.4</p><p><span style=\" font-weight:700;\">SIZE:</span> 1.2 GB</p></body></html>", None))
-        self.start_restore_button.setText(QCoreApplication.translate("MainWindow", u"Start Restore", None))
+        self.startRestoreButton.setText(QCoreApplication.translate("MainWindow", u"Start Restore", None))
         self.deleteBackupButton.setText(QCoreApplication.translate("MainWindow", u"Delete", None))
+        self.refreshBackupsButton.setText(QCoreApplication.translate("MainWindow", u"Refresh Backups", None))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.restore_tab), QCoreApplication.translate("MainWindow", u"Restore", None))
         self.label_11.setText(QCoreApplication.translate("MainWindow", u"Signing Status: ", None))
         self.checkSigningStatusButton.setText(QCoreApplication.translate("MainWindow", u"Check Signing Status", None))
