@@ -29,9 +29,12 @@ If you are using noot from source, you need to have the following dependencies i
 - Python 3.6+
 - libusb-1.0-0
 - usbmuxd
+- idevicerestore (for flashing IPSW files)
 - every Python module listed in `requirements.txt` (can be installed using `pip install -r requirements.txt`)
 
-Otherwise, if you have downloaded the AppImage or the release, and installed with the `install.sh` script, you don't need to install any dependencies, as they are already included.
+Otherwise, if you have installed with the `install.sh` script, you don't need to install any dependencies, as they are already installed by the script.
+
+If you are using the AppImage, all python modules are already included in the package, you only need to install the required system dependencies.
 
 ## Installation
 
@@ -60,6 +63,6 @@ This project is licensed under the GNU LESSER GENERAL PUBLIC LICENSE - see the [
 
 ## Disclaimer
 
-> Apple, iPhone, iPad, iPod, iPod Touch, Apple TV, Apple Watch, Mac, iOS, iPadOS, tvOS, watchOS, and macOS are trademarks of Apple Inc.
+> Apple, iPhone, iPad, iPod, iPod Touch, Apple TV, Apple Watch, Mac, iOS, iPadOS, tvOS, watchOS, macOS and iTunes are trademarks of Apple Inc.
 >
 > This project is an independent software application and has not been authorized, sponsored, or otherwise approved by Apple Inc.

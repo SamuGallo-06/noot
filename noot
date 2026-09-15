@@ -1,3 +1,0 @@
-#!/bin/sh
-cd /opt/noot || exit 1
-exec ./Noot "$@"
