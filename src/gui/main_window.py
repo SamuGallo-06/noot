@@ -820,6 +820,46 @@ class MainWindow(QMainWindow):
         self.ui.progressLabel.setVisible(False)
         self.ui.statusbar.showMessage("Flash failed.", 5000)
         
-
+    ###############################
+    # Danger Zone                 #
+    ###############################
                 
+    def __on_reboot_recovery(self):
+        if self.current_device_udid is None:
+            QMessageBox.critical(
+                self,
+                "No Device Connected",
+                "No device is currently connected. Please connect a device and try again.",
+            )
+            return
+        
+        result = QMessageBox.question(
+            self,
+            "Confirm Reboot to Recovery",
+            "You are about to reboot the connected device into Recovery mode.\n\n"
+            "Do you want to continue?",
+            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+        )
+        
+        if(result != QMessageBox.StandardButton.Yes):
+            return
+        
+        worker = AsyncWorker(
+            idevice.reboot_to_recovery,
+            udid=self.current_device_udid
+        )
+        worker.signals.finished.connect(self.__on_reboot_recovery_completed)
+        worker.signals.error.connect(self.__on_reboot_recovery_failed)
+        self._threadpool.start(worker)
+        
+    def __on_reboot_recovery_completed(self, _) -> None:
+        self.ui.statusbar.showMessage("Device rebooted into Recovery mode.", 5000)
+        
+    def __on_reboot_recovery_failed(self, error: Exception) -> None:
+        QMessageBox.critical(
+            self,
+            "Reboot to Recovery Failed",
+            f"Could not reboot the device into Recovery mode: {error}",
+        )
+        self.ui.statusbar.showMessage("Reboot to Recovery failed.", 5000)  
         

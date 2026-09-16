@@ -736,3 +736,21 @@ async def flash_from_ipsw(
         erase=erase,
         progress_callback=_on_progress if progress_callback else None,
     )
+    
+## @brief Reboot device into Recovery mode.
+    
+async def reboot_to_recovery(udid: str) -> None:
+    """@brief Reboot the device directly into Recovery mode.
+
+    Useful before flashing when starting from a known state, or when the
+    device does not enter Recovery mode on its own (a process normally handled
+    by idevicerestore during a "hot" flash via --udid). Unlike restart/shutdown,
+    the device does NOT boot normally on its own: it remains in Recovery mode
+    until it is flashed or rebooted manually (using the physical buttons;
+    'noot restart' does not work from there because lockdown is no longer
+    reachable once the device is in Recovery mode).
+
+    :raises PyMobileDevice3Exception: Se il device rifiuta la richiesta.
+    """
+    lockdown = await create_using_usbmux(serial=udid)
+    await lockdown.enter_recovery()
