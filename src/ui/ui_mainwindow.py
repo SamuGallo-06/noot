@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 ################################################################################
-## Form generated from reading UI file 'mainwindowTTeDWx.ui'
+## Form generated from reading UI file 'mainwindowgkXgEV.ui'
 ##
 ## Created by: Qt User Interface Compiler version 6.11.2
 ##
@@ -45,6 +45,10 @@ class Ui_MainWindow(object):
         self.actionReport_Issue.setObjectName(u"actionReport_Issue")
         self.actionStart_usbmuxd = QAction(MainWindow)
         self.actionStart_usbmuxd.setObjectName(u"actionStart_usbmuxd")
+        self.actionShutdown = QAction(MainWindow)
+        self.actionShutdown.setObjectName(u"actionShutdown")
+        self.actionReboot = QAction(MainWindow)
+        self.actionReboot.setObjectName(u"actionReboot")
         self.centralwidget = QWidget(MainWindow)
         self.centralwidget.setObjectName(u"centralwidget")
         self.gridLayout = QGridLayout(self.centralwidget)
@@ -88,26 +92,7 @@ class Ui_MainWindow(object):
         self.deviceInfoLabel.setTextFormat(Qt.TextFormat.MarkdownText)
         self.deviceInfoLabel.setWordWrap(True)
 
-        self.gridLayout_2.addWidget(self.deviceInfoLabel, 0, 1, 1, 3)
-
-        self.horizontalSpacer = QSpacerItem(10, 20, QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Minimum)
-
-        self.gridLayout_2.addItem(self.horizontalSpacer, 1, 0, 1, 1)
-
-        self.label_12 = QLabel(self.summary_tab)
-        self.label_12.setObjectName(u"label_12")
-
-        self.gridLayout_2.addWidget(self.label_12, 1, 1, 1, 1)
-
-        self.shutdownDeviceButton = QPushButton(self.summary_tab)
-        self.shutdownDeviceButton.setObjectName(u"shutdownDeviceButton")
-
-        self.gridLayout_2.addWidget(self.shutdownDeviceButton, 1, 2, 1, 1)
-
-        self.rebootDeviceButton = QPushButton(self.summary_tab)
-        self.rebootDeviceButton.setObjectName(u"rebootDeviceButton")
-
-        self.gridLayout_2.addWidget(self.rebootDeviceButton, 1, 3, 1, 1)
+        self.gridLayout_2.addWidget(self.deviceInfoLabel, 0, 0, 1, 2)
 
         self.tabWidget.addTab(self.summary_tab, "")
         self.backup_tab = QWidget()
@@ -422,6 +407,9 @@ class Ui_MainWindow(object):
         self.menuFile.addAction(self.actionExit)
         self.menuDevice.addAction(self.actionRefresh_Devices)
         self.menuDevice.addAction(self.actionStart_usbmuxd)
+        self.menuDevice.addSeparator()
+        self.menuDevice.addAction(self.actionShutdown)
+        self.menuDevice.addAction(self.actionReboot)
         self.menuHelp.addAction(self.actionAbout_Noot)
         self.menuHelp.addAction(self.actionWiki)
         self.menuHelp.addAction(self.actionGitHub_Repository)
@@ -431,7 +419,7 @@ class Ui_MainWindow(object):
 
         self.retranslateUi(MainWindow)
 
-        self.tabWidget.setCurrentIndex(3)
+        self.tabWidget.setCurrentIndex(0)
 
 
         QMetaObject.connectSlotsByName(MainWindow)
@@ -451,15 +439,14 @@ class Ui_MainWindow(object):
         self.actionRefresh_Devices.setText(QCoreApplication.translate("MainWindow", u"Refresh Devices", None))
         self.actionReport_Issue.setText(QCoreApplication.translate("MainWindow", u"Report Issue", None))
         self.actionStart_usbmuxd.setText(QCoreApplication.translate("MainWindow", u"Start usbmuxd", None))
+        self.actionShutdown.setText(QCoreApplication.translate("MainWindow", u"Shutdown", None))
+        self.actionReboot.setText(QCoreApplication.translate("MainWindow", u"Reboot", None))
         self.deviceDetailsLabel.setText(QCoreApplication.translate("MainWindow", u"### iPhone XR\n"
 "Samuele's iPhone ", None))
         self.progressLabel.setText(QCoreApplication.translate("MainWindow", u"Running:", None))
         self.usbmuxd_status_label.setText(QCoreApplication.translate("MainWindow", u" usbmuxd: OK", None))
         self.bootStatusLabel.setText(QCoreApplication.translate("MainWindow", u"<html><head/><body><p><span style=\" font-weight:700; color:#1c71d8;\">Recovery Mode / DFU Mode</span></p></body></html>", None))
         self.deviceInfoLabel.setText(QCoreApplication.translate("MainWindow", u"No Connected Device", None))
-        self.label_12.setText(QCoreApplication.translate("MainWindow", u"Actions: ", None))
-        self.shutdownDeviceButton.setText(QCoreApplication.translate("MainWindow", u"Shutdown", None))
-        self.rebootDeviceButton.setText(QCoreApplication.translate("MainWindow", u"Reboot", None))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.summary_tab), QCoreApplication.translate("MainWindow", u"Summary", None))
         self.latest_backup_label.setText(QCoreApplication.translate("MainWindow", u"Latest Backup: ", None))
         self.excludeBookmarksCheckBox.setText(QCoreApplication.translate("MainWindow", u"Bookmarks", None))

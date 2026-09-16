@@ -67,6 +67,9 @@ class MainWindow(QMainWindow):
         #Devices
         self.ui.actionRefresh_Devices.triggered.connect(self.refresh_devices)
         self.ui.actionStart_usbmuxd.triggered.connect(self.check_usbdmux)
+        #--
+        self.ui.actionShutdown.triggered.connect(self.__on_shutdown)
+        self.ui.actionReboot.triggered.connect(self.__on_reboot)
         
         #Help
         self.ui.actionAbout_Noot.triggered.connect(self.__on_about_noot)
@@ -88,6 +91,10 @@ class MainWindow(QMainWindow):
         #iOS Version Page
         self.ui.browseIpswFileButton.clicked.connect(self.__on_browse_ipsw)
         self.ui.flashFirmwareButton.clicked.connect(self.__on_flash_ipsw)
+        
+        #Danger Zone Page
+        self.ui.eraseDeviceButton.clicked.connect(self.__on_factory_reset)
+        self.ui.recoveryModeButton.clicked.connect(self.__on_reboot_recovery)
     
     def setupSignals(self):
         self.ui.local_backup_comboBox.currentIndexChanged.connect(
@@ -954,3 +961,61 @@ class MainWindow(QMainWindow):
         self.ui.progressBar.setValue(0)
         self.ui.progressLabel.setVisible(False)
         self.ui.statusbar.showMessage("Factory reset failed.", 5000)
+        
+    #####################################
+    # Shutdown and Reboot Actions      #
+    #####################################
+    
+    def __on_shutdown(self):
+        if self.current_device_udid is None:
+            QMessageBox.critical(
+                self,
+                "No Device Connected",
+                "No device is currently connected. Please connect a device and try again.",
+            )
+            return
+        
+        result = QMessageBox.question(
+            self,
+            "Confirm Shutdown",
+            "Do you want to shutdown the device?",
+            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+        )
+        
+        if(result != QMessageBox.StandardButton.Yes):
+            return
+        
+        worker = AsyncWorker(
+            idevice.shutdown_device,
+            udid=self.current_device_udid
+        )
+        worker.signals.finished.connect(lambda _: self.ui.statusbar.showMessage("Device shutdown successfully.", 5000))
+        worker.signals.error.connect(lambda exc: QMessageBox.critical(self, "Shutdown Failed", f"Could not shutdown the device: {exc}"))
+        self._threadpool.start(worker)
+        
+    def __on_reboot(self):
+        if self.current_device_udid is None:
+            QMessageBox.critical(
+                self,
+                "No Device Connected",
+                "No device is currently connected. Please connect a device and try again.",
+            )
+            return
+        
+        result = QMessageBox.question(
+            self,
+            "Confirm Reboot",
+            "Do you want to reboot the device?",
+            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+        )
+        
+        if(result != QMessageBox.StandardButton.Yes):
+            return
+        
+        worker = AsyncWorker(
+            idevice.restart_device,
+            udid=self.current_device_udid
+        )
+        worker.signals.finished.connect(lambda _: self.ui.statusbar.showMessage("Device restarted successfully.", 5000))
+        worker.signals.error.connect(lambda exc: QMessageBox.critical(self, "Reboot Failed", f"Could not reboot the device: {exc}"))
+        self._threadpool.start(worker)
