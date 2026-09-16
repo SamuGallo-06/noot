@@ -16,6 +16,7 @@ from PySide6.QtWidgets import (
 )
 
 import idevice
+from idevice import IdevicerestoreNotInstalledError, IdevicerestoreError, IdevicerestoreCancelledError
 from device_models import resolve_model_name
 from ui.ui_mainwindow import Ui_MainWindow
 
@@ -86,6 +87,7 @@ class MainWindow(QMainWindow):
         
         #iOS Version Page
         self.ui.browseIpswFileButton.clicked.connect(self.__on_browse_ipsw)
+        self.ui.flashFirmwareButton.clicked.connect(self.__on_flash_ipsw)
     
     def setupSignals(self):
         self.ui.local_backup_comboBox.currentIndexChanged.connect(
@@ -106,7 +108,7 @@ class MainWindow(QMainWindow):
             "About Noot",
             "Noot (Non-apple Open-source Operator for iTunes)"
             "iPhone backup manager for Linux, built using pymobiledevice3 module.\n\n"
-            "Version: 1.0.0\n"
+            "Version: 1.1.0\n"
             "Author: SamuGallo-06\n"
             "License: LGPLv3\n"
         )
@@ -664,8 +666,7 @@ class MainWindow(QMainWindow):
         self.ui.ipswFilePathInput.setText(file_path)
         self.ui.ipswFileDetailsLabel.setText("Reading IPSW file information...")
 
-        ipsw = idevice.open_ipsw(file_path)
-        info = idevice.get_ipsw_file_info(ipsw)
+        info = idevice.get_ipsw_file_info(file_path)
         
         self.ui.ipswFileDetailsLabel.setText(
             f"* **Product Version:** {info.get('product_version')}\n"
@@ -686,7 +687,6 @@ class MainWindow(QMainWindow):
         worker.signals.error.connect(self.__on_device_summary_failed)
         self._threadpool.start(worker)
 
-
     def __on_device_summary_for_compatibility(self, summary: dict, info: dict) -> None:
         device_product_type = summary.get("modello")
         supported_types = info.get("supported_product_types", [])
@@ -706,3 +706,120 @@ class MainWindow(QMainWindow):
             "Error",
             f"Failed to fetch device summary. Please ensure the device is connected and try again.\n\n{exc}",
         )
+        
+    def __on_flash_ipsw(self):
+        ipsw_file = self.ui.ipswFilePathInput.text().strip()
+        if not ipsw_file:
+            QMessageBox.warning(
+                self,
+                "No IPSW Selected",
+                "Please select an IPSW file before attempting to flash.",
+            )
+            return
+        
+        #Make sure a device is connected before proceeding
+        if self.current_device_udid is None:
+            QMessageBox.critical(
+                self,
+                "No Device Connected",
+                "No device is currently connected. Please connect a device and try again.",
+            )
+            return
+        
+        erase = self.ui.eraseDataCheckBox.isChecked()
+        
+        #Question dialog to confirm flashing the device with the selected IPSW
+        result = QMessageBox.question(
+            self,
+            "Confirm Flash",
+            f"You are about to flash the device with the IPSW:\n{ipsw_file}\n\n"
+            f"Mode: {'Erase and restore (factory reset)' if erase else 'Update (preserve data)'}\n\n"
+            "The device will reboot into Recovery mode and stay unusable until the process completes.\n\n"
+            "Do you want to continue?",
+            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+        )
+        
+        if(result != QMessageBox.StandardButton.Yes):
+            return
+        
+        #If eraseDataCheckBox is checked, ask for confirmation
+        if erase:
+            result = QMessageBox.warning(
+                self,
+                "Warning",
+                "You have selected to erase all data on the device during the flash process. "
+                "This will result in the loss of all data on the device. Are you sure you want to proceed?",
+                QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+            )
+            
+            if(result != QMessageBox.StandardButton.Yes):
+                return
+            
+        #Start Flashing Process
+        self.ui.progressBar.setVisible(True)
+        self.ui.progressBar.setMaximum(100)
+        self.ui.progressBar.setValue(0)
+        self.ui.progressLabel.setVisible(True)
+        
+        worker = AsyncWorker(
+            idevice.flash_from_ipsw,
+            udid=self.current_device_udid,
+            ecid=None,
+            erase=erase,
+            progress_callback=self.__on_flash_progress
+        )
+        worker.signals.finished.connect(self.__on_flash_completed)
+        worker.signals.error.connect(self.__on_flash_failed)
+        self._threadpool.start(worker)
+        
+    def __on_flash_progress(self, progress) -> None:
+        self.ui.progressBar.setValue(round(progress.overall_progress))
+        self.ui.progressLabel.setText(progress.step_label)
+        
+    def __on_flash_completed(self, _) -> None:
+        QMessageBox.information(
+            self,
+            "Flash Completed",
+            "The device has been flashed successfully. It will now reboot.",
+        )
+        self.ui.progressBar.setVisible(False)
+        self.ui.progressBar.setMaximum(100)
+        self.ui.progressBar.setValue(0)
+        self.ui.progressLabel.setVisible(False)
+        self.ui.statusbar.showMessage("Flash completed successfully.", 5000)
+        
+    def __on_flash_failed(self, error: Exception) -> None:
+        if isinstance(error, IdevicerestoreNotInstalledError):
+            QMessageBox.critical(
+                self,
+                "idevicerestore Not Installed",
+                f"{error}\n\nInstall it with: sudo apt install idevicerestore",
+            )
+        elif isinstance(error, IdevicerestoreError):
+            QMessageBox.critical(
+                self,
+                "Flash Failed",
+                f"The flash process failed: {error}",
+            )
+        elif isinstance(error, IdevicerestoreCancelledError):
+            QMessageBox.information(
+                self,
+                "Flash Cancelled",
+                "The flash process was cancelled.",
+            )
+        else:
+            QMessageBox.critical(
+                self,
+                "Flash Failed",
+                f"Could not complete the flash process: {error}",
+            )
+
+        self.ui.progressBar.setVisible(False)
+        self.ui.progressBar.setMaximum(100)
+        self.ui.progressBar.setValue(0)
+        self.ui.progressLabel.setVisible(False)
+        self.ui.statusbar.showMessage("Flash failed.", 5000)
+        
+
+                
+        

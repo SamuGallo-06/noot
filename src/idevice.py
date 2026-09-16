@@ -7,6 +7,8 @@ from enum import Enum, auto
 from pathlib import Path
 from typing import Callable, Optional
 from datetime import datetime
+import typer
+import shutil
  
 from pymobiledevice3.lockdown import create_using_usbmux
 from pymobiledevice3.usbmux import list_devices
@@ -29,9 +31,14 @@ from pymobiledevice3.services.mobilebackup2 import (
     BackupFilterCallback,
 )
 from pymobiledevice3.services.diagnostics import DiagnosticsService
-import typer
-import shutil
 
+from idevicerestore_bridge import(
+    IdevicerestoreNotInstalledError,
+    IdevicerestoreError,
+    IdevicerestoreCancelledError,
+    RestoreProgress
+)
+from idevicerestore_bridge import flash_from_ipsw as _idevicerestore_flash
 
 async def get_connected_devices():
     """@brief Return the connected devices with their UDID and name."""
@@ -690,24 +697,17 @@ async def validate_flash_target(udid: Optional[str], ecid: Optional[int]) -> Non
 ## above. Only ``flash_from_ipsw`` is async, since it drives the actual
 ## restore protocol over the device connection.
  
-def open_ipsw(file_path: str) -> IPSW:
-    """@brief Open an IPSW file and return it.
  
-    :param file_path: Path to a local IPSW file, an extracted IPSW directory,
-        or an http(s) URL. See ``IPSW.create_from_path``.
-    :raises FileNotFoundError: If ``file_path`` does not exist (local path only).
-    :raises BadZipFile: If the file is not a valid IPSW/zip archive.
-    """
-    return IPSW.create_from_path(file_path)
- 
- 
-def get_ipsw_file_info(source: IPSW) -> dict:
+def get_ipsw_file_info(file_path: str) -> dict:
     """@brief Return a dict with the IPSW's version, build, and supported product types.
  
-    :param source: An already-opened IPSW object.
+    :param file_path: Path to a local IPSW file.
     :return: A dict with keys ``product_version``, ``product_build_version``,
         ``supported_product_types``, ``build_major``.
     """
+    
+    source: IPSW = IPSW.create_from_path(file_path)
+    
     manifest = source.build_manifest
  
     return {
@@ -717,69 +717,22 @@ def get_ipsw_file_info(source: IPSW) -> dict:
         "build_major": manifest.build_major,                       # 21 (int)
     }
  
- 
-class UnsupportedFirmwareFormatError(Exception):
-    """@brief Raised when the target device predates Apple's Image4 firmware format.
- 
-    Devices before the A7 chip (iPhone 5s / iPad Air 1 / iPad mini 2 and
-    later use Image4) rely on the older Image3 format instead. pymobiledevice3
-    contains some Image3 tag-generation code (``TSSRequest.add_ap_img3_tags``)
-    but gates it behind an unconditional Image4 check in
-    ``BaseRestore.ensure_image4_supported()``, making that code path
-    unreachable in practice — it appears unfinished/untested upstream rather
-    than a deliberately supported feature. Attempting to bypass that guard
-    risks bricking the device mid-flash with no confirmed-working fallback,
-    so NOOT does not attempt it: flashing from IPSW is limited to A7+ devices.
-    Backup, restore, and erase (which do not depend on Image3/Image4) are
-    unaffected and still work on older hardware.
-    """
-    pass
- 
- 
 async def flash_from_ipsw(
     udid: Optional[str],
     ecid: Optional[int],
-    ipsw: IPSW,
+    ipsw_path: str,
     erase: bool,
+    progress_callback: Optional[Callable[[float], None]] = None,
 ) -> None:
-    """@brief Flash or restore a device from an IPSW.
- 
-    :param udid: UDID of a normally-booted device. Required (and used) only
-        when the device is not already in DFU/Recovery — ``ecid`` is ignored
-        in that case.
-    :param ecid: ECID of a device already in DFU/Recovery/WTF mode. Required
-        (and used) only when the device is not reachable via usbmuxd; obtain
-        it beforehand via ``get_boot_state_device()`` while the device was
-        still connected, or let the caller resolve it themselves. May be
-        ``None`` to accept the first device found in DFU/Recovery/WTF,
-        regardless of identity.
-    :param ipsw: Already-opened IPSW to flash, as returned by ``open_ipsw()``.
-    :param erase: ``True`` for a factory-reset restore (data loss), ``False``
-        to update in place preserving user data.
-    :raises UnsupportedFirmwareFormatError: If the device predates Image4
-        (pre-A7 hardware, e.g. iPad mini 1, iPhone 5c). See the exception's
-        docstring for why this is a hard limitation, not a bug.
-    :raises IRecvError: If more than one device in DFU/Recovery/WTF is found
-        and ``ecid`` was not specific enough to disambiguate.
-    :raises IRecvNoDeviceConnectedError: If no matching device shows up
-        before ``IRecv`` gives up waiting.
-    """
-    if udid is not None:
-        lockdown = await create_using_usbmux(serial=udid)
-        device = Device(lockdown=lockdown)
-    else:
-        irecv = await asyncio.to_thread(IRecv, ecid=ecid)
-        device = Device(irecv=irecv)
- 
-    if not await device.get_is_image4_supported():
-        raise UnsupportedFirmwareFormatError(
-            "This device does not support the Image4 firmware format "
-            "(pre-A7 hardware). Flashing from IPSW is not supported; "
-            "use backup/restore/erase instead."
-        )
- 
-    await Restore(
-        ipsw,
-        device,
-        behavior=Behavior.Erase if erase else Behavior.Update,
-    ).update()
+    """@brief Flash or restore a device from an IPSW via idevicerestore."""
+    def _on_progress(p: RestoreProgress) -> None:
+        if progress_callback is not None:
+            progress_callback(p.overall_progress)
+
+    await _idevicerestore_flash(
+        ipsw_path=ipsw_path,
+        udid=udid,
+        ecid=ecid,
+        erase=erase,
+        progress_callback=_on_progress if progress_callback else None,
+    )

@@ -56,13 +56,13 @@ from idevice import (
     shutdown_device,
     get_boot_state_device,
     IRecvError,
-    open_ipsw,
     get_ipsw_file_info,
     flash_from_ipsw,
     validate_flash_target,
     RecoveryDeviceMismatchError,
-    UnsupportedFirmwareFormatError,
 )
+
+from idevicerestore_bridge import IdevicerestoreNotInstalledError, IdevicerestoreError
  
 # Importing UI
 from gui.main_window import MainWindow
@@ -974,8 +974,7 @@ async def flash_firmware(
  
     typer.secho("Reading IPSW file information...", bold=True)
     try:
-        ipsw = open_ipsw(ipsw_file)
-        info = get_ipsw_file_info(ipsw)
+        info = get_ipsw_file_info(ipsw_file)
     except Exception as e:
         typer.secho(f"Error reading IPSW file information: {e}", fg=typer.colors.RED)
         raise typer.Exit(code=1)
@@ -1017,20 +1016,50 @@ async def flash_firmware(
         "This may take several minutes. Please keep the device connected and do not interrupt the process.",
         fg=typer.colors.YELLOW,
     )
-    try:
-        await flash_from_ipsw(udid=udid, ecid=ecid_int, ipsw=ipsw, erase=erase)
-    except UnsupportedFirmwareFormatError as e:
-        typer.secho(f"Error: {e}", fg=typer.colors.RED)
-        raise typer.Exit(code=1)
-    except PyMobileDevice3Exception as e:
-        typer.secho(f"Error: {e}", fg=typer.colors.RED)
-        raise typer.Exit(code=1)
- 
+    
+    def _show_step(step_label: Optional[str]) -> str:
+        return step_label or ""
+    
+    last_percent = 0.0
+    current_step_label = ""
+    
+    with typer.progressbar(
+        length=100,
+        label="Flashing firmware...",
+        item_show_func=_show_step,
+    ) as progressbar:
+        def _on_progress(progress) -> None:
+            nonlocal last_percent, current_step_label
+            current_step_label = progress.step_label
+            delta = max(0.0, progress.overall_progress - last_percent)
+            if delta:
+                progressbar.update(int(delta))
+            last_percent = progress.overall_progress
+
+        try:
+            await flash_from_ipsw(
+                udid=udid,
+                ecid=ecid_int,
+                ipsw_path=ipsw_file,
+                erase=erase,
+                progress_callback=_on_progress,
+            )
+        except IdevicerestoreNotInstalledError as e:
+            typer.secho(f"Error: {e}", fg=typer.colors.RED)
+            raise typer.Exit(code=1)
+        except IdevicerestoreError as e:
+            typer.secho(f"Error: {e}", fg=typer.colors.RED)
+            raise typer.Exit(code=1)
+
+        remaining = 100.0 - last_percent
+        if remaining > 0:
+            progressbar.update(int(remaining))
+
+    typer.secho("Flash completed.", fg=typer.colors.GREEN)
+
     typer.secho("Flash completed.", fg=typer.colors.GREEN)
  
 ## @}
-
-
 
 if __name__ == "__main__":
     try:

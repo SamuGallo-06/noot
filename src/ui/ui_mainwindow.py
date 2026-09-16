@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
 ################################################################################
-## Form generated from reading UI file 'mainwindowTClXlM.ui'
+## Form generated from reading UI file 'mainwindowTTeDWx.ui'
 ##
-## Created by: Qt User Interface Compiler version 6.11.1
+## Created by: Qt User Interface Compiler version 6.11.2
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
@@ -256,9 +256,19 @@ class Ui_MainWindow(object):
         self.version_tab.setObjectName(u"version_tab")
         self.gridLayout_6 = QGridLayout(self.version_tab)
         self.gridLayout_6.setObjectName(u"gridLayout_6")
-        self.verticalSpacer_11 = QSpacerItem(20, 10, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Fixed)
+        self.ipswFilePathInput = QLineEdit(self.version_tab)
+        self.ipswFilePathInput.setObjectName(u"ipswFilePathInput")
 
-        self.gridLayout_6.addItem(self.verticalSpacer_11, 2, 0, 1, 1)
+        self.gridLayout_6.addWidget(self.ipswFilePathInput, 6, 1, 1, 1)
+
+        self.label_11 = QLabel(self.version_tab)
+        self.label_11.setObjectName(u"label_11")
+
+        self.gridLayout_6.addWidget(self.label_11, 10, 0, 1, 1)
+
+        self.verticalSpacer_14 = QSpacerItem(20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding)
+
+        self.gridLayout_6.addItem(self.verticalSpacer_14, 9, 1, 1, 1)
 
         self.label_8 = QLabel(self.version_tab)
         self.label_8.setObjectName(u"label_8")
@@ -267,23 +277,32 @@ class Ui_MainWindow(object):
 
         self.gridLayout_6.addWidget(self.label_8, 0, 0, 1, 3)
 
-        self.verticalSpacer_14 = QSpacerItem(20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding)
+        self.verticalSpacer_13 = QSpacerItem(20, 10, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Fixed)
 
-        self.gridLayout_6.addItem(self.verticalSpacer_14, 9, 1, 1, 1)
+        self.gridLayout_6.addItem(self.verticalSpacer_13, 7, 1, 1, 1)
 
-        self.ipswFilePathInput = QLineEdit(self.version_tab)
-        self.ipswFilePathInput.setObjectName(u"ipswFilePathInput")
+        self.label_9 = QLabel(self.version_tab)
+        self.label_9.setObjectName(u"label_9")
 
-        self.gridLayout_6.addWidget(self.ipswFilePathInput, 6, 1, 1, 1)
+        self.gridLayout_6.addWidget(self.label_9, 5, 0, 1, 3)
+
+        self.label_10 = QLabel(self.version_tab)
+        self.label_10.setObjectName(u"label_10")
+
+        self.gridLayout_6.addWidget(self.label_10, 6, 0, 1, 1)
+
+        self.verticalSpacer_11 = QSpacerItem(20, 10, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Fixed)
+
+        self.gridLayout_6.addItem(self.verticalSpacer_11, 2, 0, 1, 1)
 
         self.flashFirmwareButton = QPushButton(self.version_tab)
         self.flashFirmwareButton.setObjectName(u"flashFirmwareButton")
 
-        self.gridLayout_6.addWidget(self.flashFirmwareButton, 10, 0, 1, 3)
+        self.gridLayout_6.addWidget(self.flashFirmwareButton, 13, 0, 1, 3)
 
-        self.verticalSpacer_13 = QSpacerItem(20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Minimum)
+        self.verticalSpacer_12 = QSpacerItem(20, 10, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Fixed)
 
-        self.gridLayout_6.addItem(self.verticalSpacer_13, 7, 1, 1, 1)
+        self.gridLayout_6.addItem(self.verticalSpacer_12, 4, 0, 1, 1)
 
         self.line_2 = QFrame(self.version_tab)
         self.line_2.setObjectName(u"line_2")
@@ -292,24 +311,15 @@ class Ui_MainWindow(object):
 
         self.gridLayout_6.addWidget(self.line_2, 1, 0, 1, 3)
 
-        self.label_9 = QLabel(self.version_tab)
-        self.label_9.setObjectName(u"label_9")
-
-        self.gridLayout_6.addWidget(self.label_9, 5, 0, 1, 3)
-
-        self.verticalSpacer_12 = QSpacerItem(20, 10, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Fixed)
-
-        self.gridLayout_6.addItem(self.verticalSpacer_12, 4, 0, 1, 1)
-
-        self.label_10 = QLabel(self.version_tab)
-        self.label_10.setObjectName(u"label_10")
-
-        self.gridLayout_6.addWidget(self.label_10, 6, 0, 1, 1)
-
         self.currentIosVersionLabel = QLabel(self.version_tab)
         self.currentIosVersionLabel.setObjectName(u"currentIosVersionLabel")
 
         self.gridLayout_6.addWidget(self.currentIosVersionLabel, 3, 0, 1, 3)
+
+        self.eraseDataCheckBox = QCheckBox(self.version_tab)
+        self.eraseDataCheckBox.setObjectName(u"eraseDataCheckBox")
+
+        self.gridLayout_6.addWidget(self.eraseDataCheckBox, 11, 0, 1, 1)
 
         self.browseIpswFileButton = QPushButton(self.version_tab)
         self.browseIpswFileButton.setObjectName(u"browseIpswFileButton")
@@ -322,6 +332,10 @@ class Ui_MainWindow(object):
         self.ipswFileDetailsLabel.setWordWrap(True)
 
         self.gridLayout_6.addWidget(self.ipswFileDetailsLabel, 8, 0, 1, 3)
+
+        self.verticalSpacer_10 = QSpacerItem(20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding)
+
+        self.gridLayout_6.addItem(self.verticalSpacer_10, 12, 0, 1, 1)
 
         self.tabWidget.addTab(self.version_tab, "")
         self.danger_tab = QWidget()
@@ -469,11 +483,13 @@ class Ui_MainWindow(object):
         self.deleteBackupButton.setText(QCoreApplication.translate("MainWindow", u"Delete", None))
         self.refreshBackupsButton.setText(QCoreApplication.translate("MainWindow", u"Refresh Backups", None))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.restore_tab), QCoreApplication.translate("MainWindow", u"Restore", None))
+        self.label_11.setText(QCoreApplication.translate("MainWindow", u"Restore Options:", None))
         self.label_8.setText(QCoreApplication.translate("MainWindow", u"<html><head/><body><p><span style=\" color:#ff7800;\">Downgrading/upgrading via custom IPSW may void warranty, brick your device, or fail if Apple no longer signs that firmware. Proceed at your own risk. Noot and its author assume no responsibility for data loss or device damage.</span></p></body></html>", None))
-        self.flashFirmwareButton.setText(QCoreApplication.translate("MainWindow", u"Flash Firmware", None))
         self.label_9.setText(QCoreApplication.translate("MainWindow", u"Flash Firmware from IPSW", None))
         self.label_10.setText(QCoreApplication.translate("MainWindow", u"IPSW File: ", None))
+        self.flashFirmwareButton.setText(QCoreApplication.translate("MainWindow", u"Flash Firmware", None))
         self.currentIosVersionLabel.setText(QCoreApplication.translate("MainWindow", u"Current iOS Version: ", None))
+        self.eraseDataCheckBox.setText(QCoreApplication.translate("MainWindow", u"Erase data and restore (factory reset)", None))
         self.browseIpswFileButton.setText(QCoreApplication.translate("MainWindow", u"Browse...", None))
         self.ipswFileDetailsLabel.setText(QCoreApplication.translate("MainWindow", u"* **Product Version:** {info.get(\"product_version\")}\n"
 "* **Product Build Version:** {info.get(\"product_build_version\")}\n"
