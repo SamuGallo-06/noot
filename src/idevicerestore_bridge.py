@@ -1,38 +1,38 @@
-"""Ponte verso il binario esterno ``idevicerestore`` (progetto libimobiledevice).
+"""Bridge to the external `idevicerestore` binary (libimobiledevice project).
 
-Perche' questo modulo esiste separato da idevice.py: idevice.py parla con
-pymobiledevice3 in-process (chiamate Python dirette, eccezioni tipizzate).
-idevicerestore e' invece un binario C esterno, invocato come sottoprocesso:
-il modello di comunicazione (stdout/stderr testuali, codici di uscita,
-cancellazione di un processo invece che di una coroutine) e' sufficientemente
-diverso da meritare un modulo a se', per non mescolare due stili radicalmente
-diversi nello stesso file.
+Why this module is separate from idevice.py? idevice.py communicates with
+pymobiledevice3 in-process (direct Python calls and typed exceptions).
+idevicerestore, on the other hand, is an external C binary invoked as a
+subprocess. Its communication model (textual stdout/stderr, exit codes, and
+process cancellation instead of coroutine cancellation) is different enough
+to warrant a separate module rather than mixing two fundamentally different
+styles in the same file.
 
-Perche' idevicerestore al posto di pymobiledevice3.restore.Restore: quella
-libreria richiede il formato Image4 (guard esplicito in
-BaseRestore.ensure_image4_supported), quindi non funziona su device pre-A7
-(es. iPad mini 1, iPhone 5c), che usano ancora il formato Image3. Il codice
-IMG3 esiste in pymobiledevice3 (TSSRequest.add_ap_img3_tags) ma e'
-irraggiungibile a causa di quel guard incondizionato — sembra incompleto/mai
-finito upstream, non una feature attiva. idevicerestore, al contrario, supporta
-IMG3 end-to-end da 15+ anni ed e' oggi usato come motore unico per QUALSIASI
-device (pre-A7 incluso), sostituendo interamente il percorso pymobiledevice3.
+since `pymobiledevice3.restore.Restore` requires the Image4 format (an explicit guard in
+BaseRestore.ensure_image4_supported), it doesn't work with pre-A7 devices
+(e.g. iPad mini 1 and iPhone 5c), which still use the Image3 format. IMG3 code
+exists in pymobiledevice3 (TSSRequest.add_ap_img3_tags), but it is unreachable
+because of that unconditional guard. It appears incomplete or unfinished
+upstream, rather than being an active feature. `idevicerestore`, in contrast,
+has supported IMG3 end-to-end for over 15 years and is now used as the single
+engine for every device, including pre-A7 devices, fully replacing the
+pymobiledevice3 path.
 
-Il binario espone un flag pensato apposta per l'uso da programma esterno:
-``-P/--plain-progress`` stampa righe stabili nel formato
-``progress: {step} {step_progress}\\n`` su stdout, con fflush esplicito dopo
-ogni riga (verificato nel sorgente C, idevicerestore.c:1751-1755). Gli errori
-vanno su stderr con prefisso ``ERROR: `` (verificato empiricamente). Questo
-rende il parsing dell'output affidabile: non serve interpretare la barra di
-progresso colorata/interattiva pensata per un terminale umano.
+The binary exposes a flag specifically intended for programmatic use:
+``-P/--plain-progress`` prints stable lines in the format
+``progress: {step} {step_progress}\\n`` to stdout, with an explicit fflush after
+each line (verified in the C source, idevicerestore.c:1751-1755). Errors are
+written to stderr with the ``ERROR: `` prefix (verified empirically). This
+makes output parsing reliable: there is no need to interpret the colored,
+interactive progress bar intended for a human terminal.
 
-Dipendenza di sistema, non pip-installabile:
+System dependency, not installable with pip:
     sudo apt install idevicerestore
-Porta con se' libirecovery, libimobiledevice-glue, libplist, libtatsu come
-dipendenze a cascata (gestite da apt). Verificato disponibile su Ubuntu
-24.04/Zorin OS 18 con supporto a --plain-progress incluso (pacchetto
-1.0.0-3build5, stesso flag anche nella build "stabile", non solo nelle
-snapshot git piu' recenti).
+It brings in libirecovery, libimobiledevice-glue, libplist, and libtatsu as
+transitive dependencies managed by apt. Verified to be available on Ubuntu
+24.04/Zorin OS 18 with support for --plain-progress included (package
+1.0.0-3build5, with the same flag in the stable build, not only in more
+recent git snapshots).
 """
 from __future__ import annotations
 
@@ -241,11 +241,11 @@ async def flash_from_ipsw(
         called before the process exited on its own.
     """
     if (udid is None) == (ecid is None):
-        raise ValueError("Specifica esattamente uno tra udid ed ecid, non entrambi né nessuno.")
+        raise ValueError("Specify exactly one of udid or ecid, not both or neither.")
 
     if not is_idevicerestore_available():
         raise IdevicerestoreNotInstalledError(
-            "idevicerestore non è installato. Installalo con: sudo apt install idevicerestore"
+            "idevicerestore is not installed. Install it with: sudo apt install idevicerestore"
         )
 
     args = ["--plain-progress", "--no-input"]
@@ -291,10 +291,10 @@ async def flash_from_ipsw(
     returncode = await process.wait()
 
     if handle._cancelled:
-        raise IdevicerestoreCancelledError("Il restore è stato annullato dall'utente.")
+        raise IdevicerestoreCancelledError("The restore was cancelled by the user.")
 
     if returncode != 0:
         last_error = next((l for l in reversed(stderr_lines) if l.strip()), None)
         if last_error is not None:
             raise IdevicerestoreError(last_error)
-        raise IdevicerestoreError(f"idevicerestore è terminato con codice {returncode}.")
+        raise IdevicerestoreError(f"idevicerestore exited with status code {returncode}.")

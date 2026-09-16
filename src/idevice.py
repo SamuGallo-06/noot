@@ -663,26 +663,26 @@ async def validate_flash_target(udid: Optional[str], ecid: Optional[int]) -> Non
         connected simultaneously; ``IRecv`` itself refuses to disambiguate.
     """
     if (udid is None) == (ecid is None):
-        raise ValueError("Specifica esattamente uno tra udid ed ecid, non entrambi né nessuno.")
+        raise ValueError("Specify exactly one of udid or ecid, not both or neither.")
 
     if udid is not None:
         devices = await get_connected_devices()
         if not any(d["udid"] == udid for d in devices):
-            available = ", ".join(d["udid"] for d in devices) or "nessuno"
+            available = ", ".join(d["udid"] for d in devices) or "none"
             raise DeviceNotFoundError(
-                f"Nessun device connesso con UDID '{udid}'. Device connessi: {available}"
+                f"No connected device with UDID '{udid}'. Connected devices: {available}"
             )
         return
 
     boot_state_device = await get_boot_state_device()
     if boot_state_device is None:
         raise DeviceNotFoundError(
-            f"Nessun device in Recovery/DFU/WTF trovato con ECID {ecid:x}."
+            f"No device in Recovery/DFU/WTF mode found with ECID {ecid:x}."
         )
     if boot_state_device["ecid"] != ecid:
         raise RecoveryDeviceMismatchError(
-            f"Il device in {boot_state_device['state'].name} ha ECID "
-            f"{boot_state_device['ecid']:x}, non {ecid:x}."
+            f"Device in {boot_state_device['state'].name} has ECID "
+            f"{boot_state_device['ecid']:x}, not {ecid:x}."
         )
 
 

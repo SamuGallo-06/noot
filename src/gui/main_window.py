@@ -673,17 +673,34 @@ class MainWindow(QMainWindow):
         self.ui.ipswFilePathInput.setText(file_path)
         self.ui.ipswFileDetailsLabel.setText("Reading IPSW file information...")
 
-        info = idevice.get_ipsw_file_info(file_path)
-        
+        self.ui.browseIpswFileButton.setEnabled(False)
+        worker = AsyncWorker(idevice.get_ipsw_file_info, file_path)
+        worker.signals.finished.connect(
+            lambda info: self.__on_ipsw_info_loaded(info, file_path)
+        )
+        worker.signals.error.connect(self.__on_ipsw_info_failed)
+        self._threadpool.start(worker)
+
+    def __on_ipsw_info_loaded(self, info: dict, file_path: str) -> None:
+        self.ui.browseIpswFileButton.setEnabled(True)
         self.ui.ipswFileDetailsLabel.setText(
-            f"* **Product Version:** {info.get('product_version')}\n"
-            f"* **Product Build Version:** {info.get('product_build_version')}\n"
+            f"* **Product Version:** {info.get('product_version', "<Not Available>")}\n"
+            f"* **Product Build Version:** {info.get('product_build_version', "<Not Available>")}\n"
             f"* **Supported product types:** {', '.join(info.get('supported_product_types', []))}\n"
-            f"* **Build Major:** {info.get('build_major')}"
+            f"* **Build Major:** {info.get('build_major', "<Not Available>")}"
         )
         
         if self.current_device_udid is not None:
             self.__check_ipsw_compatibility(info, file_path)
+
+    def __on_ipsw_info_failed(self, error: Exception) -> None:
+        self.ui.browseIpswFileButton.setEnabled(True)
+        self.ui.ipswFileDetailsLabel.setText("Could not read the selected IPSW file.")
+        QMessageBox.critical(
+            self,
+            "Invalid IPSW File",
+            f"Could not read the selected IPSW file: {error}",
+        )
 
     def __check_ipsw_compatibility(self, info: dict, file_path: str) -> None:
         """@brief Fetch the connected device's summary and warn if it's incompatible with the given IPSW info."""
@@ -770,6 +787,7 @@ class MainWindow(QMainWindow):
         
         worker = AsyncWorker(
             idevice.flash_from_ipsw,
+            ipsw_path=ipsw_file,
             udid=self.current_device_udid,
             ecid=None,
             erase=erase,
@@ -800,7 +818,7 @@ class MainWindow(QMainWindow):
             QMessageBox.critical(
                 self,
                 "idevicerestore Not Installed",
-                f"{error}\n\nInstall it with: sudo apt install idevicerestore",
+                f"idevicerestore is not installed on your system.\nInstall it with: sudo apt install idevicerestore",
             )
         elif isinstance(error, IdevicerestoreError):
             QMessageBox.critical(
