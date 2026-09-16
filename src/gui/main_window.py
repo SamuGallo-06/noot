@@ -862,4 +862,95 @@ class MainWindow(QMainWindow):
             f"Could not reboot the device into Recovery mode: {error}",
         )
         self.ui.statusbar.showMessage("Reboot to Recovery failed.", 5000)  
+    
+    def __on_reboot_dfu(self):
+        if self.current_device_udid is None:
+            QMessageBox.critical(
+                self,
+                "No Device Connected",
+                "No device is currently connected. Please connect a device and try again.",
+            )
+            return
         
+        # Instructions for entering DFU mode
+        # TODO: Implement instructions for entering DFU mode based on device model
+        
+    def __on_factory_reset(self):
+        if self.current_device_udid is None:
+            QMessageBox.critical(
+                self,
+                "No Device Connected",
+                "No device is currently connected. Please connect a device and try again.",
+            )
+            return
+        
+        confirm_udid = QInputDialog.getText(
+            self,
+            "Confirm Device UDID",
+            "Please enter the device UDID to confirm the factory reset:",
+        )[0]
+        
+        if confirm_udid != self.current_device_udid:
+            QMessageBox.critical(
+                self,
+                "UDID Mismatch",
+                "The entered UDID does not match the connected device's UDID. "
+                "Factory reset has been cancelled.",
+            )
+            return
+        
+        result = QMessageBox.warning(
+            self,
+            "Confirm Factory Reset",
+            "You are about to perform a factory reset on the connected device. "
+            "This will erase all data and settings on the device and restore it to its original state.\n\n"
+            "Do you want to continue?",
+            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+        )
+        
+        if(result != QMessageBox.StandardButton.Yes):
+            return
+        
+        self.ui.progressBar.setVisible(True)
+        self.ui.progressBar.setMaximum(100)
+        self.ui.progressBar.setValue(0)
+        self.ui.progressLabel.setVisible(True)
+        self.ui.progressLabel.setText("Starting factory reset...")
+        
+        worker = AsyncWorker(
+            idevice.erase_device,
+            udid=self.current_device_udid,
+            confirm_udid=confirm_udid,
+            progress_callback=self.__on_factory_reset_progress
+        )
+        worker.signals.finished.connect(self.__on_factory_reset_completed)
+        worker.signals.error.connect(self.__on_factory_reset_failed)        
+        self._threadpool.start(worker)
+        
+    def __on_factory_reset_progress(self, progress) -> None:
+        self.ui.progressBar.setValue(round(progress.overall_progress))
+        self.ui.progressLabel.setText(progress.step_label)
+        
+    def __on_factory_reset_completed(self, _) -> None:
+        QMessageBox.information(
+            self,
+            "Factory Reset Completed",
+            "The device has been reset to factory settings successfully. It will now reboot.",
+        )
+        self.ui.progressBar.setVisible(False)
+        self.ui.progressBar.setMaximum(100)
+        self.ui.progressBar.setValue(0)
+        self.ui.progressLabel.setVisible(False)
+        self.ui.statusbar.showMessage("Factory reset completed successfully.", 5000)
+    
+    def __on_factory_reset_failed(self, error: Exception) -> None:
+        QMessageBox.critical(
+            self,
+            "Factory Reset Failed",
+            f"Could not complete the factory reset: {error}",
+        )
+        self.ui.progressBar.setVisible(False)
+        self.ui.progressBar.setMaximum(100)
+        self.ui.progressBar.setValue(0)
+        self.ui.progressLabel.setVisible(False)
+        self.ui.statusbar.showMessage("Factory reset failed.", 5000)
