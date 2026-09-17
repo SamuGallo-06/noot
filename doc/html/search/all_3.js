@@ -1,6 +1,0 @@
-var searchData=
-[
-  ['debian_20based_20distributions_0',['Debian based distributions',['../md_README.html#autotoc_md3',1,'']]],
-  ['devicenotfounderror_1',['DeviceNotFoundError',['../classidevice_1_1DeviceNotFoundError.html',1,'idevice']]],
-  ['distributions_2',['distributions',['../md_README.html#autotoc_md4',1,'Arch based distributions'],['../md_README.html#autotoc_md3',1,'Debian based distributions']]]
-];

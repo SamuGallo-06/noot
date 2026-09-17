@@ -139,7 +139,7 @@ def _parse_progress_line(line: str) -> Optional[RestoreProgress]:
             step=RestoreStep.DETECT,
             step_label=f"Unknown step {raw_step}",
             step_progress=step_progress,
-            overall_progress=step_progress / _NUM_STEPS,
+            overall_progress=step_progress / _NUM_STEPS * 100.0,
         )
 
     step_progress = float(raw_step_progress)

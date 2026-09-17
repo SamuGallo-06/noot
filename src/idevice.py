@@ -722,19 +722,23 @@ async def flash_from_ipsw(
     ecid: Optional[int],
     ipsw_path: str,
     erase: bool,
-    progress_callback: Optional[Callable[[float], None]] = None,
+    progress_callback: Optional[Callable[[RestoreProgress], None]] = None,
 ) -> None:
-    """@brief Flash or restore a device from an IPSW via idevicerestore."""
-    def _on_progress(p: RestoreProgress) -> None:
-        if progress_callback is not None:
-            progress_callback(p.overall_progress)
+    """@brief Flash or restore a device from an IPSW via idevicerestore.
 
+    Unlike the other operations in this module (backup, restore, erase),
+    ``progress_callback`` here receives the full ``RestoreProgress`` object,
+    not a bare float: flashing has distinct named steps (detect, upload
+    filesystem, flash firmware, ...) that both the CLI and GUI display
+    alongside the percentage, so the richer type is forwarded as-is instead
+    of being unpacked here.
+    """
     await _idevicerestore_flash(
         ipsw_path=ipsw_path,
         udid=udid,
         ecid=ecid,
         erase=erase,
-        progress_callback=_on_progress if progress_callback else None,
+        progress_callback=progress_callback,
     )
     
 ## @brief Reboot device into Recovery mode.
