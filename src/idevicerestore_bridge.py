@@ -270,12 +270,33 @@ async def flash_from_ipsw(
     if handle_out is not None:
         handle_out.append(handle)
 
-    stderr_lines: list[str] = []
+        stderr_lines: list[str] = []
+
+    async def _iter_lines(stream: asyncio.StreamReader):
+        """Produce righe da uno stream senza il limite per-riga di readline().
+
+        Legge blocchi di dimensione fissa e spezza su '\\n' e '\\r': idevicerestore
+        puo' scrivere avanzamenti con '\\r' e log lunghi senza newline, che con
+        readline() superano il limite di 64 KiB e sollevano ValueError. Il
+        residuo senza terminatore viene tenuto in buffer fino al prossimo blocco.
+        """
+        buffer = ""
+        while True:
+            chunk = await stream.read(4096)
+            if not chunk:
+                break
+            buffer += chunk.decode(errors="replace")
+            parts = re.split(r"[\r\n]", buffer)
+            buffer = parts.pop()  # ultimo pezzo: potrebbe essere incompleto
+            for part in parts:
+                if part:
+                    yield part
+        if buffer:
+            yield buffer
 
     async def _consume_stdout() -> None:
         assert process.stdout is not None
-        async for raw_line in process.stdout:
-            line = raw_line.decode(errors="replace").rstrip("\n")
+        async for line in _iter_lines(process.stdout):
             if progress_callback is None:
                 continue
             progress = _parse_progress_line(line)
@@ -284,10 +305,23 @@ async def flash_from_ipsw(
 
     async def _consume_stderr() -> None:
         assert process.stderr is not None
-        async for raw_line in process.stderr:
-            stderr_lines.append(raw_line.decode(errors="replace").rstrip("\n"))
+        async for line in _iter_lines(process.stderr):
+            stderr_lines.append(line)
 
-    await asyncio.gather(_consume_stdout(), _consume_stderr())
+    try:
+        await asyncio.gather(_consume_stdout(), _consume_stderr())
+    except BaseException:
+        ## Se la lettura dell'output fallisce (o il task viene cancellato) il
+        ## processo idevicerestore non deve restare in esecuzione da solo,
+        ## altrimenti continua a scrivere sul device senza che NOOT lo veda.
+        if process.returncode is None:
+            process.terminate()
+            try:
+                await asyncio.wait_for(process.wait(), timeout=5.0)
+            except asyncio.TimeoutError:
+                process.kill()
+                await process.wait()
+        raise
     returncode = await process.wait()
 
     if handle._cancelled:

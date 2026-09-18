@@ -60,6 +60,9 @@ from idevice import (
     flash_from_ipsw,
     validate_flash_target,
     RecoveryDeviceMismatchError,
+    exit_recovery_mode, 
+    NotInRecoveryModeError,
+    IRecvNoDeviceConnectedError
 )
 
 from idevicerestore_bridge import IdevicerestoreNotInstalledError, IdevicerestoreError
@@ -154,6 +157,23 @@ async def ensure_usbmuxd_or_exit(gui: bool = False):
             fg=typer.colors.RED,
         )
         raise typer.Exit(code=1)
+    
+async def probe_boot_state_or_none():
+    """Prova a rilevare un device in DFU/Recovery/WTF senza mai sollevare eccezioni.
+
+    Ritorna una tupla ``(device, multiple)``:
+      - ``device``: il dict di get_boot_state_device(), oppure None.
+      - ``multiple``: True se IRecv ha rifiutato la scelta perche' ci sono
+        piu' device in questi stati contemporaneamente.
+
+    Usata da ``list``, dove il rilevamento boot-state e' informativo e non deve
+    mai far fallire il comando principale. ``list-dfu`` gestisce invece
+    IRecvError in modo esplicito, perche' li' e' l'obiettivo del comando.
+    """
+    try:
+        return await get_boot_state_device(), False
+    except IRecvError:
+        return None, True
 
 ## @name Commands
 ## @{
@@ -161,7 +181,7 @@ async def ensure_usbmuxd_or_exit(gui: bool = False):
 @app.command("list")
 @coro
 async def list_devices():
-    """List all connected iOS devices."""
+    """List all connected iOS devices (normal mode and DFU/Recovery/WTF)."""
     status = await ensure_usbmuxd_running()
     if status == UsbmuxdStatus.FAILED:
         typer.secho("Error: usbmuxd is unreachable.", fg=typer.colors.RED)
@@ -174,19 +194,42 @@ async def list_devices():
         raise typer.Exit(code=1)
 
     devices = await get_connected_devices()
-    if not devices:
+    boot_device, multiple_boot_devices = await probe_boot_state_or_none()
+
+    if not devices and boot_device is None and not multiple_boot_devices:
         typer.echo("No devices detected.")
         return
 
-    typer.secho("Connected devices:", bold=True)
-    table = Table()
-    table.add_column("Name", style="cyan")
-    table.add_column("UDID", style="magenta")
-    for d in devices:
-        name = d.get("name", "Unknown")
-        udid = d.get("udid")
-        table.add_row(name, udid)
-    console.print(table)
+    if devices:
+        typer.secho("Connected devices:", bold=True)
+        table = Table()
+        table.add_column("Name", style="cyan")
+        table.add_column("UDID", style="magenta")
+        for d in devices:
+            name = d.get("name", "Unknown")
+            udid = d.get("udid")
+            table.add_row(name, udid)
+        console.print(table)
+
+    if multiple_boot_devices:
+        typer.secho(
+            "Multiple devices in DFU/Recovery/WTF mode detected. "
+            "Disconnect all but one to see its details.",
+            fg=typer.colors.YELLOW,
+        )
+    elif boot_device is not None:
+        typer.secho("Devices in DFU/Recovery/WTF mode:", bold=True, fg=typer.colors.YELLOW)
+        table = Table()
+        table.add_column("Mode", style="yellow")
+        table.add_column("Model", style="cyan")
+        table.add_column("ECID", style="magenta")
+        table.add_row(
+            boot_device["state"].name.replace("_", " ").title(),
+            boot_device.get("display_name") or "Unknown",
+            f"{boot_device['ecid']:x}",
+        )
+        console.print(table)
+        typer.echo("Use 'noot list-dfu' for more details.")
 
 @app.command("list-dfu")
 @coro
@@ -1058,6 +1101,68 @@ async def flash_firmware(
     typer.secho("Flash completed.", fg=typer.colors.GREEN)
 
     typer.secho("Flash completed.", fg=typer.colors.GREEN)
+    
+@app.command("exit-recovery")
+@coro
+async def exit_recovery(
+    ecid: Annotated[
+        str,
+        typer.Option(
+            "--ecid",
+            "-e",
+            help="Hex ECID of the device in Recovery mode (see 'noot list-dfu').",
+            prompt="Enter device ECID",
+        ),
+    ],
+):
+    """Reboot a device out of Recovery mode into a normal boot.
+
+    Works only in Recovery mode: DFU and WTF have no command interpreter, so
+    a device in those states must be rebooted using the physical buttons.
+    """
+    try:
+        ecid_int = int(ecid, 16)
+    except ValueError:
+        typer.secho(f"Error: '{ecid}' is not a valid hex ECID.", fg=typer.colors.RED)
+        raise typer.Exit(code=1)
+
+    typer.secho(
+        "The device will reboot normally. This does NOT flash or erase anything. "
+        "If the installed system is damaged, the device will return to Recovery on its own "
+        "and will need 'noot flash'.",
+        fg=typer.colors.YELLOW,
+    )
+    typer.confirm("Reboot the device out of Recovery mode?", abort=True)
+
+    try:
+        await exit_recovery_mode(ecid_int)
+    except NotInRecoveryModeError as e:
+        typer.secho(f"Error: {e}", fg=typer.colors.RED)
+        typer.secho(
+            "To leave DFU/WTF mode, hold the power and home/volume buttons "
+            "until the device restarts.",
+            fg=typer.colors.YELLOW,
+        )
+        raise typer.Exit(code=1)
+    except IRecvNoDeviceConnectedError:
+        typer.secho(
+            f"Error: no device in Recovery/DFU/WTF mode found with ECID {ecid_int:x}.",
+            fg=typer.colors.RED,
+        )
+        raise typer.Exit(code=1)
+    except IRecvError as e:
+        typer.secho(f"Error: {e}", fg=typer.colors.RED)
+        typer.secho(
+            "Multiple devices in Recovery/DFU/WTF mode detected. "
+            "Disconnect all but one and try again.",
+            fg=typer.colors.YELLOW,
+        )
+        raise typer.Exit(code=1)
+
+    typer.secho(
+        "Reboot command sent. The device should reappear in 'noot list' within a few seconds.",
+        fg=typer.colors.GREEN,
+    )
  
 ## @}
 

@@ -588,25 +588,33 @@ def _classify_irecv_mode(mode: IRecvMode) -> BootState:
 
 
 def _probe_irecv_device() -> Optional[dict]:
-    """@brief Blocking libusb probe. Runs in a worker thread, never call directly from async code."""
+    """@brief Sonda bloccante via libusb. Gira in un worker thread, mai da codice async."""
     try:
-        ## timeout=0: perform a single immediate scan instead of IRecv's
-        ## default of blocking indefinitely until a device shows up.
-        with IRecv(timeout=0) as irecv:
+        ## timeout e' in SECONDI (vedi IRecv._find): con 0 il ciclo di scansione
+        ## non parte nemmeno una volta e il device non viene mai trovato. Con 1
+        ## si ottiene una scansione reale e, se non c'e' nulla, un'attesa
+        ## massima di circa un secondo prima di rinunciare.
+        with IRecv(timeout=1) as irecv:
+            ## Solo ecid e modo sono garantiti: ecid e' letto da _find() per
+            ## filtrare i device. Gli altri campi (SRNM, SRTG) dipendono da cosa
+            ## il device pubblica nella propria stringa USB: in DFU, ad esempio,
+            ## SRTG (versione iBoot) non c'e'. Quindi vanno letti in modo
+            ## tollerante, non tramite le property di IRecv che sollevano KeyError.
             info = {
                 "state": _classify_irecv_mode(irecv.mode),
                 "ecid": irecv.ecid,
-                "serial": irecv.serial_number,
-                "iboot_version": irecv.iboot_version,
+                "serial": irecv._device_info.get("SRNM"),
+                "iboot_version": irecv._device_info.get("SRTG"),
             }
-            ## product_type/hardware_model/display_name rely on a local static
-            ## table (IRECV_DEVICES) that may lag behind brand-new hardware,
-            ## so a lookup miss must not take down detection entirely.
+            ## product_type/hardware_model/display_name si appoggiano a una tabella
+            ## statica locale (IRECV_DEVICES) che puo' essere indietro rispetto
+            ## all'hardware piu' recente, e a CPID/BDID: un fallimento qui non
+            ## deve far cadere l'intero rilevamento.
             try:
                 info["product_type"] = irecv.product_type
                 info["hardware_model"] = irecv.hardware_model
                 info["display_name"] = irecv.display_name
-            except KeyError:
+            except (KeyError, StopIteration):
                 info["product_type"] = None
                 info["hardware_model"] = None
                 info["display_name"] = None
@@ -684,6 +692,46 @@ async def validate_flash_target(udid: Optional[str], ecid: Optional[int]) -> Non
             f"Device in {boot_state_device['state'].name} has ECID "
             f"{boot_state_device['ecid']:x}, not {ecid:x}."
         )
+        
+class NotInRecoveryModeError(Exception):
+    """@brief Sollevata quando si tenta di uscire da Recovery su un device che non e' in Recovery.
+
+    DFU e WTF non eseguono iBoot, quindi il comando 'reboot' non ha nessun
+    interprete che lo riceva: da quegli stati si esce solo fisicamente.
+    """
+    pass
+
+
+def _reboot_irecv_device(ecid: int) -> None:
+    """@brief Blocca la sonda su un ECID specifico e invia il reboot. Gira in un worker thread."""
+    ## ecid mirato: se sul bus ci fosse un altro device, IRecv lo scarta invece
+    ## di rebootare quello sbagliato. timeout=1 per lo stesso motivo di
+    ## _probe_irecv_device (0 non esegue nessuna scansione).
+    with IRecv(ecid=ecid, timeout=1) as irecv:
+        if _classify_irecv_mode(irecv.mode) is not BootState.RECOVERY:
+            raise NotInRecoveryModeError(
+                f"Il device {ecid:x} e' in {_classify_irecv_mode(irecv.mode).name}, non in Recovery: "
+                "il comando reboot funziona solo in Recovery."
+            )
+        irecv.reboot()
+
+
+async def exit_recovery_mode(ecid: int) -> None:
+    """@brief Riavvia in modo normale un device attualmente in Recovery.
+
+    Il device NON viene flashato: esce da Recovery e riparte normalmente. Se
+    il sistema installato e' integro, ricompare sotto usbmuxd dopo qualche
+    secondo. Se e' corrotto (tipico dopo un flash fallito), rientra da solo
+    in Recovery e serve un restore con 'noot flash'.
+
+    :param ecid: ECID del device in Recovery (da 'noot list-dfu' / 'noot list').
+        Obbligatorio e mai dedotto: coerente con la regola degli identificatori
+        espliciti per le operazioni sui device.
+    :raises IRecvNoDeviceConnectedError: Nessun device con quell'ECID.
+    :raises NotInRecoveryModeError: Il device e' in DFU o WTF.
+    :raises IRecvError: Piu' device in Recovery/DFU/WTF contemporaneamente.
+    """
+    await asyncio.to_thread(_reboot_irecv_device, ecid)
 
 
 
