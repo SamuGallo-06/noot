@@ -4,8 +4,8 @@ from datetime import datetime
 from pathlib import Path
 from typing import Callable, Optional
 
-from PySide6.QtCore import QThreadPool
-
+from PySide6.QtCore import QThreadPool, Qt
+from PySide6.QtGui import QGuiApplication
 from PySide6.QtWidgets import (
     QDialog,
     QFileDialog,
@@ -18,18 +18,16 @@ from PySide6.QtWidgets import (
 import idevice
 from idevice import IdevicerestoreNotInstalledError, IdevicerestoreError, IdevicerestoreCancelledError
 from device_models import resolve_model_name
+from settings import get_ask_udid_confirmation, get_backup_directory
 from ui.ui_mainwindow import Ui_MainWindow
+from .preferences_form import PreferencesDialog
 
 from .enter_password_dialog import EnterPasswordDialog
 from .set_password_dialog import SetPasswordDialog
 from .change_password_dialog import ChangePasswordDialog
 
 from .async_worker import AsyncWorker
-
-## Cartella di default per i backup locali. In futuro andra' sostituita da un
-## valore letto/scritto tramite platformdirs + Preferences (vedi TODO in fondo).
-DEFAULT_BACKUP_DIR = Path.home() / ".local" / "share" / "noot" / "backups"
-
+import settings
 
 class MainWindow(QMainWindow):
     def __init__(self) -> None:
@@ -58,14 +56,26 @@ class MainWindow(QMainWindow):
         self.setupSignals()
         self.setupLabels()
 
-        self.__list_backups(backup_dir=DEFAULT_BACKUP_DIR)
+        self.__list_backups(backup_dir=get_backup_directory())
 
         self.check_usbdmux()
         self.refresh_devices()
+        self.apply_theme(settings.get_current_theme())
+        
+    def apply_theme(self, theme: str) -> None:
+            """theme: 'light', 'dark', o 'system'"""
+            hints = QGuiApplication.styleHints()
+            if theme == "light":
+                hints.setColorScheme(Qt.ColorScheme.Light)
+            elif theme == "dark":
+                hints.setColorScheme(Qt.ColorScheme.Dark)
+            else:  # system
+                hints.setColorScheme(Qt.ColorScheme.Unknown)  # Unknown = segui il sistema
         
     def setupActions(self):
         """@brief Connect menu actions to their handlers."""
         #File
+        self.ui.actionPreferences.triggered.connect(self.__on_preferences)
         self.ui.actionExit.triggered.connect(self.close)
         
         #Devices
@@ -90,7 +100,7 @@ class MainWindow(QMainWindow):
         
         # Restore Page
         self.ui.deleteBackupButton.clicked.connect(self.__on_delete_backup)
-        self.ui.refreshBackupsButton.clicked.connect(lambda: self.__list_backups(backup_dir=DEFAULT_BACKUP_DIR))
+        self.ui.refreshBackupsButton.clicked.connect(lambda: self.__list_backups(backup_dir=get_backup_directory()))
         self.ui.startRestoreButton.clicked.connect(self.__perform_restore)
         
         #iOS Version Page
@@ -137,6 +147,15 @@ class MainWindow(QMainWindow):
         self.ui.changeEncryptionpasswordButton.setEnabled(not busy)
         self.ui.deleteBackupButton.setEnabled(not busy)
         self.ui.actionRefresh_Devices.setEnabled(not busy)
+        
+    #########################
+    # File Menu Actions     #
+    #########################
+    
+    def __on_preferences(self):
+        """@brief Show the preferences dialog."""
+        form = PreferencesDialog(self)
+        form.exec()
        
     ############################
     # Help Menu Actions       #
@@ -556,7 +575,7 @@ class MainWindow(QMainWindow):
         worker = AsyncWorker(
             idevice.run_backup,
             udid=self.current_device_udid,
-            backup_dir=DEFAULT_BACKUP_DIR,
+            backup_dir=get_backup_directory(),
             full=full_backup,
             exclude=exclude,
             password=password,
@@ -608,12 +627,14 @@ class MainWindow(QMainWindow):
     # Restore Page:              #
     ##############################
     
-    def __list_backups(self, backup_dir: Path = DEFAULT_BACKUP_DIR) -> None:
+    def __list_backups(self, backup_dir: Path | None = None) -> None:
         """@brief Load the available local backups asynchronously.
 
         @param backup_dir Directory containing local backups.
         """
         self._set_busy(True)
+        if backup_dir is None:
+            backup_dir = get_backup_directory()
         worker = AsyncWorker(idevice.list_local_backups, backup_dir=backup_dir)
         worker.signals.finished.connect(self.__on_backups_listed)
         worker.signals.error.connect(lambda exc: print("Errore:", exc))
@@ -728,7 +749,7 @@ class MainWindow(QMainWindow):
 
         worker = AsyncWorker(
             idevice.delete_local_backup,
-            backup_dir=DEFAULT_BACKUP_DIR,
+            backup_dir=get_backup_directory(),
             udid=udid,
         )
         worker.signals.finished.connect(self.__on_backup_deleted)
@@ -813,7 +834,7 @@ class MainWindow(QMainWindow):
         worker = AsyncWorker(
             idevice.run_restore,
             udid=self.current_device_udid,
-            backup_dir=DEFAULT_BACKUP_DIR,
+            backup_dir=get_backup_directory(),
             source_udid=source_udid,
             password=password,
             restore_system_files=True,
@@ -1207,20 +1228,22 @@ class MainWindow(QMainWindow):
             )
             return
         
-        confirm_udid = QInputDialog.getText(
-            self,
-            "Confirm Device UDID",
-            "Please enter the device UDID to confirm the factory reset:",
-        )[0]
-        
-        if confirm_udid != self.current_device_udid:
-            QMessageBox.critical(
+        confirm_udid = self.current_device_udid
+        if get_ask_udid_confirmation():
+            confirm_udid = QInputDialog.getText(
                 self,
-                "UDID Mismatch",
-                "The entered UDID does not match the connected device's UDID. "
-                "Factory reset has been cancelled.",
-            )
-            return
+                "Confirm Device UDID",
+                "Please enter the device UDID to confirm the factory reset:",
+            )[0]
+            
+            if confirm_udid != self.current_device_udid:
+                QMessageBox.critical(
+                    self,
+                    "UDID Mismatch",
+                    "The entered UDID does not match the connected device's UDID. "
+                    "Factory reset has been cancelled.",
+                )
+                return
         
         result = QMessageBox.warning(
             self,

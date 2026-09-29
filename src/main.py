@@ -1,10 +1,10 @@
 import asyncio
 from functools import wraps
 from pathlib import Path
+import shutil
 import sys
 from typing import Annotated, Optional
  
-from platformdirs import user_data_dir
 import typer
 import click
 
@@ -19,7 +19,6 @@ from pathlib import Path
 import sys
 from typing import Annotated, Optional
  
-from platformdirs import user_data_dir
 import typer
 import click
  
@@ -66,6 +65,7 @@ from idevice import (
 )
 
 from idevicerestore_bridge import IdevicerestoreNotInstalledError, IdevicerestoreError
+from settings import get_backup_directory
  
 # Importing UI
 from gui.main_window import MainWindow
@@ -74,11 +74,11 @@ from gui.main_window import MainWindow
 # Importing UI
 from gui.main_window import MainWindow
 
+import settings
+
 VERSION="1.0.0"
 
 MAX_PASSWORD_ATTEMPTS = 3
-
-DEFAULT_BACKUP_DIR = Path(user_data_dir("noot", "SamuGallo-06")) / "backups"
 
 app = typer.Typer(
     help="NOOT - iOS device management and backup utility",
@@ -461,7 +461,7 @@ async def list_backups(
             "-d",
             help="Folder containing local backups",
         ),
-    ] = DEFAULT_BACKUP_DIR,
+    ] = get_backup_directory(),
 ):
     """List local backups available in the backup folder."""
     backups = list_local_backups(backup_dir)
@@ -508,7 +508,7 @@ async def backup(
             "-d",
             help="Destination folder for backup files",
         ),
-    ] = DEFAULT_BACKUP_DIR,
+    ] = get_backup_directory(),
     full_backup: Annotated[
         bool,
         typer.Option(
@@ -624,7 +624,7 @@ async def restore(
             "-d",
             help="Folder containing local backups",
         ),
-    ] = DEFAULT_BACKUP_DIR,
+    ] = get_backup_directory(),
     remove_items_not_in_backup: Annotated[
         bool,
         typer.Option(
@@ -754,7 +754,7 @@ async def delete(
             "-d",
             help="Destination folder for backup files",
         ),
-    ] = DEFAULT_BACKUP_DIR, 
+    ] = get_backup_directory(), 
 ):
     """Delete a local backup for the specified device UDID."""
     
@@ -1163,6 +1163,99 @@ async def exit_recovery(
         "Reboot command sent. The device should reappear in 'noot list' within a few seconds.",
         fg=typer.colors.GREEN,
     )
+    
+config_app = typer.Typer(help="View and edit Noot configuration.")
+app.add_typer(config_app, name="config")
+
+@config_app.command("show")
+def config_show():
+    """Show the whole configuration."""
+    cfg = settings.load()
+    for section in cfg.sections():
+        typer.secho(f"[{section}]", bold=True)
+        for key, value in cfg.items(section):
+            typer.echo(f"{key} = {value}")
+
+@config_app.command("get")
+def config_get(
+    key: Annotated[
+        str, 
+        typer.Argument(help="Key as section.key, e.g. backup.dir")
+    ],
+):
+    """Print the value of a single key."""
+    section, _, name = key.partition(".")
+    cfg = settings.load()
+    if not cfg.has_option(section, name):
+        typer.secho(f"Error: unknown key '{key}'.", fg=typer.colors.RED)
+        raise typer.Exit(code=1)
+    typer.echo(cfg.get(section, name))
+
+@config_app.command("set")
+def config_set(
+    key: Annotated[
+        str, 
+        typer.Argument(help="Key as section.key")
+    ],
+    value: Annotated[
+        str, 
+        typer.Argument(help="New value")
+    ],
+):
+    """Set a key to a new value."""
+    section, _, name = key.partition(".")
+    cfg = settings.load()
+    if not cfg.has_section(section):
+        typer.secho(f"Error: unknown section '{section}'.", fg=typer.colors.RED)
+        raise typer.Exit(code=1)
+    cfg.set(section, name, value)
+    settings.save(cfg)
+    typer.secho(f"{key} = {value}", fg=typer.colors.GREEN)
+    
+@config_app.command("export")
+def config_export(
+    output_path: Annotated[
+        str,
+        typer.Argument(help="Path to the exported configuration file. The Noot configuration will be written to this file.")
+    ]
+):
+    try:
+        shutil.copy2(settings.CONFIG_PATH, output_path)
+    except Exception as e:
+        typer.secho(f"Error: {e}", fg=typer.colors.RED)
+    else:
+        typer.secho("Configuration exported successfully.")
+
+@config_app.command("load")
+def config_load(
+    input_path: Annotated[
+        str,
+        typer.Argument(help="Path to the configuration file to load into Noot.")
+    ]
+):
+    result, cfg = settings.validate(Path(input_path))
+    if(result != "SUCCESS"):
+        typer.secho("Invalid configuration file.")
+        typer.secho(result, fg=typer.colors.RED)
+    else:
+        ## A None check is not necessary because a None configuration is returned when the result message is not SUCCESS, which is handled above.
+        settings.save(cfg) #type: ignore
+        typer.secho("Configuration loaded successfully", fg=typer.colors.GREEN)
+        
+@config_app.command("check")
+def config_check():
+    result, _ = settings.validate(settings.CONFIG_PATH)
+    if(result != "SUCCESS"):
+        typer.secho("Invalid configuration file.")
+        typer.secho(result, fg=typer.colors.RED)
+    else:
+        typer.secho("Valid configuration file", fg=typer.colors.GREEN)
+        
+        
+    
+            
+            
+    
  
 ## @}
 

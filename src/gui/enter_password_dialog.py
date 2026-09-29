@@ -7,6 +7,8 @@ class EnterPasswordDialog(QDialog):
         super().__init__(parent)
         self.ui = Ui_DialogEnterPassword()
         self.ui.setupUi(self)
+    
+        
 
     def password(self) -> str:
         return self.ui.lineEdit_2.text()

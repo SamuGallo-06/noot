@@ -1,0 +1,213 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>PreferencesDialog</class>
+ <widget class="QWidget" name="PreferencesDialog">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>564</width>
+    <height>487</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Noot Settings</string>
+  </property>
+  <layout class="QGridLayout" name="gridLayout">
+   <item row="6" column="0">
+    <spacer name="horizontalSpacer">
+     <property name="orientation">
+      <enum>Qt::Orientation::Horizontal</enum>
+     </property>
+     <property name="sizeType">
+      <enum>QSizePolicy::Policy::Fixed</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>10</width>
+       <height>20</height>
+      </size>
+     </property>
+    </spacer>
+   </item>
+   <item row="5" column="0" colspan="5">
+    <widget class="QLabel" name="label">
+     <property name="text">
+      <string>### Paths</string>
+     </property>
+     <property name="textFormat">
+      <enum>Qt::TextFormat::MarkdownText</enum>
+     </property>
+    </widget>
+   </item>
+   <item row="4" column="1">
+    <widget class="QLabel" name="label_7">
+     <property name="text">
+      <string>Language</string>
+     </property>
+    </widget>
+   </item>
+   <item row="4" column="2" colspan="3">
+    <widget class="QComboBox" name="languageComboBox">
+     <item>
+      <property name="text">
+       <string>English</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Italian</string>
+      </property>
+     </item>
+    </widget>
+   </item>
+   <item row="6" column="1">
+    <widget class="QLabel" name="label_2">
+     <property name="text">
+      <string>Backup Library Path</string>
+     </property>
+    </widget>
+   </item>
+   <item row="9" column="0">
+    <spacer name="horizontalSpacer_2">
+     <property name="orientation">
+      <enum>Qt::Orientation::Horizontal</enum>
+     </property>
+     <property name="sizeType">
+      <enum>QSizePolicy::Policy::Fixed</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>10</width>
+       <height>20</height>
+      </size>
+     </property>
+    </spacer>
+   </item>
+   <item row="9" column="1" colspan="4">
+    <widget class="QCheckBox" name="askUdidCheckBox">
+     <property name="text">
+      <string>Ask for UDID confirmation for dangerous operations</string>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="0" colspan="5">
+    <widget class="QLabel" name="label_5">
+     <property name="text">
+      <string>### Ui</string>
+     </property>
+     <property name="textFormat">
+      <enum>Qt::TextFormat::MarkdownText</enum>
+     </property>
+    </widget>
+   </item>
+   <item row="7" column="0">
+    <spacer name="horizontalSpacer_3">
+     <property name="orientation">
+      <enum>Qt::Orientation::Horizontal</enum>
+     </property>
+     <property name="sizeType">
+      <enum>QSizePolicy::Policy::Fixed</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>10</width>
+       <height>20</height>
+      </size>
+     </property>
+    </spacer>
+   </item>
+   <item row="7" column="2" colspan="2">
+    <widget class="QLineEdit" name="idevicerestorePathInput"/>
+   </item>
+   <item row="3" column="2" colspan="3">
+    <widget class="QComboBox" name="themeComboBox">
+     <item>
+      <property name="text">
+       <string>Use System Settings</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Light</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Dark</string>
+      </property>
+     </item>
+    </widget>
+   </item>
+   <item row="10" column="2">
+    <spacer name="verticalSpacer">
+     <property name="orientation">
+      <enum>Qt::Orientation::Vertical</enum>
+     </property>
+     <property name="sizeType">
+      <enum>QSizePolicy::Policy::Fixed</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>20</width>
+       <height>40</height>
+      </size>
+     </property>
+    </spacer>
+   </item>
+   <item row="7" column="1">
+    <widget class="QLabel" name="label_4">
+     <property name="text">
+      <string>`idevicerestore` path</string>
+     </property>
+     <property name="textFormat">
+      <enum>Qt::TextFormat::MarkdownText</enum>
+     </property>
+    </widget>
+   </item>
+   <item row="6" column="4">
+    <widget class="QPushButton" name="browseBackupPathButton">
+     <property name="text">
+      <string>Browse</string>
+     </property>
+    </widget>
+   </item>
+   <item row="8" column="0" colspan="5">
+    <widget class="QLabel" name="label_3">
+     <property name="text">
+      <string>### Security</string>
+     </property>
+     <property name="textFormat">
+      <enum>Qt::TextFormat::MarkdownText</enum>
+     </property>
+    </widget>
+   </item>
+   <item row="6" column="2" colspan="2">
+    <widget class="QLineEdit" name="backupLibraryPathInput"/>
+   </item>
+   <item row="7" column="4">
+    <widget class="QPushButton" name="browseIdevicerestoreButton">
+     <property name="text">
+      <string>Browse</string>
+     </property>
+    </widget>
+   </item>
+   <item row="3" column="1">
+    <widget class="QLabel" name="label_6">
+     <property name="text">
+      <string>Theme</string>
+     </property>
+    </widget>
+   </item>
+   <item row="11" column="0" colspan="5">
+    <widget class="QDialogButtonBox" name="buttonBox">
+     <property name="standardButtons">
+      <set>QDialogButtonBox::StandardButton::Apply|QDialogButtonBox::StandardButton::Close|QDialogButtonBox::StandardButton::Reset|QDialogButtonBox::StandardButton::RestoreDefaults</set>
+     </property>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
