@@ -1,6 +1,9 @@
 #!/bin/sh
 set -e
-cd "$(dirname "$0")"
+
+SCRIPT_DIR=$(cd "$(dirname "$0")" && pwd)
+REPO_ROOT=$(cd "$SCRIPT_DIR/../.." && pwd)
+cd "$REPO_ROOT"
 
 VER=2.0.0
 PKG=packages/deb/noot_${VER}_amd64
@@ -19,7 +22,7 @@ mkdir -p "$PKG/DEBIAN" "$PKG/opt" "$PKG/usr/bin" \
 cp -r "$PYINSTALLER_OUT/dist/noot" "$PKG/opt/noot"
 ln -s /opt/noot/noot "$PKG/usr/bin/noot"
 cp src/assets/icon.svg "$PKG/usr/share/icons/hicolor/scalable/apps/noot.svg"
-cp noot.desktop "$PKG/usr/share/applications/noot.desktop"
+cp packages/deb/noot.desktop "$PKG/usr/share/applications/noot.desktop"
 
 cat > "$PKG/DEBIAN/control" <<EOF
 Package: noot
@@ -36,6 +39,36 @@ Description: iPhone backup manager for Linux
  restore, erase and firmware flashing of iOS devices, with a CLI
  and a Qt graphical interface.
 EOF
+
+cat > "$PKG/DEBIAN/postinst" <<'EOF'
+#!/bin/sh
+set -e
+
+case "$1" in
+    configure)
+        if [ -d /run/systemd/system ]; then
+            systemctl start usbmuxd || true
+        fi
+        ;;
+esac
+
+exit 0
+EOF
+
+cat > "$PKG/DEBIAN/postrm" <<'EOF'
+#!/bin/sh
+set -e
+
+case "$1" in
+    remove|purge)
+        # pulizia dopo la rimozione
+        ;;
+esac
+
+exit 0
+EOF
+
+chmod 755 "$PKG/DEBIAN/postinst" "$PKG/DEBIAN/postrm"
 
 chmod -R go-w "$PKG"
 chmod 755 "$PKG/opt/noot/noot"

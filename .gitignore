@@ -8,10 +8,8 @@ releases/
 wiki/
 .flatpak-builder/
 flatpak-builder-tools/
-packages/pyinstaller/
-packages/deb/noot_*
-packages/flatpak/build/
-packages/flatpak/repo/
-packages/flatpak/.flatpak-builder/
 *.deb
 *.flatpak
+packages/deb/*
+packages/pyinstaller/*
+packages/flatpak/*
