@@ -16,11 +16,13 @@ import json
 from functools import lru_cache
 from importlib.resources import files
 
+from pathlib import Path
+
 
 @lru_cache(maxsize=1)
 def _load_model_map() -> dict[str, str]:
     """Carica il JSON una sola volta per processo (risultato messo in cache)."""
-    with open("device_models.json", "r") as f:
+    with open(Path(__file__).parent / "device_models.json", "r") as f:
         raw = json.load(f)
     ## "_comment" e' un campo informativo nel JSON, non un ProductType reale.
     return {k: v for k, v in raw.items() if not k.startswith("_")}

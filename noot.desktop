@@ -1,8 +1,8 @@
 [Desktop Entry]
 Name=Noot
 Comment=iPhone backup manager for Linux
-Exec=/usr/bin/noot
-Icon=/opt/noot/assets/icon.png
+Icon=io.github.samugallo06.noot
+Exec=noot --gui
 Terminal=false
 Type=Application
 Categories=Utility;

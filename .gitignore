@@ -6,3 +6,6 @@ build/
 dist/
 releases/
 wiki/
+.flatpak-builder/
+flatpak-builder-tools/
+packages/
