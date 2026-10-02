@@ -10,6 +10,6 @@ wiki/
 flatpak-builder-tools/
 *.deb
 *.flatpak
-packages/deb/*
+packages/debian/noot_*
 packages/pyinstaller/*
 packages/flatpak/*

@@ -1,2 +1,2 @@
 #!/bin/sh
-exec python3 /app/share/noot/main.py "$@"
+exec python3 /usr/share/noot/main.py "$@"

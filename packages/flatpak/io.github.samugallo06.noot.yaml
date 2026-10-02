@@ -1,0 +1,121 @@
+app-id: io.github.samugallo06.noot
+runtime: org.kde.Platform
+runtime-version: "6.11"
+sdk: org.kde.Sdk
+base: io.qt.PySide.BaseApp
+base-version: "6.11"
+command: noot
+
+finish-args:
+  - --socket=wayland
+  - --socket=fallback-x11
+  - --share=ipc
+  - --share=network
+  - --device=all
+  - --filesystem=/run/usbmuxd
+
+cleanup:
+  - /include
+  - /lib/pkgconfig
+  - /lib/*.la
+  - /share/man
+
+modules:
+  - name: libplist
+    buildsystem: autotools
+    config-opts: [--without-cython]
+    sources:
+      - type: git
+        url: https://github.com/libimobiledevice/libplist.git
+        tag: 2.7.0
+        commit: e1531342fe084781124d2243ccad8d8eca5c9db5
+
+  - name: libimobiledevice-glue
+    buildsystem: autotools
+    sources:
+      - type: git
+        url: https://github.com/libimobiledevice/libimobiledevice-glue.git
+        tag: 1.3.2
+        commit: aef2bf0f5bfe961ad83d224166462d87b1df2b00
+
+  - name: libtatsu
+    buildsystem: autotools
+    sources:
+      - type: git
+        url: https://github.com/libimobiledevice/libtatsu.git
+        tag: 1.0.5
+        commit: 42329cb756682535c7c0f087987b78d1dd5b16c8
+
+  - name: libusbmuxd
+    buildsystem: autotools
+    sources:
+      - type: git
+        url: https://github.com/libimobiledevice/libusbmuxd.git
+        tag: 2.1.1
+        commit: adf9c22b9010490e4b55eaeb14731991db1c172c
+
+  - name: libimobiledevice
+    buildsystem: autotools
+    config-opts: [--without-cython]
+    sources:
+      - type: git
+        url: https://github.com/libimobiledevice/libimobiledevice.git
+        tag: 1.4.0
+        commit: 149f7623c672c1fa73122c7119a12bfc0012f2ac
+
+  - name: libirecovery
+    buildsystem: autotools
+    sources:
+      - type: git
+        url: https://github.com/libimobiledevice/libirecovery.git
+        tag: 1.3.1
+        commit: b59ef4814525f487287da1609864f432cd79e3ed
+
+  - name: libzip
+    buildsystem: cmake-ninja
+    config-opts:
+      - -DBUILD_DOC=OFF
+      - -DBUILD_EXAMPLES=OFF
+      - -DBUILD_REGRESS=OFF
+      - -DBUILD_TOOLS=OFF
+    sources:
+      - type: git
+        url: https://github.com/nih-at/libzip.git
+        tag: v1.11.4
+        commit: 6f8a0cdd24a0dc6cce9dac4a7679da784ab124eaflatpak build-bundle repo noot.flatpak io.github.samugallo06.noot
+
+  - name: idevicerestore
+    buildsystem: autotools
+    sources:
+      - type: git
+        url: https://github.com/libimobiledevice/idevicerestore.git
+        branch: master
+
+  - name: python-deps
+    buildsystem: simple
+    build-options:
+      build-args:
+        - --share=network
+    build-commands:
+      - pip3 install --prefix=/app --no-cache-dir -r requirements.txt
+    sources:
+      - type: file
+        path: ../../src/requirements.txt
+
+  - name: noot
+    buildsystem: simple
+    build-commands:
+      - mkdir -p /app/share/noot
+      - cp -r src/. /app/share/noot
+      - rm -rf /app/share/noot/bin
+      - find /app/share/noot -name "__pycache__" -type d -exec rm -rf {} +
+      - install -Dm755 src/bin/noot /app/bin/noot
+      - install -Dm644 src/assets/icon.svg /app/share/icons/hicolor/scalable/apps/io.github.samugallo06.noot.svg
+      - install -Dm644 io.github.samugallo06.noot.desktop /app/share/applications/io.github.samugallo06.noot.desktop
+      - rm -f /app/share/metainfo/io.qt.PySide.BaseApp.metainfo.xml
+    sources:
+      - type: dir
+        path: ../../src
+        dest: src
+      - type: file
+        path: io.github.samugallo06.noot.desktop
