@@ -16,21 +16,21 @@ class PreferencesDialog(QDialog):
         pressed = self.ui.buttonBox.standardButton(button)
         
         if pressed == QDialogButtonBox.StandardButton.Apply:
-            print("Saving settings...")
+            print(self.tr("Saving settings..."))
             self.save_settings()
             self.close()
         elif pressed == pressed == QDialogButtonBox.StandardButton.Close:
-            print("Closing...")
-            confirm = QMessageBox.question(self, "Confirm Close", "Are you sure you want to close the settings dialog?", QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
+            print(self.tr("Closing..."))
+            confirm = QMessageBox.question(self, self.tr("Confirm Close"), self.tr("Are you sure you want to close the settings dialog?"), QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
             if confirm == QMessageBox.StandardButton.Yes:
                 self.close()
             else:
                 return
         elif pressed == QDialogButtonBox.StandardButton.RestoreDefaults:
-            print("Restored default values")
+            print(self.tr("Restored default values"))
             self.restore_defaults()
         elif pressed == QDialogButtonBox.StandardButton.Reset:
-            print("Resetting to last saved values...")
+            print(self.tr("Resetting to last saved values..."))
             self.load_settings()
             
     def load_settings(self):

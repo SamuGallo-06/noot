@@ -15,7 +15,7 @@ class ChangePasswordDialog(QDialog):
         confirm_password = self.ui.passwordConfirmInput.text()
         
         if password != confirm_password:
-            QMessageBox.warning(self, "Password Mismatch", "The passwords do not match. Please try again.")
+            QMessageBox.warning(self, self.tr("Password Mismatch"), self.tr("The passwords do not match. Please try again."))
             return
         
         self.accept()
