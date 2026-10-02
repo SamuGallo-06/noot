@@ -236,22 +236,30 @@ class MainWindow(QMainWindow):
         worker.signals.error.connect(lambda exc: print("Errore:", exc))
         self._run_worker(worker)
         
-    def __on_usbdmux_checked(self, is_running: bool) -> None:
+    def __on_usbdmux_checked(self, result) -> None:
         """@brief Update the usbmuxd status and start it when necessary.
 
-        @param is_running Whether usbmuxd is currently running.
+        @param result bool from check_usbmuxd, or UsbmuxdStatus from ensure_usbmuxd_running.
         """
-        if not is_running:
-            #first of all, try to start usbmuxd automatically
-            try:
-                worker = AsyncWorker(idevice.ensure_usbmuxd_running, gui=True)
-                worker.signals.finished.connect(self.__on_usbdmux_checked)
-                worker.signals.error.connect(lambda exc: self.__on_usbdmux_check_failed(exc))
-                self._run_worker(worker)
-            except Exception as e:
-                self.__on_usbdmux_check_failed(e)
-        
-        self.ui.usbmuxd_status_label.setText("usbmuxd is running" if is_running else "usbmuxd is NOT running")
+        if isinstance(result, idevice.UsbmuxdStatus):
+            if result == idevice.UsbmuxdStatus.FAILED:
+                self.ui.usbmuxd_status_label.setText("usbmuxd is NOT running")
+                self.__on_usbdmux_check_failed(
+                    "usbmuxd is not running and cannot be started from here. "
+                    "Start it on your system with: sudo systemctl start usbmuxd"
+                )
+            else:
+                self.ui.usbmuxd_status_label.setText("usbmuxd is running")
+            return
+
+        if not result:
+            worker = AsyncWorker(idevice.ensure_usbmuxd_running, gui=True)
+            worker.signals.finished.connect(self.__on_usbdmux_checked)
+            worker.signals.error.connect(lambda exc: self.__on_usbdmux_check_failed(exc))
+            self._run_worker(worker)
+            return
+
+        self.ui.usbmuxd_status_label.setText("usbmuxd is running")
     
     def __on_usbdmux_check_failed(self, error):
         """@brief Show an error raised while checking or starting usbmuxd.
@@ -632,9 +640,6 @@ class MainWindow(QMainWindow):
 
         @param backup_dir Directory containing local backups.
         """
-        self._set_busy(True)
-        if backup_dir is None:
-            backup_dir = get_backup_directory()
         worker = AsyncWorker(idevice.list_local_backups, backup_dir=backup_dir)
         worker.signals.finished.connect(self.__on_backups_listed)
         worker.signals.error.connect(lambda exc: print("Errore:", exc))
@@ -669,7 +674,6 @@ class MainWindow(QMainWindow):
             )
 
         self.__on_backup_selected(self.ui.local_backup_comboBox.currentIndex())
-        self._set_busy(False)
 
     def __on_backup_selected(self, index: int) -> None:
         """@brief Display details for the selected local backup.

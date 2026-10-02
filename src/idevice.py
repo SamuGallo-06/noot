@@ -110,6 +110,11 @@ async def ensure_usbmuxd_running(gui: bool = False) -> UsbmuxdStatus:
     if await check_usbmuxd():
         return UsbmuxdStatus.OK
 
+    # Dentro il sandbox Flatpak non si può avviare un servizio dell'host
+    # (pkexec/systemctl non esistono): niente tentativi, si segnala e basta.
+    if os.path.exists("/.flatpak-info"):
+        return UsbmuxdStatus.FAILED
+
     typer.secho("usbmuxd is not running. Attempting to start it...", fg=typer.colors.YELLOW)
     if not usbmuxd_socket_exists():
         await run_sys_cmd([auth_tool, "systemctl", "start", "usbmuxd"])
