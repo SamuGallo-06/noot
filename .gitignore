@@ -15,4 +15,5 @@ packages/pyinstaller/*
 packages/flatpak/*
 tmp/
 packages/AppImage/Noot-x86_64.AppImage
+packages/AppImage/AppDir/*
 packages/AppImage/AppDir
