@@ -48,7 +48,7 @@ class MainWindow(QMainWindow):
         self.ui.progressBar.setVisible(False)
         self.ui.progressLabel.setVisible(False)
         self.ui.different_device_warning.setVisible(False)
-        self.ui.statusbar.showMessage("Ready")
+        self.ui.statusbar.showMessage(self.tr("Ready"))
         self.ui.tabWidget.setCurrentIndex(0)
         
         self.setupActions()
@@ -119,8 +119,8 @@ class MainWindow(QMainWindow):
     
     def setupLabels(self):
         """@brief Initialize labels whose content depends on runtime state."""
-        self.ui.latest_backup_label.setText("Latest Backup: Not Implemented Yet")
-        self.ui.enableEncrypyionButton.setText("Enable Encryption")  # default finche' non si conosce lo stato reale
+        self.ui.latest_backup_label.setText(self.tr("Latest Backup: Not Implemented Yet"))
+        self.ui.enableEncrypyionButton.setText(self.tr("Enable Encryption"))  # default, will be updated after checking the device state
         
     def _set_busy(self, busy: bool) -> None:
         """@brief Enable or disable controls during an asynchronous operation.
@@ -165,12 +165,11 @@ class MainWindow(QMainWindow):
         """@brief Show the application information dialog."""
         QMessageBox.about(
             self,
-            "About Noot",
-            "Noot (Non-apple Open-source Operator for iTunes)"
-            "iPhone backup manager for Linux, built using pymobiledevice3 module.\n\n"
+            self.tr("About Noot"),
+            self.tr("Noot (Non-apple Open-source Operator for iTunes)\n iPhone backup manager for Linux, built using pymobiledevice3 module.\n\n"
             "Version: 1.1.0\n"
             "Author: SamuGallo-06\n"
-            "License: LGPLv3\n"
+            "License: LGPLv3\n")
         )
 
     def __on_github_repository(self):
@@ -226,14 +225,14 @@ class MainWindow(QMainWindow):
             return
         worker = AsyncWorker(idevice.get_connected_devices)
         worker.signals.finished.connect(self.__on_devices_found)
-        worker.signals.error.connect(lambda exc: print("Errore:", exc))
+        worker.signals.error.connect(lambda exc: print(self.tr("Error:"), exc))
         self._run_worker(worker)
         
     def check_usbdmux(self) -> None:
         """@brief Check whether usbmuxd is running asynchronously."""
         worker = AsyncWorker(idevice.check_usbmuxd)
         worker.signals.finished.connect(self.__on_usbdmux_checked)
-        worker.signals.error.connect(lambda exc: print("Errore:", exc))
+        worker.signals.error.connect(lambda exc: print(self.tr("Error:"), exc))
         self._run_worker(worker)
         
     def __on_usbdmux_checked(self, result) -> None:
@@ -243,13 +242,13 @@ class MainWindow(QMainWindow):
         """
         if isinstance(result, idevice.UsbmuxdStatus):
             if result == idevice.UsbmuxdStatus.FAILED:
-                self.ui.usbmuxd_status_label.setText("usbmuxd is NOT running")
-                self.__on_usbdmux_check_failed(
+                self.ui.usbmuxd_status_label.setText(self.tr("usbmuxd is NOT running"))
+                self.__on_usbdmux_check_failed(self.tr(
                     "usbmuxd is not running and cannot be started from here. "
                     "Start it on your system with: sudo systemctl start usbmuxd"
-                )
+                ))
             else:
-                self.ui.usbmuxd_status_label.setText("usbmuxd is running")
+                self.ui.usbmuxd_status_label.setText(self.tr("usbmuxd is running"))
             return
 
         if not result:
@@ -268,8 +267,8 @@ class MainWindow(QMainWindow):
         """
         QMessageBox.critical(
             self,
-            "usbmuxd Not Running",
-            "Cound not start usbmuxd automatically. Please start it manually and try again.\n\nError: " + str(error),
+            self.tr("usbmuxd Not Running"),
+            self.tr("Cound not start usbmuxd automatically. Please start it manually and try again.\n\nError: {error}").format(error=error)
         )
 
     def _load_device_summary(self, udid: str) -> None:
@@ -279,7 +278,7 @@ class MainWindow(QMainWindow):
         """
         worker = AsyncWorker(idevice.get_device_summary, udid=udid)
         worker.signals.finished.connect(self.__on_summary_loaded)
-        worker.signals.error.connect(lambda exc: print("Errore summary:", exc))
+        worker.signals.error.connect(lambda exc: print(self.tr("Errore summary:"), exc))
         self._run_worker(worker)
 
     def __on_summary_loaded(self, summary: dict) -> None:
@@ -317,7 +316,7 @@ class MainWindow(QMainWindow):
 
         if not devices:
             self.current_device_udid = None
-            self.ui.deviceInfoLabel.setText("No connected devices found.")
+            self.ui.deviceInfoLabel.setText(self.tr("No connected devices found."))
             self.ui.deviceDetailsLabel.setText("")
             return
 
@@ -330,17 +329,14 @@ class MainWindow(QMainWindow):
         elif len(devices) > 1:
             QMessageBox.critical(
                 self,
-                "Multiple Devices Detected",
-                "Noot only supports one connected device at a time to prevent data loss or connection errors. "
-                "Please disconnect all other devices and keep only the one you want to manage."
+                self.tr("Multiple Devices Detected"),
+                self.tr("Noot only supports one connected device at a time to prevent data loss or connection errors.\n"
+                "Please disconnect all other devices and keep only the one you want to manage.")
             )
             self.current_device_udid = None
-            self.ui.deviceInfoLabel.setText("No connected devices found.")
+            self.ui.deviceInfoLabel.setText(self.tr("No connected devices found."))
             self.ui.deviceDetailsLabel.setText("")
-            
-    
-                
-            
+              
     #############################
     # Backup Page: Encryption   #
     #############################
@@ -374,7 +370,7 @@ class MainWindow(QMainWindow):
         @param is_encrypted Whether backup encryption is enabled.
         """
         self.ui.enableEncrypyionButton.setText(
-            "Disable Encryption" if is_encrypted else "Enable Encryption"
+            self.tr("Disable Encryption") if is_encrypted else self.tr("Enable Encryption")
         )
     
     def __changeEncryptionPassword(self):
@@ -403,8 +399,8 @@ class MainWindow(QMainWindow):
         """
         QMessageBox.information(
             self,
-            "Password Changed",
-            "The backup encryption password has been changed successfully.",
+            self.tr("Password Changed"),
+            self.tr("The backup encryption password has been changed successfully."),
         )
         self._set_busy(False)
         self._refresh_encryption_button_state()
@@ -416,8 +412,8 @@ class MainWindow(QMainWindow):
         """
         QMessageBox.critical(
             self,
-            "Password Change Failed",
-            f"Could not change the backup encryption password: {error}",
+            self.tr("Password Change Failed"),
+            self.tr("Could not change the backup encryption password: {error}").format(error=error),
         )
         self._set_busy(False)
         self._refresh_encryption_button_state()
@@ -465,8 +461,8 @@ class MainWindow(QMainWindow):
         """
         QMessageBox.critical(
             self,
-            "Encryption Status Check Failed",
-            f"Could not determine the backup encryption status: {error}",
+            self.tr("Encryption Status Check Failed"),
+            self.tr("Could not determine the backup encryption status: {error}").format(error=error),
         )
             
     def __on_enable_encryption_finished(self, result):
@@ -476,8 +472,8 @@ class MainWindow(QMainWindow):
         """
         QMessageBox.information(
             self,
-            "Encryption Enabled",
-            "Backup encryption has been enabled successfully.",
+            self.tr("Encryption Enabled"),
+            self.tr("Backup encryption has been enabled successfully."),
         )
         self._set_busy(False)
         self._refresh_encryption_button_state()
@@ -489,8 +485,8 @@ class MainWindow(QMainWindow):
         """
         QMessageBox.critical(
             self,
-            "Enabling Encryption Failed",
-            f"Could not enable backup encryption: {error}",
+            self.tr("Enabling Encryption Failed"),
+            self.tr("Could not enable backup encryption: {error}").format(error=error),
         )
         self._set_busy(False)
     
@@ -501,8 +497,8 @@ class MainWindow(QMainWindow):
         """
         QMessageBox.information(
             self,
-            "Encryption Disabled",
-            "Backup encryption has been disabled successfully.",
+            self.tr("Encryption Disabled"),
+            self.tr("Backup encryption has been disabled successfully."),
         )
         self._set_busy(False)
         self._refresh_encryption_button_state()
@@ -514,8 +510,8 @@ class MainWindow(QMainWindow):
         """
         QMessageBox.critical(
             self,
-            "Disabling Encryption Failed",
-            f"Could not disable backup encryption: {error}",
+            self.tr("Disabling Encryption Failed"),
+            self.tr("Could not disable backup encryption: {error}").format(error=error),
         )
         self._set_busy(False)
         
@@ -528,8 +524,8 @@ class MainWindow(QMainWindow):
         if self.current_device_udid is None:
             QMessageBox.critical(
                 self,
-                "No Device Connected",
-                "No device is currently connected. Please connect a device and try again.",
+                self.tr("No Device Connected"),
+                self.tr("No device is currently connected. Please connect a device and try again."),
             )
             return
 
@@ -549,9 +545,9 @@ class MainWindow(QMainWindow):
         else:
             QMessageBox.information(
                 self,
-                "Backup Not Encrypted",
-                "Backup encryption is not enabled for this device.\n"
-                "You will be prompted to set a password for the backup.",
+                self.tr("Backup Not Encrypted"),
+                self.tr("Backup encryption is not enabled for this device.\n"
+                "You will be prompted to set a password for the backup."),
             )
             password_dialog = SetPasswordDialog(self)
             if password_dialog.exec() != QDialog.DialogCode.Accepted:
@@ -562,7 +558,7 @@ class MainWindow(QMainWindow):
         self.ui.progressBar.setMaximum(100)
         self.ui.progressBar.setValue(0)
         self.ui.progressLabel.setVisible(True)
-        self.ui.progressLabel.setText("Starting backup...")
+        self.ui.progressLabel.setText(self.tr("Starting backup..."))
         self._set_busy(True)
         
         full_backup = self.ui.fullBackupCheckBox.isChecked()
@@ -599,7 +595,7 @@ class MainWindow(QMainWindow):
         @param percent Current backup progress as a percentage.
         """
         self.ui.progressBar.setValue(round(percent))
-        self.ui.progressLabel.setText("Backing up...")
+        self.ui.progressLabel.setText(self.tr("Backing up..."))
 
     def __on_backup_finished(self, result) -> None:
         """@brief Handle a completed backup operation.
@@ -608,12 +604,12 @@ class MainWindow(QMainWindow):
         """
         QMessageBox.information(
             self,
-            "Backup Completed",
-            "The backup completed successfully.",
+            self.tr("Backup Completed"),
+            self.tr("The backup completed successfully."),
         )
         self.ui.progressBar.setVisible(False)
         self.ui.progressLabel.setText("")
-        self.ui.statusbar.showMessage("Backup completed successfully.", 5000)
+        self.ui.statusbar.showMessage(self.tr("Backup completed successfully."), 5000)
         self._set_busy(False)
     def __on_backup_failed(self, error) -> None:
         """@brief Handle a failed backup operation.
@@ -622,12 +618,12 @@ class MainWindow(QMainWindow):
         """
         QMessageBox.critical(
             self,
-            "Backup Failed",
-            f"Could not complete the backup: {error}",
+            self.tr("Backup Failed"),
+            self.tr("Could not complete the backup: {error}").format(error=error),
         )
         self.ui.progressBar.setVisible(False)
         self.ui.progressLabel.setText("")
-        self.ui.statusbar.showMessage("Backup failed.", 5000)
+        self.ui.statusbar.showMessage(self.tr("Backup failed."), 5000)
         self._set_busy(False)
         
         
@@ -642,7 +638,7 @@ class MainWindow(QMainWindow):
         """
         worker = AsyncWorker(idevice.list_local_backups, backup_dir=backup_dir)
         worker.signals.finished.connect(self.__on_backups_listed)
-        worker.signals.error.connect(lambda exc: print("Errore:", exc))
+        worker.signals.error.connect(lambda exc: print(self.tr("Error:"), exc))
         self._run_worker(worker)
     
     def __on_backups_listed(self, backups: list[dict[str, str | datetime | None]]) -> None:
@@ -654,19 +650,19 @@ class MainWindow(QMainWindow):
         self.ui.local_backup_comboBox.clear()
 
         if not backups:
-            self.ui.local_backup_comboBox.addItem("No local backups found")
+            self.ui.local_backup_comboBox.addItem(self.tr("No local backups found"))
             self.ui.local_backup_comboBox.setEnabled(False)
-            self.ui.backup_details_label.setText("No valid local backups found.")
+            self.ui.backup_details_label.setText(self.tr("No valid local backups found."))
             return
 
         self.ui.local_backup_comboBox.setEnabled(True)
         for backup in backups:
-            device_name = backup.get("device_name") or "Unnamed device"
+            device_name = backup.get("device_name") or self.tr("Unnamed device")
             backup_date = backup.get("backup_date")
             date_text = (
                 backup_date.strftime("%Y-%m-%d %H:%M:%S")
                 if isinstance(backup_date, datetime)
-                else str(backup_date or "Unknown date")
+                else str(backup_date or self.tr("Unknown date"))
             )
             self.ui.local_backup_comboBox.addItem(
                 f"{device_name} - {date_text}",
@@ -705,11 +701,11 @@ class MainWindow(QMainWindow):
         date_text = (
             backup_date.strftime("%Y-%m-%d %H:%M:%S")
             if isinstance(backup_date, datetime)
-            else str(backup_date or "Unknown date")
+            else str(backup_date or self.tr("Unknown date"))
         )
         self.ui.backup_details_label.setText(
             f"<b>BACKUP DATE:</b> {date_text}<br>"
-            f"<b>DEVICE:</b> {backup.get('device_name') or 'Unnamed device'}<br>"
+            f"<b>DEVICE:</b> {backup.get('device_name') or self.tr('Unnamed device')}<br>"
             f"<b>UDID:</b> {udid}"
         )
         
@@ -741,8 +737,11 @@ class MainWindow(QMainWindow):
 
         confirm = QMessageBox.question(
             self,
-            "Delete Backup",
-            f"Are you sure you want to delete the backup for device '{backup.get('device_name') or 'Unnamed device'}' dated '{backup.get('backup_date')}'?",
+            self.tr("Delete Backup"),
+            self.tr("Are you sure you want to delete the backup for device '{device_name}' dated '{backup_date}'?").format(
+                device_name=str(backup.get("device_name") or self.tr("Unnamed device")),
+                backup_date=str(backup.get("backup_date") or self.tr("Unknown date")),
+            ),
             QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
         )
 
@@ -766,7 +765,7 @@ class MainWindow(QMainWindow):
         @param result The worker result, unused by this handler.
         """
         self.ui.deleteBackupButton.setEnabled(True)
-        self.ui.statusbar.showMessage("Backup deleted successfully.", 5000)
+        self.ui.statusbar.showMessage(self.tr("Backup deleted successfully."), 5000)
         self.__list_backups()
 
     def __on_backup_delete_failed(self, error) -> None:
@@ -777,18 +776,18 @@ class MainWindow(QMainWindow):
         self.ui.deleteBackupButton.setEnabled(True)
         QMessageBox.critical(
             self,
-            "Delete Backup Failed",
-            f"Could not delete the backup: {error}",
+            self.tr("Delete Backup Failed"),
+            self.tr("Could not delete the backup: {error}").format(error=error),
         )
-        self.ui.statusbar.showMessage("Backup deletion failed.", 5000)
+        self.ui.statusbar.showMessage(self.tr("Backup deletion failed."), 5000)
         
     def __perform_restore(self):
         """@brief Validate the selected backup and start the restore flow."""
         if self.current_device_udid is None:
             QMessageBox.critical(
                 self,
-                "No Device Connected",
-                "No device is currently connected. Please connect a device and try again.",
+                self.tr("No Device Connected"),
+                self.tr("No device is currently connected. Please connect a device and try again."),
             )
             return
 
@@ -811,13 +810,16 @@ class MainWindow(QMainWindow):
         if backup is None:
             return
 
-        device_name = backup.get("device_name") or "Unnamed device"
+        device_name = backup.get("device_name") or self.tr("Unnamed device")
         confirm = QMessageBox.question(
             self,
-            "Restore Backup",
-            f"This will overwrite all data on the connected device with the backup "
-            f"for '{device_name}' dated '{backup.get('backup_date')}'. "
-            f"This operation cannot be undone. Continue?",
+            self.tr("Restore Backup"),
+            self.tr("This will overwrite all data on the connected device with the backup "
+            "for '{device_name}' dated '{backup_date}'. "
+            "This operation cannot be undone. Continue?").format(
+                device_name=device_name,
+                backup_date=backup.get("backup_date") or self.tr("Unknown date"),
+            ),
             QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
         )
         if confirm != QMessageBox.StandardButton.Yes:
@@ -832,7 +834,7 @@ class MainWindow(QMainWindow):
         self.ui.progressBar.setMaximum(100)
         self.ui.progressBar.setValue(0)
         self.ui.progressLabel.setVisible(True)
-        self.ui.progressLabel.setText("Starting restore...")
+        self.ui.progressLabel.setText(self.tr("Starting restore..."))
         self._set_busy(True)
 
         worker = AsyncWorker(
@@ -863,13 +865,13 @@ class MainWindow(QMainWindow):
         """
         QMessageBox.information(
             self,
-            "Restore Completed",
-            "The restore completed successfully."
-            "Device will now reboot.",
+            self.tr("Restore Completed"),
+            self.tr("The restore completed successfully."
+            "Device will now reboot."),
         )
         self.ui.progressBar.setVisible(False)
         self.ui.progressLabel.setText("")
-        self.ui.statusbar.showMessage("Restore completed successfully.", 5000)
+        self.ui.statusbar.showMessage(self.tr("Restore completed successfully."), 5000)
         self._set_busy(False)
         
     def __on_restore_failed(self, error) -> None:
@@ -879,12 +881,12 @@ class MainWindow(QMainWindow):
         """
         QMessageBox.critical(
             self,
-            "Restore Failed",
-            f"Could not complete the restore: {error}",
+            self.tr("Restore Failed"),
+            self.tr("Could not complete the restore: {error}").format(error=error),
         )
         self.ui.progressBar.setVisible(False)
         self.ui.progressLabel.setText("")
-        self.ui.statusbar.showMessage("Restore failed.", 5000)
+        self.ui.statusbar.showMessage(self.tr("Restore failed."), 5000)
         self._set_busy(False)
         
     #############################
@@ -897,13 +899,13 @@ class MainWindow(QMainWindow):
             self,
             "Select IPSW File",
             str(Path.home()),
-            "IPSW Files (*.ipsw);;All Files (*)",
+            self.tr("IPSW Files (*.ipsw);;All Files (*)"),
         )
         if not file_path:
             return
 
         self.ui.ipswFilePathInput.setText(file_path)
-        self.ui.ipswFileDetailsLabel.setText("Reading IPSW file information...")
+        self.ui.ipswFileDetailsLabel.setText(self.tr("Reading IPSW file information..."))
 
         self.ui.browseIpswFileButton.setEnabled(False)
         worker = AsyncWorker(idevice.get_ipsw_file_info, file_path)
@@ -921,10 +923,15 @@ class MainWindow(QMainWindow):
         """
         self.ui.browseIpswFileButton.setEnabled(True)
         self.ui.ipswFileDetailsLabel.setText(
-            f"* **Product Version:** {info.get('product_version', '<Not Available>')}\n"
-            f"* **Product Build Version:** {info.get('product_build_version', '<Not Available>')}\n"
-            f"* **Supported product types:** {', '.join(info.get('supported_product_types', []))}\n"
-            f"* **Build Major:** {info.get('build_major', '<Not Available>')}"
+            self.tr("* **Product Version:** {product_version}\n"
+            "* **Product Build Version:** {product_build_version}\n"
+            "* **Supported product types:** {supported_product_types}\n"
+            "* **Build Major:** {build_mayor}").format(
+                product_version=info.get('product_version', '<Not Available>'),
+                product_build_version=info.get('product_build_version', '<Not Available>'),
+                supported_product_types=', '.join(info.get('supported_product_types', [])),
+                build_mayor=info.get('build_major', '<Not Available>')
+            )
         )
         
         if self.current_device_udid is not None:
@@ -936,11 +943,11 @@ class MainWindow(QMainWindow):
         @param error The exception raised by the worker.
         """
         self.ui.browseIpswFileButton.setEnabled(True)
-        self.ui.ipswFileDetailsLabel.setText("Could not read the selected IPSW file.")
+        self.ui.ipswFileDetailsLabel.setText(self.tr("Could not read the selected IPSW file."))
         QMessageBox.critical(
             self,
-            "Invalid IPSW File",
-            f"Could not read the selected IPSW file: {error}",
+            self.tr("Invalid IPSW File"),
+            self.tr("Could not read the selected IPSW file: {error}").format(error=error),
         )
 
     def __check_ipsw_compatibility(self, info: dict, file_path: str) -> None:
@@ -968,10 +975,13 @@ class MainWindow(QMainWindow):
         if device_product_type not in supported_types:
             QMessageBox.warning(
                 self,
-                "Incompatible IPSW",
-                f"The selected IPSW is not compatible with the connected device "
-                f"({device_product_type}).\n\n"
-                f"Supported product types for this IPSW: {', '.join(supported_types)}",
+                self.tr("Incompatible IPSW"),
+                ("The selected IPSW is not compatible with the connected device "
+                "({device_product_type}).\n\n"
+                "Supported product types for this IPSW: {supported_product_types}").format(
+                    device_product_type=device_product_type,
+                    supported_product_types=', '.join(supported_types)
+                ),
             )
         
     def __on_device_summary_failed(self, exc: Exception) -> None:
@@ -981,8 +991,8 @@ class MainWindow(QMainWindow):
         """
         QMessageBox.critical(
             self,
-            "Error",
-            f"Failed to fetch device summary. Please ensure the device is connected and try again.\n\n{exc}",
+            self.tr("Error"),
+            self.tr("Failed to fetch device summary. Please ensure the device is connected and try again.\n\n{exc}").format(exc=exc),
         )
         
     def __on_flash_ipsw(self):
@@ -998,8 +1008,8 @@ class MainWindow(QMainWindow):
         if not ipsw_file:
             QMessageBox.warning(
                 self,
-                "No IPSW Selected",
-                "Please select an IPSW file before attempting to flash.",
+                self.tr("No IPSW Selected"),
+                self.tr("Please select an IPSW file before attempting to flash."),
             )
             return
 
@@ -1036,9 +1046,9 @@ class MainWindow(QMainWindow):
         if device is None:
             QMessageBox.critical(
                 self,
-                "No Device Connected",
-                "No device is currently connected, and none was found in DFU/Recovery/WTF mode. "
-                "Please connect a device and try again.",
+                self.tr("No Device Connected"),
+                self.tr("No device is currently connected, and none was found in DFU/Recovery/WTF mode. "
+                "Please connect a device and try again."),
             )
             return
 
@@ -1058,11 +1068,14 @@ class MainWindow(QMainWindow):
         #Question dialog to confirm flashing the device with the selected IPSW
         result = QMessageBox.question(
             self,
-            "Confirm Flash",
-            f"You are about to flash the device with the IPSW:\n{ipsw_file}\n\n"
-            f"Mode: {'Erase and restore (factory reset)' if erase else 'Update (preserve data)'}\n\n"
+            self.tr("Confirm Flash"),
+            self.tr("You are about to flash the device with the IPSW:\n{ipsw_file}\n\n"
+            "Mode: {mode}\n\n"
             "The device will reboot into Recovery mode and stay unusable until the process completes.\n\n"
-            "Do you want to continue?",
+            "Do you want to continue?").format(
+                ipsw_file=ipsw_file,
+                mode='Erase and restore (factory reset)' if erase else 'Update (preserve data)'
+            ),
             QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
         )
         
@@ -1073,9 +1086,9 @@ class MainWindow(QMainWindow):
         if erase:
             result = QMessageBox.warning(
                 self,
-                "Warning",
-                "You have selected to erase all data on the device during the flash process. "
-                "This will result in the loss of all data on the device. Are you sure you want to proceed?",
+                self.tr("Warning"),
+                self.tr("You have selected to erase all data on the device during the flash process. "
+                "This will result in the loss of all data on the device. Are you sure you want to proceed?"),
                 QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
             )
             
@@ -1113,14 +1126,14 @@ class MainWindow(QMainWindow):
         """@brief Handle a completed firmware flash operation."""
         QMessageBox.information(
             self,
-            "Flash Completed",
-            "The device has been flashed successfully. It will now reboot.",
+            self.tr("Flash Completed"),
+            self.tr("The device has been flashed successfully. It will now reboot."),
         )
         self.ui.progressBar.setVisible(False)
         self.ui.progressBar.setMaximum(100)
         self.ui.progressBar.setValue(0)
         self.ui.progressLabel.setVisible(False)
-        self.ui.statusbar.showMessage("Flash completed successfully.", 5000)
+        self.ui.statusbar.showMessage(self.tr("Flash completed successfully."), 5000)
         self._set_busy(False)
         
     def __on_flash_failed(self, error: Exception) -> None:
@@ -1131,26 +1144,26 @@ class MainWindow(QMainWindow):
         if isinstance(error, IdevicerestoreNotInstalledError):
             QMessageBox.critical(
                 self,
-                "idevicerestore Not Installed",
-                f"idevicerestore is not installed on your system.\nInstall it with: sudo apt install idevicerestore",
+                self.tr("idevicerestore Not Installed"),
+                self.tr("idevicerestore is not installed on your system.\nInstall it with: sudo apt install idevicerestore"),
             )
         elif isinstance(error, IdevicerestoreError):
             QMessageBox.critical(
                 self,
-                "Flash Failed",
-                f"The flash process failed: {error}",
+                self.tr("Flash Failed"),
+                self.tr("The flash process failed: {error}").format(error=error),
             )
         elif isinstance(error, IdevicerestoreCancelledError):
             QMessageBox.information(
                 self,
-                "Flash Cancelled",
-                "The flash process was cancelled.",
+                self.tr("Flash Cancelled"),
+                self.tr("The flash process was cancelled."),
             )
         else:
             QMessageBox.critical(
                 self,
-                "Flash Failed",
-                f"Could not complete the flash process: {error}",
+                self.tr("Flash Failed"),
+                self.tr("Could not complete the flash process: {error}").format(error=error),
             )
 
         self.ui.progressBar.setVisible(False)
@@ -1169,16 +1182,16 @@ class MainWindow(QMainWindow):
         if self.current_device_udid is None:
             QMessageBox.critical(
                 self,
-                "No Device Connected",
-                "No device is currently connected. Please connect a device and try again.",
+                self.tr("No Device Connected"),
+                self.tr("No device is currently connected. Please connect a device and try again."),
             )
             return
         
         result = QMessageBox.question(
             self,
-            "Confirm Reboot to Recovery",
-            "You are about to reboot the connected device into Recovery mode.\n\n"
-            "Do you want to continue?",
+            self.tr("Confirm Reboot to Recovery"),
+            self.tr("You are about to reboot the connected device into Recovery mode.\n\n"
+            "Do you want to continue?"),
             QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
         )
         
@@ -1195,7 +1208,7 @@ class MainWindow(QMainWindow):
         
     def __on_reboot_recovery_completed(self, _) -> None:
         """@brief Report a successful reboot into recovery mode."""
-        self.ui.statusbar.showMessage("Device rebooted into Recovery mode.", 5000)
+        self.ui.statusbar.showMessage(self.tr("Device rebooted into Recovery mode."), 5000)
         
     def __on_reboot_recovery_failed(self, error: Exception) -> None:
         """@brief Report a failed reboot into recovery mode.
@@ -1204,18 +1217,18 @@ class MainWindow(QMainWindow):
         """
         QMessageBox.critical(
             self,
-            "Reboot to Recovery Failed",
-            f"Could not reboot the device into Recovery mode: {error}",
+            self.tr("Reboot to Recovery Failed"),
+            self.tr("Could not reboot the device into Recovery mode: {error}").format(error=error),
         )
-        self.ui.statusbar.showMessage("Reboot to Recovery failed.", 5000)  
+        self.ui.statusbar.showMessage(self.tr("Reboot to Recovery failed."), 5000)  
     
     def __on_reboot_dfu(self):
         """@brief Provide instructions for entering DFU mode."""
         if self.current_device_udid is None:
             QMessageBox.critical(
                 self,
-                "No Device Connected",
-                "No device is currently connected. Please connect a device and try again.",
+                self.tr("No Device Connected"),
+                self.tr("No device is currently connected. Please connect a device and try again."),
             )
             return
         
@@ -1227,8 +1240,8 @@ class MainWindow(QMainWindow):
         if self.current_device_udid is None:
             QMessageBox.critical(
                 self,
-                "No Device Connected",
-                "No device is currently connected. Please connect a device and try again.",
+                self.tr("No Device Connected"),
+                self.tr("No device is currently connected. Please connect a device and try again."),
             )
             return
         
@@ -1236,25 +1249,25 @@ class MainWindow(QMainWindow):
         if get_ask_udid_confirmation():
             confirm_udid = QInputDialog.getText(
                 self,
-                "Confirm Device UDID",
-                "Please enter the device UDID to confirm the factory reset:",
+                self.tr("Confirm Device UDID"),
+                self.tr("Please enter the device UDID to confirm the factory reset:"),
             )[0]
             
             if confirm_udid != self.current_device_udid:
                 QMessageBox.critical(
                     self,
-                    "UDID Mismatch",
-                    "The entered UDID does not match the connected device's UDID. "
-                    "Factory reset has been cancelled.",
+                    self.tr("UDID Mismatch"),
+                    self.tr("The entered UDID does not match the connected device's UDID. "
+                    "Factory reset has been cancelled."),
                 )
                 return
         
         result = QMessageBox.warning(
             self,
-            "Confirm Factory Reset",
-            "You are about to perform a factory reset on the connected device. "
+            self.tr("Confirm Factory Reset"),
+            self.tr("You are about to perform a factory reset on the connected device. "
             "This will erase all data and settings on the device and restore it to its original state.\n\n"
-            "Do you want to continue?",
+            "Do you want to continue?"),
             QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
         )
         
@@ -1265,7 +1278,7 @@ class MainWindow(QMainWindow):
         self.ui.progressBar.setMaximum(100)
         self.ui.progressBar.setValue(0)
         self.ui.progressLabel.setVisible(True)
-        self.ui.progressLabel.setText("Starting factory reset...")
+        self.ui.progressLabel.setText(self.tr("Starting factory reset..."))
         self._set_busy(True)
         
         worker = AsyncWorker(
@@ -1290,14 +1303,14 @@ class MainWindow(QMainWindow):
         """@brief Handle a completed factory reset operation."""
         QMessageBox.information(
             self,
-            "Factory Reset Completed",
-            "The device has been reset to factory settings successfully. It will now reboot.",
+            self.tr("Factory Reset Completed"),
+            self.tr("The device has been reset to factory settings successfully. It will now reboot."),
         )
         self.ui.progressBar.setVisible(False)
         self.ui.progressBar.setMaximum(100)
         self.ui.progressBar.setValue(0)
         self.ui.progressLabel.setVisible(False)
-        self.ui.statusbar.showMessage("Factory reset completed successfully.", 5000)
+        self.ui.statusbar.showMessage(self.tr("Factory reset completed successfully."), 5000)
         self._set_busy(False)
     
     def __on_factory_reset_failed(self, error: Exception) -> None:
@@ -1307,14 +1320,14 @@ class MainWindow(QMainWindow):
         """
         QMessageBox.critical(
             self,
-            "Factory Reset Failed",
-            f"Could not complete the factory reset: {error}",
+            self.tr("Factory Reset Failed"),
+            self.tr("Could not complete the factory reset: {error}"),
         )
         self.ui.progressBar.setVisible(False)
         self.ui.progressBar.setMaximum(100)
         self.ui.progressBar.setValue(0)
         self.ui.progressLabel.setVisible(False)
-        self.ui.statusbar.showMessage("Factory reset failed.", 5000)
+        self.ui.statusbar.showMessage(self.tr("Factory reset failed."), 5000)
         self._set_busy(False)
         
     #####################################
@@ -1326,15 +1339,15 @@ class MainWindow(QMainWindow):
         if self.current_device_udid is None:
             QMessageBox.critical(
                 self,
-                "No Device Connected",
-                "No device is currently connected. Please connect a device and try again.",
+                self.tr("No Device Connected"),
+                self.tr("No device is currently connected. Please connect a device and try again."),
             )
             return
         
         result = QMessageBox.question(
             self,
-            "Confirm Shutdown",
-            "Do you want to shutdown the device?",
+            self.tr("Confirm Shutdown"),
+            self.tr("Do you want to shutdown the device?"),
             QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
         )
         
@@ -1345,8 +1358,8 @@ class MainWindow(QMainWindow):
             idevice.shutdown_device,
             udid=self.current_device_udid
         )
-        worker.signals.finished.connect(lambda _: self.ui.statusbar.showMessage("Device shutdown successfully.", 5000))
-        worker.signals.error.connect(lambda exc: QMessageBox.critical(self, "Shutdown Failed", f"Could not shutdown the device: {exc}"))
+        worker.signals.finished.connect(lambda _: self.ui.statusbar.showMessage(self.tr("Device shutdown successfully."), 5000))
+        worker.signals.error.connect(lambda exc: QMessageBox.critical(self, self.tr("Shutdown Failed"), self.tr("Could not shutdown the device: {exc}").format(exc=exc)))
         self._run_worker(worker)
         
     def __on_reboot(self):
@@ -1354,15 +1367,15 @@ class MainWindow(QMainWindow):
         if self.current_device_udid is None:
             QMessageBox.critical(
                 self,
-                "No Device Connected",
-                "No device is currently connected. Please connect a device and try again.",
+                self.tr("No Device Connected"),
+                self.tr("No device is currently connected. Please connect a device and try again."),
             )
             return
         
         result = QMessageBox.question(
             self,
-            "Confirm Reboot",
-            "Do you want to reboot the device?",
+            self.tr("Confirm Reboot"),
+            self.tr("Do you want to reboot the device?"),
             QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
         )
         
@@ -1373,6 +1386,6 @@ class MainWindow(QMainWindow):
             idevice.restart_device,
             udid=self.current_device_udid
         )
-        worker.signals.finished.connect(lambda _: self.ui.statusbar.showMessage("Device restarted successfully.", 5000))
-        worker.signals.error.connect(lambda exc: QMessageBox.critical(self, "Reboot Failed", f"Could not reboot the device: {exc}"))
+        worker.signals.finished.connect(lambda _: self.ui.statusbar.showMessage(self.tr("Device restarted successfully."), 5000))
+        worker.signals.error.connect(lambda exc: QMessageBox.critical(self, self.tr("Reboot Failed"), self.tr("Could not reboot the device: {exc}").format(exc=exc)))
         self._run_worker(worker)
