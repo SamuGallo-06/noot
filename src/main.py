@@ -12,6 +12,7 @@ from rich.console import Console
 from rich.table import Table
 
 from PySide6.QtWidgets import QApplication
+from PySide6.QtCore import QLocale, QTranslator
  
 import asyncio
 from functools import wraps
@@ -101,8 +102,20 @@ def version_callback():
 def launch_gui():
     """Launch the graphical user interface."""
     app = QApplication(sys.argv)
+    
+    locale = settings.get_current_language()
+    
+    translations_path = Path(__file__).resolve().parent / "assets" / "translations"
+    typer.echo(f"Loading translations for locale: {locale} from {translations_path}")
+    app_translator = QTranslator()
+    
+    app_translator.load(f"noot_{locale}.qm", str(translations_path))
+    app.installTranslator(app_translator)
+    typer.echo("Using locale: " + locale)
+        
     app.setApplicationName("Noot")
     window = MainWindow()
+    window.setWindowTitle(f"Noot - iOS Device Management Utility")
     window.show()
     sys.exit(app.exec())
 

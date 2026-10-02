@@ -59,4 +59,8 @@ def get_ask_udid_confirmation() -> bool:
 def get_current_theme() -> str:
     cfg = load()
     return cfg.get("ui", "theme").lower()
+
+def get_current_language() -> str:
+    cfg = load()
+    return cfg.get("ui", "language").lower()
         

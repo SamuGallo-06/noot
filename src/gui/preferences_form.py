@@ -8,8 +8,16 @@ class PreferencesDialog(QDialog):
         super().__init__(parent)
         self.ui = Ui_PreferencesDialog()
         self.ui.setupUi(self)
+        self.setupComboBoxes()
         self.load_settings()
+        self.setWindowTitle(self.tr("Preferences"))
         self.ui.buttonBox.clicked.connect(self.__on_buttonbox_clicked)
+        
+    def setupComboBoxes(self):
+        # Populate the language combo box with available languages
+        self.ui.languageComboBox.clear()
+        self.ui.languageComboBox.addItem("English", "en")
+        self.ui.languageComboBox.addItem("Italiano", "it")
         
     def __on_buttonbox_clicked(self, button):
         
@@ -47,7 +55,7 @@ class PreferencesDialog(QDialog):
         cfg.set("paths", "backup_directory", self.ui.backupLibraryPathInput.text())
         cfg.set("paths", "idevicerestore", self.ui.idevicerestorePathInput.text())
         cfg.set("misc", "ask_udid_confirmation", str(self.ui.askUdidCheckBox.isChecked()))
-        cfg.set("ui", "language", self.ui.languageComboBox.currentText())
+        cfg.set("ui", "language", self.ui.languageComboBox.currentData())
         cfg.set("ui", "theme", self.ui.themeComboBox.currentText())
         settings.save(cfg)
         
