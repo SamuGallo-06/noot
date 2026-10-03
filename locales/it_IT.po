@@ -1,0 +1,979 @@
+# Noot - Gestione e backup per dispositivi iOS.
+# Copyright (C) 2026 Samuele Gallicani
+# This file is distributed under the same license as the Noot package.
+# Samuele Gallicani <samu.galliani@gmail.com>, 2026.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-10-03 12:54+0200\n"
+"PO-Revision-Date: 2026-10-03 16:23+0200\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: it_IT\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Generator: Poedit 3.9\n"
+
+#: src/main.py:69
+msgid "NOOT - iOS device management and backup utility"
+msgstr "NOOT - Gestione e backup per dispositivi iOS"
+
+#: src/main.py:85
+#, python-brace-format
+msgid "NOOT version: {version}"
+msgstr "Versione di NOOT: {version}"
+
+#: src/main.py:104
+#, python-brace-format
+msgid "Unable to load translations for '{lang_code}'"
+msgstr "Impossibile caricare le traduzioni per la lingua '{lang_code}'"
+
+#: src/main.py:136
+msgid "Launch GUI interface"
+msgstr "Avvia interfaccia grafica"
+
+#: src/main.py:140
+msgid "Display the current version"
+msgstr "Mostra la versione del software corrente"
+
+#: src/main.py:145
+msgid "Launching graphical user interface..."
+msgstr "Avvio dell'interfaccia grafica..."
+
+#: src/main.py:154
+msgid "No command provided. use --help for usage information."
+msgstr "Nessun comando specificato. Usa --help per visualizzare la guida."
+
+#: src/main.py:163 src/main.py:166 src/main.py:268 src/main.py:437
+#: src/main.py:621 src/main.py:624 src/main.py:627 src/main.py:763
+#: src/main.py:766 src/main.py:769 src/main.py:906 src/main.py:939
+#: src/main.py:967 src/main.py:1049 src/main.py:1052 src/main.py:1055
+#: src/main.py:1139 src/main.py:1142 src/main.py:1193 src/main.py:1207
+#: src/main.py:1278
+#, python-brace-format
+msgid "Error: {error}"
+msgstr "Errore: {error}"
+
+#: src/main.py:174
+msgid "usbmuxd was not running and has been started."
+msgstr "usbmuxd non era in esecuzione ed è stato avviato."
+
+#: src/main.py:177
+msgid "Error: usbmuxd is unreachable and could not be started automatically.\n"
+msgstr ""
+"Errore: non è stato possibile avviare usbmuxd automaticamente (demone non "
+"raggiungibile).\n"
+
+#: src/main.py:178
+msgid "Try manually: sudo systemctl start usbmuxd"
+msgstr "Prova manualmente con : sudo systemctl start usbmuxd"
+
+#: src/main.py:193
+msgid "List all connected iOS devices (normal mode and DFU/Recovery/WTF)."
+msgstr ""
+"Elenca tutti i dispositivi iOS, siano essi in modalità normale, modalità "
+"recovery o DFU."
+
+#: src/main.py:199 src/main.py:205 src/main.py:307 src/main.py:572
+#: src/main.py:681
+msgid "Error: usbmuxd is unreachable."
+msgstr "Errore: usbmuxd non è raggiungibile."
+
+#: src/main.py:202 src/main.py:310 src/main.py:575 src/main.py:684
+msgid "usbmuxd was restarted successfully."
+msgstr "usbmuxd riavviato con successo."
+
+#: src/main.py:212
+msgid "No devices detected."
+msgstr "Nessun dispositivo rilevato."
+
+#: src/main.py:216
+msgid "Connected devices:"
+msgstr "Dispositivi connessi:"
+
+#: src/main.py:218
+msgid "Name"
+msgstr "Nome"
+
+#: src/main.py:221 src/main.py:239 src/main.py:283 src/main.py:285
+#: src/main.py:286
+msgid "Unknown"
+msgstr "Sconosciuto"
+
+#: src/main.py:228
+msgid "Multiple devices in DFU/Recovery/WTF mode detected.\n"
+msgstr "Diversi dispositivi rilevati in modalità di recupero / DFU.\n"
+
+#: src/main.py:228
+msgid "Disconnect all but one to see its details."
+msgstr "Disconnetterli tutti tranne uno per verificarne i dettagli."
+
+#: src/main.py:232
+msgid "Devices in DFU/Recovery/WTF mode:"
+msgstr "Dispositivi in modalità di recupero /DFU:"
+
+#: src/main.py:234
+msgid "Mode"
+msgstr "Modalità"
+
+#: src/main.py:235 src/main.py:283
+msgid "Model"
+msgstr "Modello"
+
+#: src/main.py:236 src/main.py:284
+msgid "ECID"
+msgstr "ECID"
+
+#: src/main.py:243
+msgid "Use 'noot list-dfu' for more details."
+msgstr "Usa 'noot list-dfu' per maggiori dettagli."
+
+#: src/main.py:248
+msgid ""
+"Check for a device in DFU, Recovery, or WTF mode (single instant check).\n"
+"\n"
+"Unlike 'list', this does not go through usbmuxd: devices in these modes are "
+"invisible to it. Useful before a firmware flash, or while waiting for a "
+"device to enter DFU (re-run the command until it shows up)."
+msgstr ""
+"Verifica la presenza di un dispositivo in modalità DFU, Recovery o WTF "
+"(controllo singolo). \n"
+"\n"
+"A differenza di 'list', non utilizza usbmuxd, a cui i dispositivi in tali "
+"modalità risultano invisibili. Utile prima del flash del firmware o durante "
+"l'attesa dell'accesso in DFU (eseguire nuovamente il comando finché non "
+"compare)"
+
+#: src/main.py:270
+msgid ""
+"Multiple devices in DFU/Recovery/WTF mode detected. Disconnect all but one "
+"and try again."
+msgstr ""
+"Rilevati più dispositivi in modalità di recupero / DFU. Scollegare tutti i "
+"dispositivi tranne uno e riprovare."
+
+#: src/main.py:277
+msgid "No device in DFU/Recovery/WTF mode detected."
+msgstr "Nessun dispositivo rilevato in modalità di recupero / DFU."
+
+#: src/main.py:281
+#, python-brace-format
+msgid "Device in {label} mode:"
+msgstr "Dispositivi in modalità {label}:"
+
+#: src/main.py:285
+msgid "Serial"
+msgstr "Seriale"
+
+#: src/main.py:286
+msgid "iBoot version"
+msgstr "Versione di iBoot"
+
+#: src/main.py:289
+msgid "Display detailed hardware and system info for a specific device."
+msgstr ""
+"Mostra i dettagli dell'hardware e le informazioni software di uno specifico "
+"dispositivo."
+
+#: src/main.py:297
+msgid "Device UDID or name (e.g. 'iPhone 5c'). Use 'noot list' to see options."
+msgstr ""
+"UDID o nome del dispositivo (es. 'iPhone 5c di Luca`). Usa 'noot list' per "
+"l'elenco."
+
+#: src/main.py:298 src/main.py:341 src/main.py:409 src/main.py:451
+#: src/main.py:537
+msgid "Enter device UDID or name"
+msgstr "Inserisci l'UDID o il nome del dispositivo"
+
+#: src/main.py:315
+#, python-brace-format
+msgid "Error: Unable to fetch summary for device {udid}"
+msgstr "Errore: Impossibile ottenere le informazioni del dispositivo {udid}"
+
+#: src/main.py:320
+#, python-brace-format
+msgid "Device Summary [{udid}]:"
+msgstr "Dettagli Dispositivo [{udid}]"
+
+#: src/main.py:327
+msgid ""
+"Enable backup encryption on the device by setting a new backup password.\n"
+"\n"
+"NOOT always performs encrypted backups, so this must be run once before the "
+"first backup (unless encryption is already enabled on the device, e.g. via a "
+"previous iTunes/Finder pairing)."
+msgstr ""
+"Abilita la cifratura dei backup impostando una nuova password.\n"
+"\n"
+"NOOT esegue sempre backup cifrati, di conseguenza questo comando va eseguito "
+"prima di effettuare il primo backup (a meno che non siano già stati "
+"abilitati i backup cifrati, magari da un precedente backup effettuato da "
+"iTunes o dal Finder)."
+
+#: src/main.py:340 src/main.py:408 src/main.py:450 src/main.py:536
+msgid "Device UDID or name. Use 'noot list' to see options."
+msgstr "UDID o nome del dispositivo. Usa 'noot list' per l'elenco."
+
+#: src/main.py:357
+msgid "Backup encryption is already enabled on this device."
+msgstr "Su questo dispositivo è già abilitata la cifratura dei backup."
+
+#: src/main.py:361
+msgid ""
+"This password protects your backups. Passsword must be at least 8 characters "
+"long and contain both letters and numbers and special characters. Store it "
+"safely: it cannot be recovered, and you will need it to restore or read this "
+"device's backups."
+msgstr ""
+"Questa password serve a proteggere i backup. La password deve essere lunga "
+"almeno 8 caratteri, e contenere almeno un numero, una lettera maiuscola e un "
+"carattere speciale. Conservala in un posto sicuro, non potrà essere "
+"ripristinata in alcun modo, e sarà necessaria per ripristinare o leggere i "
+"backup del dispositivo."
+
+#: src/main.py:365
+msgid "Do you want to enable encryption?"
+msgstr "Vuoi abilitare la cifratura dei backup?"
+
+#: src/main.py:368
+msgid "Choose a password"
+msgstr "Scegli una password"
+
+#: src/main.py:377
+msgid "Error: Password cannot be empty."
+msgstr "Errore: La password non può essere vuota."
+
+#: src/main.py:381 src/main.py:428
+msgid "Error: Password cannot be empty or whitespace."
+msgstr "Errore: La password non può essere vuota o composta da spazi."
+
+#: src/main.py:385 src/main.py:431
+msgid "Error: Password must be at least 4 characters long."
+msgstr ""
+"Errore: La password non soddisfa i requisiti minimi (lunga 8 caratteri, con "
+"almeno una maiuscola, numero e carattere speciale)"
+
+#: src/main.py:397
+msgid "Backup encryption enabled successfully."
+msgstr "Cifratura dei backup abilitata con successo."
+
+#: src/main.py:400
+msgid "Change the current backup encryption password on the device."
+msgstr "Cambia la password di cifratura corrente del dispositivo."
+
+#: src/main.py:418
+msgid "Error: backup encryption is not enabled on this device."
+msgstr "Errore: Su questo dispositivo la cifratura dei backup non è abilitata."
+
+#: src/main.py:421 src/main.py:464
+msgid "Current backup password"
+msgstr "Password di cifratura attuale"
+
+#: src/main.py:423
+msgid "New backup password"
+msgstr "Nuova password"
+
+#: src/main.py:440
+msgid "Backup encryption password changed successfully."
+msgstr "Password di cifratura modificata correttamente."
+
+#: src/main.py:442
+msgid ""
+"Disable backup encryption on the device (requires the current backup "
+"password)."
+msgstr ""
+"Disabilita la cifratura dei backup sul dispositivo (richiede la password "
+"attuale)."
+
+#: src/main.py:460
+msgid "Backup encryption is already disabled on this device."
+msgstr "La cifratura dei backup è già attiva su questo dispositivo."
+
+#: src/main.py:472
+#, python-brace-format
+msgid "Incorrect password. {remaining} attempt remaining."
+msgid_plural "Incorrect password. {remaining} attempts remaining."
+msgstr[0] "Password errata. {remaining} tentativi rimasti."
+msgstr[1] "Password errata. {remaining} tentativo rimasto."
+
+#: src/main.py:479
+msgid "Error: too many incorrect attempts."
+msgstr "Errore: Troppi tentativi non validi."
+
+#: src/main.py:482
+msgid "Backup encryption disabled."
+msgstr "Cifratura dei backup disabilitata."
+
+#: src/main.py:485
+msgid "List local backups available in the backup folder."
+msgstr "Elenca tutti i backup disponibili su questo computer."
+
+#: src/main.py:493 src/main.py:661
+msgid "Folder containing local backups"
+msgstr "Percorso dei backup locali"
+
+#: src/main.py:500
+#, python-brace-format
+msgid "No backups found in {dir}."
+msgstr "Nessun backup trovato in {dir}."
+
+#: src/main.py:505
+#, python-brace-format
+msgid "{count} backup found in {dir}:"
+msgid_plural "{count} backups found in {dir}:"
+msgstr[0] "{count} backup trovati in {dir}:"
+msgstr[1] "{count} backup trovato in {dir}:"
+
+#: src/main.py:516
+msgid "Device Name"
+msgstr "Nome Dispositivo"
+
+#: src/main.py:518
+msgid "Date"
+msgstr "Data"
+
+#: src/main.py:521 src/main.py:727
+msgid "Unknown device"
+msgstr "Dispositivo sconosciuto"
+
+#: src/main.py:522
+msgid "Unknown date"
+msgstr "Data sconosciuta"
+
+#: src/main.py:528
+msgid "Run a local backup for the specified device."
+msgstr "Esegue un backup locale per il dispositivo specificato."
+
+#: src/main.py:545 src/main.py:791
+msgid "Destination folder for backup files"
+msgstr "Percorso di destinazione per i backup"
+
+#: src/main.py:553
+msgid "Perform Full Backup"
+msgstr "Esegui backup completo"
+
+#: src/main.py:562
+msgid "Category to exclude from the backup. Repeatable."
+msgstr "Categorie da escludere dal backup. Puoi specificarne diverse."
+
+#: src/main.py:581
+msgid ""
+"Error: backup encryption is not enabled on this device.\n"
+"Run 'noot enable-encryption --udid ...' first."
+msgstr ""
+"Errore: I backup cifrati non sono attivi su questo dispositivo.\n"
+"Esegui prima `noot enable-encryption --udid UDID`."
+
+#: src/main.py:588
+msgid ""
+"This backup will be encrypted. Please enter recovered, and you'll need it to "
+"restore or read this backup later."
+msgstr "Questo backup verrà cifrato. Immettere la password."
+
+#: src/main.py:592
+msgid "Backup password"
+msgstr "Password del backup"
+
+#: src/main.py:594
+msgid "Starting full backup"
+msgstr "Avvio del backup completo"
+
+#: src/main.py:594
+msgid "Starting incremental backup"
+msgstr "Avvio del backup incrementale"
+
+#: src/main.py:595
+#, python-brace-format
+msgid "Device: {udid}"
+msgstr "Dispositivo: {udid}"
+
+#: src/main.py:596
+#, python-brace-format
+msgid "Destination: {dir}"
+msgstr "Destinazione: {dir}"
+
+#: src/main.py:598
+#, python-brace-format
+msgid "Excluding: {categories}"
+msgstr "Esclusioni: {categories}"
+
+#: src/main.py:599
+msgid "Keep the device connected and unlocked until the backup finishes.\n"
+msgstr ""
+"Tieni il dispositivo collegato e sbloccato fino alla fine della procedura.\n"
+
+#: src/main.py:603
+msgid "Backing up"
+msgstr "Eseguo backup"
+
+#: src/main.py:630
+msgid "Backup completed successfully."
+msgstr "Backup completato con successo."
+
+#: src/main.py:632
+msgid "Restore a local backup onto the connected device."
+msgstr "Ripristina un backup locale sul dispositivo connesso."
+
+#: src/main.py:640
+msgid ""
+"Target iOS device UDID (the device connected now, that will receive the "
+"restore)."
+msgstr ""
+"UDID del dispositivo iOS di destinazione (il dispositivo connesso che riceverà il ripristino)."
+
+#: src/main.py:641 src/main.py:783 src/main.py:840 src/main.py:925
+#: src/main.py:953
+msgid "Enter device UDID"
+msgstr "Inserisci l'UDID del dispositivo"
+
+#: src/main.py:650
+msgid ""
+"UDID of the backup to restore, if different from the target device. Defaults "
+"to the target device's own UDID (restore its own latest backup). Use 'noot "
+"list-backups' to see what's available."
+msgstr ""
+"UDID del backup da ripristinare, se diverso dal dispositivo di destinazione. "
+"Il valore predefinito corrisponde all'UDID del dispositivo stesso (ripristina l'ultimo backup). "
+"Usa 'noot list-backups' per visualizzare i backup disponibili."
+
+#: src/main.py:669
+msgid ""
+"Remove data on the device that isn't present in the backup (mirror restore). "
+"Default: keep extra data untouched."
+msgstr ""
+"Rimuovi i dati sul dispositivo non presenti nel backup (ripristino speculare). "
+"Predefinito: lascia invariati i dati aggiuntivi."
+
+#: src/main.py:689
+msgid "Restore backup"
+msgstr "Ripristina backup"
+
+#: src/main.py:690
+#, python-brace-format
+msgid "Target device: {udid}"
+msgstr "Dispositivo di destinazione: {udid}"
+
+#: src/main.py:693
+#, python-brace-format
+msgid ""
+"⚠ You are restoring a backup from a DIFFERENT device ({source}) onto this "
+"one ({udid})."
+msgstr ""
+"⚠ Stai ripristinando il backup di un dispositivo DIVERSO ({source}) su questo ({udid})."
+
+#: src/main.py:698
+#, python-brace-format
+msgid "Backup source: {source} (same as target)"
+msgstr "Sorgente backup: {source} (uguale alla destinazione)"
+
+#: src/main.py:699
+#, python-brace-format
+msgid "Backup location: {dir}"
+msgstr "Posizione del backup: {dir}"
+
+#: src/main.py:702
+msgid ""
+"\n"
+"Restoring will overwrite existing data on the target device with the "
+"contents of this backup. This cannot be undone."
+msgstr ""
+"\n"
+"Il ripristino sovrascriverà i dati esistenti sul dispositivo con il contenuto "
+"di questo backup. Questa operazione non può essere annullata."
+
+#: src/main.py:707
+msgid ""
+"⚠ --remove-extra-data is enabled: any data on the device NOT present in this "
+"backup will also be deleted."
+msgstr ""
+"⚠ L'opzione --remove-extra-data è attiva: qualsiasi dato sul dispositivo NON presente "
+"in questo backup verrà cancellato."
+
+#: src/main.py:711
+msgid "Do you want to continue?"
+msgstr "Vuoi continuare?"
+
+#: src/main.py:714
+msgid ""
+"The device will restart automatically once the restore is complete. Keep it "
+"connected until then."
+msgstr ""
+"Il dispositivo si riavvierà automaticamente al termine del ripristino. "
+"Tienilo collegato fino alla conclusione dell'operazione."
+
+#: src/main.py:723
+#, python-brace-format
+msgid "Error: no backup found for '{source}' in {dir}."
+msgstr "Errore: nessun backup trovato per '{source}' in {dir}."
+
+#: src/main.py:725
+msgid "Available backups:"
+msgstr "Backup disponibili:"
+
+#: src/main.py:731
+msgid "Backup password (leave blank if not encrypted): "
+msgstr "Password del backup (lascia vuoto se non cifrato): "
+
+#: src/main.py:734
+msgid ""
+"\n"
+"For safety reasons, please confirm you want to restore this device from a "
+"backup."
+msgstr ""
+"\n"
+"Per motivi di sicurezza, conferma di voler ripristinare questo dispositivo da un backup."
+
+#: src/main.py:738
+#, python-brace-format
+msgid "Type the device UDID ({udid}) to confirm the restore"
+msgstr "Digita l'UDID del dispositivo ({udid}) per confermare il ripristino"
+
+#: src/main.py:740
+msgid "UDID does not match. Restore cancelled."
+msgstr "L'UDID non corrisponde. Ripristino annullato."
+
+#: src/main.py:745
+msgid "Restoring backup"
+msgstr "Ripristino del backup in corso"
+
+#: src/main.py:772
+msgid "Backup restored successfully."
+msgstr "Backup ripristinato con successo."
+
+#: src/main.py:774
+msgid "Delete a local backup for the specified device UDID."
+msgstr "Elimina un backup locale per l'UDID specificato."
+
+#: src/main.py:782 src/main.py:839 src/main.py:924 src/main.py:952
+msgid "Target iOS device UDID"
+msgstr "UDID del dispositivo iOS di destinazione"
+
+#: src/main.py:802
+#, python-brace-format
+msgid "No backup found for UDID {udid} in {dir}."
+msgstr "Nessun backup trovato per l'UDID {udid} in {dir}."
+
+#: src/main.py:806
+#, python-brace-format
+msgid ""
+"Are you sure you want to delete the backup for device '{name}' (UDID: "
+"{udid})?"
+msgstr ""
+"Sei sicuro di voler eliminare il backup per il dispositivo '{name}' (UDID: {udid})?"
+
+#: src/main.py:809
+msgid "This action cannot be undone. Continue?"
+msgstr "Questa azione non può essere annullata. Continuare?"
+
+#: src/main.py:821
+#, python-brace-format
+msgid "Backup for UDID {udid} deleted successfully."
+msgstr "Backup per l'UDID {udid} eliminato con successo."
+
+#: src/main.py:823
+#, python-brace-format
+msgid "Backup directory {path} does not exist."
+msgstr "La cartella di backup {path} non esiste."
+
+#: src/main.py:826
+#, python-brace-format
+msgid "Error deleting backup: {error}"
+msgstr "Errore durante l'eliminazione del backup: {error}"
+
+#: src/main.py:831
+msgid ""
+"Erase all data on the specified iOS device, restoring it to factory settings."
+msgstr ""
+"Cancella tutti i dati sul dispositivo iOS specificato, ripristinandolo alle impostazioni di fabbrica."
+
+#: src/main.py:851
+msgid ""
+"This operation will completely erase all data, settings, apps and personal "
+"files on the device, restoring it to its factory settings.\n"
+msgstr ""
+"Questa operazione cancellerà completamente tutti i dati, le impostazioni, le app e i file personali "
+"sul dispositivo, ripristinandolo alle impostazioni di fabbrica.\n"
+
+#: src/main.py:857
+msgid ""
+"Before continuing, on the device:\n"
+"  1. Make sure the battery is charged at least 50%.\n"
+"  2. Turn off Find My (Settings > [Your Name] > Find My > Find My iPhone/"
+"iPad, and turn it off).\n"
+"  3. Keep the device connected via USB and do not disconnect it during the "
+"process.\n"
+msgstr ""
+"Prima di continuare, assicurati sul dispositivo di:\n"
+"  1. Avere la batteria carica almeno al 50%.\n"
+"  2. Disattivare 'Dov'è' (Impostazioni > [Il tuo nome] > Dov'è > Trova il mio iPhone/iPad).\n"
+"  3. Tenere il dispositivo connesso via USB senza scollegarlo durante l'operazione.\n"
+
+#: src/main.py:863
+msgid "Have you completed the steps above and want to continue?"
+msgstr "Hai completato i passaggi precedenti e vuoi continuare?"
+
+#: src/main.py:867
+#, python-brace-format
+msgid "Error: unable to fetch device info for {udid}."
+msgstr "Errore: impossibile ottenere le informazioni del dispositivo {udid}."
+
+#: src/main.py:871
+msgid ""
+"\n"
+"For safety reasons, please confirm you want to erase this device.\n"
+"This action is irreversible."
+msgstr ""
+"\n"
+"Per motivi di sicurezza, conferma di voler cancellare questo dispositivo.\n"
+"Questa azione è irreversibile."
+
+#: src/main.py:875
+#, python-brace-format
+msgid "Type the device UDID ({udid}) to confirm the erase"
+msgstr "Digita l'UDID del dispositivo ({udid}) per confermare la cancellazione"
+
+#: src/main.py:877
+msgid "UDID does not match. Erase operation cancelled."
+msgstr "L'UDID non corrisponde. Operazione di cancellazione annullata."
+
+#: src/main.py:882
+#, python-brace-format
+msgid ""
+"\n"
+"⚠ WARNING: this will permanently erase all data on '{device_label}'. There "
+"is no way to undo this."
+msgstr ""
+"\n"
+"⚠ ATTENZIONE: tutti i dati su '{device_label}' verranno cancellati in modo permanente. "
+"Non c'è modo di annullare questa operazione."
+
+#: src/main.py:887
+#, python-brace-format
+msgid "Erase '{device_label}' now?"
+msgstr "Cancellare '{device_label}' adesso?"
+
+#: src/main.py:891
+msgid "Erasing device"
+msgstr "Cancellazione dispositivo in corso"
+
+#: src/main.py:914
+msgid "Device erased successfully."
+msgstr "Dispositivo cancellato con successo."
+
+#: src/main.py:916
+msgid "Restart the specified iOS device."
+msgstr "Riavvia il dispositivo iOS specificato."
+
+#: src/main.py:935
+#, python-brace-format
+msgid "Restarting device {udid}..."
+msgstr "Riavvio del dispositivo {udid}..."
+
+#: src/main.py:942
+msgid "Device restarted successfully."
+msgstr "Dispositivo riavviato con successo."
+
+#: src/main.py:944
+msgid "Shutdown the specified iOS device."
+msgstr "Spegni il dispositivo iOS specificato."
+
+#: src/main.py:963
+#, python-brace-format
+msgid "Shutting down device {udid}..."
+msgstr "Spegnimento del dispositivo {udid}..."
+
+#: src/main.py:970
+msgid "Device shut down successfully."
+msgstr "Dispositivo spento con successo."
+
+#: src/main.py:976
+msgid ""
+"Flash or restore the specified device from an IPSW (path or URL).\n"
+"\n"
+"Exactly one of --udid or --ecid must be given: --udid for a normally-booted "
+"device (the common case, equivalent to iTunes/Finder — the device reboots "
+"into Recovery mode on its own during the process); --ecid only if the device "
+"is already stuck in Recovery/DFU/WTF, e.g. after a failed update (get it "
+"from 'noot list-dfu')."
+msgstr ""
+"Esegui il flash o ripristina il dispositivo specificato da un file IPSW (percorso o URL).\n"
+"\n"
+"È necessario specificare uno solo tra --udid o --ecid: --udid per un dispositivo avviato "
+"normalmente (il caso più comune, equivalente a iTunes/Finder — il dispositivo si riavvia in modalità "
+"Recovery da solo durante il processo); --ecid solo se il dispositivo è già bloccato in Recovery/DFU/WTF, "
+"ad esempio dopo un aggiornamento non riuscito (puoi recuperarlo con 'noot list-dfu')."
+
+#: src/main.py:991
+msgid ""
+"UDID of a normally-booted target device. Mutually exclusive with --ecid."
+msgstr ""
+"UDID di un dispositivo di destinazione avviato normalmente. Esclude l'uso di --ecid."
+
+#: src/main.py:999
+msgid ""
+"Hex ECID of a device already stuck in Recovery/DFU/WTF (see 'noot list-"
+"dfu'). Mutually exclusive with --udid."
+msgstr ""
+"ECID esadecimale di un dispositivo già bloccato in Recovery/DFU/WTF (vedi 'noot list-dfu'). "
+"Esclude l'uso di --udid."
+
+#: src/main.py:1006
+msgid "IPSW File Path or URL"
+msgstr "Percorso o URL del file IPSW"
+
+#: src/main.py:1007
+msgid "Enter IPSW File Path..."
+msgstr "Inserisci il percorso del file IPSW..."
+
+#: src/main.py:1014
+msgid "Erase and restore (factory reset) instead of updating in place."
+msgstr ""
+"Cancella e ripristina (ripristino di fabbrica) anziché aggiornare mantenendo i dati."
+
+#: src/main.py:1015
+msgid "Erase and restore? (factory reset, data loss)"
+msgstr "Cancellare e ripristinare? (ripristino di fabbrica, perdita dati)"
+
+#: src/main.py:1028
+msgid "Error: specify exactly one of --udid or --ecid."
+msgstr "Errore: specifica solo uno tra --udid o --ecid."
+
+#: src/main.py:1032
+#, python-brace-format
+msgid "Error: File {file} does not exist"
+msgstr "Errore: Il file {file} non esiste"
+
+#: src/main.py:1040 src/main.py:1179
+#, python-brace-format
+msgid "Error: '{ecid}' is not a valid hex ECID."
+msgstr "Errore: '{ecid}' non è un ECID esadecimale valido."
+
+#: src/main.py:1045
+msgid "Checking target device..."
+msgstr "Controllo del dispositivo di destinazione in corso..."
+
+#: src/main.py:1057 src/main.py:1209
+msgid ""
+"Multiple devices in Recovery/DFU/WTF mode detected. Disconnect all but one "
+"and try again."
+msgstr ""
+"Rilevati più dispositivi in modalità di recupero / DFU. Scollegare tutti i "
+"dispositivi tranne uno e riprovare."
+
+#: src/main.py:1062
+msgid "Target device confirmed."
+msgstr "Dispositivo di destinazione confermato."
+
+#: src/main.py:1064
+msgid "Reading IPSW file information..."
+msgstr "Lettura delle informazioni del file IPSW in corso..."
+
+#: src/main.py:1068
+#, python-brace-format
+msgid "Error reading IPSW file information: {error}"
+msgstr "Errore durante la lettura delle informazioni del file IPSW: {error}"
+
+#: src/main.py:1077
+#, python-brace-format
+msgid "Current device model: {model}"
+msgstr "Modello attuale del dispositivo: {model}"
+
+#: src/main.py:1080
+msgid "Error: This IPSW file is not compatible with the connected device."
+msgstr "Errore: Questo file IPSW non è compatibile con il dispositivo collegato."
+
+#: src/main.py:1087
+#, python-brace-format
+msgid "Summary: iOS {version} ({build}) — {mode}"
+msgstr "Riepilogo: iOS {version} ({build}) — {mode}"
+
+#: src/main.py:1090
+msgid "ERASE (factory reset)"
+msgstr "INIZIALIZZA (ripristino di fabbrica)"
+
+#: src/main.py:1090
+msgid "UPDATE (preserve data)"
+msgstr "AGGIORNA (conserva i dati)"
+
+#: src/main.py:1095
+msgid ""
+"The device will reboot into Recovery mode and stay unusable until the "
+"process completes."
+msgstr ""
+"Il dispositivo si riavvierà in modalità Recovery e rimarrà inutilizzabile fino "
+"al termine della procedura."
+
+#: src/main.py:1099
+msgid ""
+"Warning: back up your data first if you have not already — this cannot be "
+"undone."
+msgstr ""
+"Attenzione: se non l'hai già fatto esegui prima un backup — questa operazione "
+"non può essere annullata."
+
+#: src/main.py:1103
+msgid "Proceed with the flash?"
+msgstr "Procedere con il flash?"
+
+#: src/main.py:1105 src/main.py:1119
+msgid "Flashing firmware..."
+msgstr "Scrittura (flash) del firmware in corso..."
+
+#: src/main.py:1107
+msgid ""
+"This may take several minutes. Please keep the device connected and do not "
+"interrupt the process."
+msgstr ""
+"L'operazione potrebbe richiedere alcuni minuti. Tieni il dispositivo collegato e "
+"non interrompere la procedura."
+
+#: src/main.py:1149
+msgid "Flash completed."
+msgstr "Flash completato."
+
+#: src/main.py:1154
+msgid ""
+"Reboot a device out of Recovery mode into a normal boot.\n"
+"\n"
+"Works only in Recovery mode: DFU and WTF have no command interpreter, so a "
+"device in those states must be rebooted using the physical buttons."
+msgstr ""
+"Riavvia un dispositivo facendolo uscire dalla modalità Recovery per l'avvio normale.\n"
+"\n"
+"Funziona solo in modalità Recovery: DFU e WTF non hanno un interprete comandi, "
+"pertanto in quegli stati il dispositivo deve essere riavviato tramite i tasti fisici."
+
+#: src/main.py:1166
+msgid "Hex ECID of the device in Recovery mode (see 'noot list-dfu')."
+msgstr "ECID esadecimale del dispositivo in modalità Recovery (vedi 'noot list-dfu')."
+
+#: src/main.py:1167
+msgid "Enter device ECID"
+msgstr "Inserisci l'ECID del dispositivo"
+
+#: src/main.py:1183
+msgid ""
+"The device will reboot normally. This does NOT flash or erase anything. If "
+"the installed system is damaged, the device will return to Recovery on its "
+"own and will need 'noot flash'."
+msgstr ""
+"Il dispositivo si riavvierà normalmente. Questa operazione NON esegue flash o cancellazioni. "
+"Se il sistema operativo è danneggiato, il dispositivo tornerà automaticamente in Recovery "
+"e richiederà 'noot flash'."
+
+#: src/main.py:1188
+msgid "Reboot the device out of Recovery mode?"
+msgstr "Uscire dalla modalità Recovery e riavviare il dispositivo?"
+
+#: src/main.py:1195
+msgid ""
+"To leave DFU/WTF mode, hold the power and home/volume buttons until the "
+"device restarts."
+msgstr ""
+"Per uscire dalla modalità DFU/WTF, tieni premuti i tasti di accensione e home/volume "
+"fino al riavvio del dispositivo."
+
+#: src/main.py:1202
+#, python-brace-format
+msgid "Error: no device in Recovery/DFU/WTF mode found with ECID {ecid:x}."
+msgstr ""
+"Errore: nessun dispositivo in modalità di recupero / DFU trovato con l'ECID {ecid:x}."
+
+#: src/main.py:1216
+msgid ""
+"Reboot command sent. The device should reappear in 'noot list' within a few "
+"seconds."
+msgstr ""
+"Comando di riavvio inviato. Il dispositivo dovrebbe riapparire in 'noot list' "
+"entro pochi secondi."
+
+#: src/main.py:1220
+msgid "View and edit Noot configuration."
+msgstr "Visualizza e modifica la configurazione di Noot."
+
+#: src/main.py:1223
+msgid "Show the whole configuration."
+msgstr "Mostra l'intera configurazione."
+
+#: src/main.py:1232
+msgid "Print the value of a single key."
+msgstr "Stampa il valore di una singola chiave."
+
+#: src/main.py:1236
+msgid "Key as section.key, e.g. backup.dir"
+msgstr "Chiave nel formato sezione.chiave, es. backup.dir"
+
+#: src/main.py:1243
+#, python-brace-format
+msgid "Error: unknown key '{key}'."
+msgstr "Errore: chiave '{key}' sconosciuta."
+
+#: src/main.py:1247
+msgid "Set a key to a new value."
+msgstr "Imposta una chiave a un nuovo valore."
+
+#: src/main.py:1251
+msgid "Key as section.key"
+msgstr "Chiave nel formato sezione.chiave"
+
+#: src/main.py:1255
+msgid "New value"
+msgstr "Nuovo valore"
+
+#: src/main.py:1262
+#, python-brace-format
+msgid "Error: unknown section '{section}'."
+msgstr "Errore: sezione '{section}' sconosciuta."
+
+#: src/main.py:1268
+msgid "Export the Noot configuration to a file."
+msgstr "Esporta la configurazione di Noot su un file."
+
+#: src/main.py:1272
+msgid ""
+"Path to the exported configuration file. The Noot configuration will be "
+"written to this file."
+msgstr ""
+"Percorso del file di esportazione. La configurazione di Noot verrà scritta "
+"in questo file."
+
+#: src/main.py:1280
+msgid "Configuration exported successfully."
+msgstr "Configurazione esportata con successo."
+
+#: src/main.py:1282
+msgid "Load a configuration file into Noot."
+msgstr "Carica un file di configurazione in Noot."
+
+#: src/main.py:1286
+msgid "Path to the configuration file to load into Noot."
+msgstr "Percorso del file di configurazione da caricare in Noot."
+
+#: src/main.py:1291 src/main.py:1302
+msgid "Invalid configuration file."
+msgstr "File di configurazione non valido."
+
+#: src/main.py:1296
+msgid "Configuration loaded successfully"
+msgstr "Configurazione caricata con successo"
+
+#: src/main.py:1298
+msgid "Check that the current configuration file is valid."
+msgstr "Verifica che il file di configurazione attuale sia valido."
+
+#: src/main.py:1305
+msgid "Valid configuration file"
+msgstr "File di configurazione valido"
+
+#: src/main.py:1319
+msgid ""
+"\n"
+"Process interrupted by user."
+msgstr ""
+"\n"
+"Processo interrotto dall'utente."

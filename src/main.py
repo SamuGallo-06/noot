@@ -16,7 +16,7 @@ from PySide6.QtWidgets import QApplication
 from PySide6.QtGui import QGuiApplication
 from PySide6.QtCore import Qt,QLocale, QTranslator
 
-from i18n import tr, ngettext
+from i18n import tr, ngettext, LOCALE_DIR
  
 from idevice import (
     check_usbmuxd,
@@ -96,7 +96,7 @@ def apply_language(app: QApplication, lang_code: str) -> None:
         return
 
     translator = QTranslator(app)
-    qm_path = Path(__file__).parent / "i18n" / f"noot_{lang_code}.qm"
+    qm_path = Path(__file__).parent / "assets" / "locales" / f"noot_{lang_code}.qm"
     if translator.load(str(qm_path)):
         app.installTranslator(translator)
         _active_translators.append(translator)
