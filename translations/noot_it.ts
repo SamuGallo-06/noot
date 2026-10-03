@@ -15,6 +15,70 @@
     </message>
 </context>
 <context>
+    <name>DialogChangePassword</name>
+    <message>
+        <location filename="../src/ui/dialog_change_password.ui" line="14"/>
+        <source>Dialog</source>
+        <translation>Dialogo</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/dialog_change_password.ui" line="20"/>
+        <source>Confirm</source>
+        <translation>Conferma</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/dialog_change_password.ui" line="27"/>
+        <source>Previous Password: </source>
+        <translation>Password precedente</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/dialog_change_password.ui" line="34"/>
+        <source>New Password</source>
+        <translation>Nuova Password</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/dialog_change_password.ui" line="51"/>
+        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt; font-weight:700;&quot;&gt;Change Encryption Password&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt; font-weight:700;&quot;&gt;Cambia password di cifratura&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+    </message>
+</context>
+<context>
+    <name>DialogEnterPassword</name>
+    <message>
+        <location filename="../src/ui/dialog_enter_password.ui" line="14"/>
+        <source>Dialog</source>
+        <translation>Dialogo</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/dialog_enter_password.ui" line="37"/>
+        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt; font-weight:700;&quot;&gt;Enter Encryption Password&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt; font-weight:700;&quot;&gt;Inserisci la password di cifratura&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+    </message>
+</context>
+<context>
+    <name>DialogSetPassword</name>
+    <message>
+        <location filename="../src/ui/dialog_set_password.ui" line="14"/>
+        <source>Dialog</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/ui/dialog_set_password.ui" line="37"/>
+        <source>New Password</source>
+        <translation>Nuova password</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/dialog_set_password.ui" line="44"/>
+        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt; font-weight:700;&quot;&gt;Set Encryption Password&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt; font-weight:700;&quot;&gt;Imposta password di cifratura&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/dialog_set_password.ui" line="77"/>
+        <source>Confirm</source>
+        <translation>Conferma</translation>
+    </message>
+</context>
+<context>
     <name>MainWindow</name>
     <message>
         <location filename="../src/gui/main_window.py" line="51"/>
@@ -34,6 +98,7 @@
     </message>
     <message>
         <location filename="../src/gui/main_window.py" line="168"/>
+        <location filename="../src/ui/mainwindow.ui" line="669"/>
         <source>About Noot</source>
         <translation>Informazioni su Noot</translation>
     </message>
@@ -224,7 +289,7 @@ You will be prompted to set a password for the backup.</source>
 Ti verrà richiesto di impostare una password per il backup.</translation>
     </message>
     <message>
-        <location filename="../src/gui/main_line.py" line="561"/>
+        <location filename="../src/gui/main_window.py" line="561"/>
         <source>Starting backup...</source>
         <translation>Avvio del backup in corso...</translation>
     </message>
@@ -673,38 +738,426 @@ Vuoi continuare?</translation>
         <source>Could not reboot the device: {exc}</source>
         <translation>Impossibile riavviare il dispositivo: {exc}</translation>
     </message>
+    <message>
+        <location filename="../src/ui/mainwindow.ui" line="14"/>
+        <source>MainWindow</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/ui/mainwindow.ui" line="21"/>
+        <source>### iPhone XR
+Samuele&apos;s iPhone </source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/ui/mainwindow.ui" line="39"/>
+        <source>Running:</source>
+        <translation>In Esecuzione: </translation>
+    </message>
+    <message>
+        <location filename="../src/ui/mainwindow.ui" line="46"/>
+        <source> usbmuxd: OK</source>
+        <translation>usbmuxd: OK</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/mainwindow.ui" line="53"/>
+        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700; color:#1c71d8;&quot;&gt;Recovery Mode / DFU Mode&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700; color:#1c71d8;&quot;&gt;Recovery Mode / Modalità DFU&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/mainwindow.ui" line="67"/>
+        <source>Summary</source>
+        <translation>Informazioni</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/mainwindow.ui" line="73"/>
+        <source>No Connected Device</source>
+        <translation>Nessun dispositivo connesso</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/mainwindow.ui" line="87"/>
+        <source>Backup</source>
+        <translation></translation>
+    </message>
+    <message>
+        <location filename="../src/ui/mainwindow.ui" line="93"/>
+        <source>Latest Backup: </source>
+        <translation>Ultimo Backup: </translation>
+    </message>
+    <message>
+        <location filename="../src/ui/mainwindow.ui" line="100"/>
+        <source>Bookmarks</source>
+        <translation>Segnalibri</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/mainwindow.ui" line="107"/>
+        <source>Full Backup</source>
+        <translation>Backup Completo</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/mainwindow.ui" line="127"/>
+        <source>SMS</source>
+        <translation></translation>
+    </message>
+    <message>
+        <location filename="../src/ui/mainwindow.ui" line="160"/>
+        <source>Whatsapp</source>
+        <translation></translation>
+    </message>
+    <message>
+        <location filename="../src/ui/mainwindow.ui" line="167"/>
+        <source>**Backup Options**</source>
+        <translation>**Opzioni di Backup**</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/mainwindow.ui" line="177"/>
+        <source>Backup Encryption</source>
+        <translation>Cifratura Backup</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/mainwindow.ui" line="184"/>
+        <source>Exclude from backup: </source>
+        <translation>Escludi dal backup: </translation>
+    </message>
+    <message>
+        <location filename="../src/ui/mainwindow.ui" line="191"/>
+        <source>Enable/Disable</source>
+        <translation>Abilita/Disabilita</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/mainwindow.ui" line="198"/>
+        <source>Perform Backup</source>
+        <translation>Esegui Backup</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/mainwindow.ui" line="205"/>
+        <source>Messages</source>
+        <translation>Messaggi</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/mainwindow.ui" line="212"/>
+        <source>Contacts</source>
+        <translation>Contatti</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/mainwindow.ui" line="219"/>
+        <source>Call History</source>
+        <translation>Cronologia Chiamate</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/mainwindow.ui" line="226"/>
+        <source>Change Password</source>
+        <translation>Cambia Password</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/mainwindow.ui" line="234"/>
+        <source>Restore</source>
+        <translation>Ripristina</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/mainwindow.ui" line="256"/>
+        <source>Backup stored on this computer:</source>
+        <translation>Backup su questo computer:</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/mainwindow.ui" line="298"/>
+        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700; color:#ff7800;&quot;&gt;WARNING: &lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; color:#ff7800;&quot;&gt;This backup was made from a different device. Some data may not restore correctly.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700; color:#ff7800;&quot;&gt;WARNING: &lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; color:#ff7800;&quot;&gt;Il backup è stato effettuato da un dispositivo diverso. Alcuni dati potrebbero non essere ripristinati correttamente.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/mainwindow.ui" line="305"/>
+        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;BACKUP DATE:&lt;/span&gt; 2026-09-08 14:32&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;DEVICE:&lt;/span&gt; Samuele&apos;s iPhone&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;IOS VERSION:&lt;/span&gt; 18.4&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;SIZE:&lt;/span&gt; 1.2 GB&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;DATA BACKUP:&lt;/span&gt; 2026-09-08 14:32&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;DISPOSITIVO:&lt;/span&gt; iPhone di Samuele&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;VERSIONE IOS:&lt;/span&gt; 18.4&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;DIMENSIONE:&lt;/span&gt; 1,2 GB&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/mainwindow.ui" line="318"/>
+        <source>Start Restore</source>
+        <translation>Avvia Ripristino</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/mainwindow.ui" line="325"/>
+        <source>Delete</source>
+        <translation>Elimina</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/mainwindow.ui" line="332"/>
+        <source>Refresh Backups</source>
+        <translation>Aggiorna Backup</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/mainwindow.ui" line="340"/>
+        <source>iOS Version</source>
+        <translation>Versione iOS</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/mainwindow.ui" line="349"/>
+        <source>Restore Options:</source>
+        <translation>Opzioni di ripristino:</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/mainwindow.ui" line="369"/>
+        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; color:#ff7800;&quot;&gt;Downgrading/upgrading via custom IPSW may void warranty, brick your device, or fail if Apple no longer signs that firmware. Proceed at your own risk. Noot and its author assume no responsibility for data loss or device damage.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; color:#ff7800;&quot;&gt;Il downgrade o l&apos;upgrade tramite IPSW personalizzati può invalidare la garanzia, rendere il dispositivo inutilizzabile (brick) o non riuscire se Apple non firma più quel firmware. Procedi a tuo rischio e pericolo. Noot e il suo autore non si assumono alcuna responsabilità per la perdita di dati o danni al dispositivo.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/mainwindow.ui" line="398"/>
+        <source>Flash Firmware from IPSW</source>
+        <translation>Ripristina da file IPSW</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/mainwindow.ui" line="405"/>
+        <source>IPSW File: </source>
+        <translation>File IPSW: </translation>
+    </message>
+    <message>
+        <location filename="../src/ui/mainwindow.ui" line="428"/>
+        <source>Flash Firmware</source>
+        <translation>Installa Firmware</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/mainwindow.ui" line="458"/>
+        <source>Current iOS Version: </source>
+        <translation>Versione attuale di iOS: </translation>
+    </message>
+    <message>
+        <location filename="../src/ui/mainwindow.ui" line="465"/>
+        <source>Erase data and restore (factory reset)</source>
+        <translation>Inizializza e ripristina (ripristino ai dati di fabbrica)</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/mainwindow.ui" line="472"/>
+        <source>Browse...</source>
+        <translation>Sfoglia...</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/mainwindow.ui" line="479"/>
+        <source>* **Product Version:** {info.get(&quot;product_version&quot;)}
+* **Product Build Version:** {info.get(&quot;product_build_version&quot;)}
+* **Supported Product Types:** {&apos;, &apos;.join(info.get(&quot;supported_product_types&quot;, []))}
+* **Build Major:** {info.get(&quot;build_major&quot;)}</source>
+        <translation>* **Versione prodotto:** {info.get(&quot;product_version&quot;)}
+* **Versione build prodotto:** {info.get(&quot;product_build_version&quot;)}
+* **Tipi di prodotto supportati:** {&apos;, &apos;.join(info.get(&quot;supported_product_types&quot;, []))}
+* **Build Major:** {info.get(&quot;build_major&quot;)}</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/mainwindow.ui" line="509"/>
+        <source>Danger Zone</source>
+        <translation>Zona Pericolosa</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/mainwindow.ui" line="515"/>
+        <source>Enter/Exit Recovery Mode</source>
+        <translation>Entra/Esci dalla recovery mode</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/mainwindow.ui" line="522"/>
+        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt; font-weight:700;&quot;&gt;Erase Device&lt;/span&gt;&lt;/p&gt;&lt;p&gt;This will permanently erase all content and settings from this device, restoring it to factory defaults. This includes photos, messages, apps, and all personal data. This action cannot be undone.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt; font-weight:700;&quot;&gt;Inizializza dispositivo&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Questa operazione cancellerà definitivamente tutti i contenuti e le impostazioni da questo dispositivo, ripristinandolo ai valori di fabbrica. Saranno inclusi foto, messaggi, app e tutti i dati personali. Questa azione non può essere annullata.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/mainwindow.ui" line="548"/>
+        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt; font-weight:700;&quot;&gt;Recovery Mode&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Restart the device into Recovery Mode. This is required for firmware restore operations and can also help resolve devices stuck after a failed update. The device will disconnect and restart automatically. .&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt; font-weight:700;&quot;&gt;Modalità di recupero&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Riavvia il dispositivo in modalità di recupero. Questa operazione è necessaria per il ripristino del firmware e può aiutare a sbloccare dispositivi bloccati dopo un aggiornamento non riuscito. Il dispositivo si disconnetterà e si riavvierà automaticamente.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/mainwindow.ui" line="574"/>
+        <source>Erase Device</source>
+        <translation>Inizializza dispositivo</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/mainwindow.ui" line="588"/>
+        <source>I understand this will permanently erase all data on this device</source>
+        <translation>Comprendo che l&apos;operazione cancellerà tutti i dati sul dispositivo</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/mainwindow.ui" line="595"/>
+        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700; color:#f66151;&quot;&gt;Actions in this section are irreversible and will permanently affect your device. Proceed only if you understand the consequences. &lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <translation type="unfinished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700; color:#f66151;&quot;&gt;Le azioni in questa sezione sono irreversibili e modificheranno il dispositivo in modo permanente. Procedi solo se sai quello che fai, e se sei consapevole delle conseguenze.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/mainwindow.ui" line="635"/>
+        <source>File</source>
+        <translation>File</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/mainwindow.ui" line="643"/>
+        <source>Device</source>
+        <translation>Dispositivo</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/mainwindow.ui" line="653"/>
+        <source>Help</source>
+        <translation>Aiuto</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/mainwindow.ui" line="674"/>
+        <source>Wiki</source>
+        <translation>Wiki</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/mainwindow.ui" line="679"/>
+        <source>GitHub Repository</source>
+        <translation>Repo GitHub</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/mainwindow.ui" line="684"/>
+        <source>How to Enter DFU mode</source>
+        <translation>Come entrare in modalità DFU</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/mainwindow.ui" line="689"/>
+        <source>Preferences</source>
+        <translation>Preferenze</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/mainwindow.ui" line="694"/>
+        <source>Exit</source>
+        <translation>Esci</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/mainwindow.ui" line="697"/>
+        <source>Ctrl+Q</source>
+        <translation>CTRL+Q</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/mainwindow.ui" line="702"/>
+        <source>Refresh Devices</source>
+        <translation>Aggiorna Dispositivi</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/mainwindow.ui" line="707"/>
+        <source>Report Issue</source>
+        <translation>Segnala un problema</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/mainwindow.ui" line="712"/>
+        <source>Start usbmuxd</source>
+        <translation>Avvia usbmuxd</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/mainwindow.ui" line="717"/>
+        <source>Shutdown</source>
+        <translation>Spegni</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/mainwindow.ui" line="722"/>
+        <source>Reboot</source>
+        <translation>Riavvia</translation>
+    </message>
 </context>
 <context>
     <name>PreferencesDialog</name>
     <message>
-        <location filename="../src/gui/preferences_form.py" line="19"/>
+        <location filename="../src/gui/preferences_form.py" line="13"/>
+        <source>Preferences</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/preferences_form.py" line="27"/>
         <source>Saving settings...</source>
         <translation>Salvataggio impostazioni in corso...</translation>
     </message>
     <message>
-        <location filename="../src/gui/preferences_form.py" line="23"/>
+        <location filename="../src/gui/preferences_form.py" line="31"/>
         <source>Closing...</source>
         <translation>Chiusura in corso...</translation>
     </message>
     <message>
-        <location filename="../src/gui/preferences_form.py" line="24"/>
+        <location filename="../src/gui/preferences_form.py" line="32"/>
         <source>Confirm Close</source>
         <translation>Conferma chiusura</translation>
     </message>
     <message>
-        <location filename="../src/gui/preferences_form.py" line="24"/>
+        <location filename="../src/gui/preferences_form.py" line="32"/>
         <source>Are you sure you want to close the settings dialog?</source>
         <translation>Sei sicuro di voler chiudere le impostazioni?</translation>
     </message>
     <message>
-        <location filename="../src/gui/preferences_form.py" line="30"/>
+        <location filename="../src/gui/preferences_form.py" line="38"/>
         <source>Restored default values</source>
         <translation>Valori predefiniti ripristinati</translation>
     </message>
     <message>
-        <location filename="../src/gui/preferences_form.py" line="33"/>
+        <location filename="../src/gui/preferences_form.py" line="41"/>
         <source>Resetting to last saved values...</source>
         <translation>Ripristino agli ultimi valori salvati in corso...</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/settings.ui" line="14"/>
+        <source>Noot Settings</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/ui/settings.ui" line="36"/>
+        <source>### Paths</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/ui/settings.ui" line="46"/>
+        <source>Language</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/ui/settings.ui" line="54"/>
+        <source>English</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/ui/settings.ui" line="59"/>
+        <source>Italian</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/ui/settings.ui" line="67"/>
+        <source>Backup Library Path</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/ui/settings.ui" line="90"/>
+        <source>Ask for UDID confirmation for dangerous operations</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/ui/settings.ui" line="97"/>
+        <source>### Ui</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/ui/settings.ui" line="127"/>
+        <source>Use System Settings</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/ui/settings.ui" line="132"/>
+        <source>Light</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/ui/settings.ui" line="137"/>
+        <source>Dark</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/ui/settings.ui" line="161"/>
+        <source>`idevicerestore` path</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/ui/settings.ui" line="171"/>
+        <location filename="../src/ui/settings.ui" line="191"/>
+        <source>Browse</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/ui/settings.ui" line="178"/>
+        <source>### Security</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/ui/settings.ui" line="198"/>
+        <source>Theme</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>

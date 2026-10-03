@@ -7,26 +7,14 @@ from typing import Annotated, Optional
  
 import typer
 import click
+import settings
 
 from rich.console import Console
-from rich.table import Table
-
-from PySide6.QtWidgets import QApplication
-from PySide6.QtCore import QLocale, QTranslator
- 
-import asyncio
-from functools import wraps
-from pathlib import Path
-import sys
-from typing import Annotated, Optional
- 
-import typer
-import click
- 
-from rich.console import Console
-from rich.table import Table
+from rich.table import Table 
  
 from PySide6.QtWidgets import QApplication
+from PySide6.QtGui import QGuiApplication
+from PySide6.QtCore import Qt,QLocale, QTranslator
  
 from idevice import (
     check_usbmuxd,
@@ -71,12 +59,6 @@ from settings import get_backup_directory
 # Importing UI
 from gui.main_window import MainWindow
 
-
-# Importing UI
-from gui.main_window import MainWindow
-
-import settings
-
 VERSION="1.0.0"
 
 MAX_PASSWORD_ATTEMPTS = 3
@@ -87,6 +69,8 @@ app = typer.Typer(
 )
 
 console = Console()
+
+_active_translators: list[QTranslator] = []
 
 def coro(f):
     """Decorator to run async functions inside synchronous Typer commands."""
@@ -99,23 +83,46 @@ def version_callback():
     typer.echo(f"NOOT version: {VERSION}")
     raise typer.Exit()
 
+def apply_language(app: QApplication, lang_code: str) -> None:
+    global _active_translators
+
+    for translator in _active_translators:
+        app.removeTranslator(translator)
+    _active_translators = []
+
+    if lang_code == "en":
+        return
+
+    translator = QTranslator(app)
+    qm_path = Path(__file__).parent / "i18n" / f"noot_{lang_code}.qm"
+    if translator.load(str(qm_path)):
+        app.installTranslator(translator)
+        _active_translators.append(translator)
+    else:
+        print(f"Impossibile caricare la traduzione per '{lang_code}'")
+
+
+def apply_theme(theme: str) -> None:
+    hints = QGuiApplication.styleHints()
+    if theme == "light":
+        hints.setColorScheme(Qt.ColorScheme.Light)
+    elif theme == "dark":
+        hints.setColorScheme(Qt.ColorScheme.Dark)
+    else:  # system
+        hints.setColorScheme(Qt.ColorScheme.Unknown)
+
+
 def launch_gui():
     """Launch the graphical user interface."""
     app = QApplication(sys.argv)
-    
-    locale = settings.get_current_language()
-    
-    translations_path = Path(__file__).resolve().parent / "assets" / "translations"
-    typer.echo(f"Loading translations for locale: {locale} from {translations_path}")
-    app_translator = QTranslator()
-    
-    app_translator.load(f"noot_{locale}.qm", str(translations_path))
-    app.installTranslator(app_translator)
-    typer.echo("Using locale: " + locale)
-        
     app.setApplicationName("Noot")
+
+    cfg = settings.load()
+    apply_language(app, cfg.get("ui", "language"))
+    apply_theme(cfg.get("ui", "theme"))
+
     window = MainWindow()
-    window.setWindowTitle(f"Noot - iOS Device Management Utility")
+    window.setWindowTitle("Noot - iOS Device Management Utility")
     window.show()
     sys.exit(app.exec())
 

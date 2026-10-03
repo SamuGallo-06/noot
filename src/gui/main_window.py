@@ -60,8 +60,8 @@ class MainWindow(QMainWindow):
 
         self.check_usbdmux()
         self.refresh_devices()
-        self.apply_theme(settings.get_current_theme())
-        
+
+    
     def apply_theme(self, theme: str) -> None:
             """theme: 'light', 'dark', o 'system'"""
             hints = QGuiApplication.styleHints()
