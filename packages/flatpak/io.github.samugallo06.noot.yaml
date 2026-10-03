@@ -6,20 +6,6 @@ base: io.qt.PySide.BaseApp
 base-version: "6.11"
 command: noot
 
-finish-args:
-  - --socket=wayland
-  - --socket=fallback-x11
-  - --share=ipc
-  - --share=network
-  - --device=all
-  - --filesystem=/run/usbmuxd
-
-cleanup:
-  - /include
-  - /lib/pkgconfig
-  - /lib/*.la
-  - /share/man
-
 modules:
   - name: libplist
     buildsystem: autotools
@@ -113,3 +99,17 @@ modules:
         dest: src
       - type: file
         path: io.github.samugallo06.noot.desktop
+
+finish-args:
+  - --socket=wayland
+  - --socket=fallback-x11
+  - --share=ipc
+  - --share=network
+  - --device=all
+  - --filesystem=/run/usbmuxd
+
+cleanup:
+  - /include
+  - /lib/pkgconfig
+  - /lib/*.la
+  - /share/man
